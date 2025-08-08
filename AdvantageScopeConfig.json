@@ -1,0 +1,342 @@
+{
+  "hubs": [
+    {
+      "x": -7,
+      "y": -7,
+      "width": 1934,
+      "height": 1166,
+      "state": {
+        "sidebar": {
+          "width": 435,
+          "expanded": [
+            "/AdvantageKit/NetworkInputs/SmartDashboard",
+            "/CameraPublisher/FrontRight",
+            "/CameraPublisher/FrontRight/streams",
+            "/CameraPublisher/photonvision_Port_1182_Output_MJPEG_Server",
+            "/CameraPublisher/photonvision_Port_1181_Input_MJPEG_Server",
+            "/CameraPublisher/photonvision_Port_1181_Input_MJPEG_Server/streams",
+            "/CameraPublisher/photonvision_Port_1182_Output_MJPEG_Server/streams",
+            "/SmartDashboard/AutoChooser/options",
+            "/SmartDashboard/AutoChooser",
+            "/AdvantageKit/RealOutputs/Robot Pose",
+            "/AdvantageKit/RealOutputs/Alerts/infos",
+            "/AdvantageKit/RealOutputs/Alerts/warnings",
+            "/photonvision/Arducam_OV2311_USB_Camera/rawBytes",
+            "/photonvision/Arducam_OV2311_USB_Camera/rawBytes/targets",
+            "/photonvision/Arducam_OV2311_USB_Camera/rawBytes/metadata",
+            "/photonvision/Arducam_OV2311_USB_Camera/rawBytes/targets/0",
+            "/photonvision/.timesync",
+            "/photonvision/.timesync/photonvision",
+            "/photonvision/RightCamera/rawBytes",
+            "/photonvision/RightCamera/rawBytes/targets",
+            "/photonvision/RightCamera/rawBytes/metadata",
+            "/photonvision/RightCamera/rawBytes/targets/0",
+            "/AdvantageKit",
+            "/Tuning/Elevator",
+            "/Tuning/Swerve",
+            "/SmartDashboard/Alerts",
+            "/AdvantageKit/RealOutputs/Alerts/errors",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Alerts",
+            "/AdvantageKit/RealOutputs/Elevator",
+            "/AdvantageKit/RealOutputs/Swerve",
+            "/AdvantageKit/RealOutputs/Photonvision",
+            "/AdvantageKit/RealOutputs/Coral",
+            "/Tuning",
+            "/AdvantageKit/RealOutputs/AlignToPose",
+            "/photonvision",
+            "/AdvantageKit/RealOutputs/AlignToPose/Target Pose",
+            "/AdvantageKit/RealOutputs/AlignToPose/Target Pose/translation",
+            "/AdvantageKit/RealOutputs/AlignToPose/Current Pose",
+            "/AdvantageKit/RealOutputs/AlignToPose/Current Pose/translation",
+            "/AdvantageKit/RealOutputs/AlignToPose/Current Pose/rotation",
+            "/AdvantageKit/RealOutputs/AlignToPose/Target Pose/rotation"
+          ]
+        },
+        "tabs": {
+          "selected": 9,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "11ouuo212e9mvfmpp8zl8llb85qceul2",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 2,
+              "title": "PathPlanner Funny Stuff",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/PathPlanner/activePath",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/PathPlanner/currentPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/PathPlanner/targetPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 30
+              },
+              "controllerUUID": "0sdlai8w88idsn4f3sjs7jxkhsin6lv7",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Supposed Position",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Robot Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 30
+              },
+              "controllerUUID": "liz5knv3qzgtoxaomd8n2vobwjdu7ryi",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "Cool Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Robot Pose 3D",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "2025 KitBot"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Target Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "2025 KitBot",
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "65yt2s7dw353efe02pgm5p4va29zbagd",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  10.06102416885918,
+                  6.363055585561339,
+                  -6.1845350817260405
+                ],
+                "cameraTarget": [
+                  2.8650844236482413,
+                  -0.5500346670744579,
+                  -1.5033984087995245
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 9,
+              "title": "Troll Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "rotationLegacy",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Pidgey Rotation2D",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "units": "degrees"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve Module States",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "jccs3ip14zzhikunys0zimoco38h940n",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 12,
+              "title": "Random Info",
+              "controller": null,
+              "controllerUUID": "0700azcugfcyda6526wj8a1u6wkxna66",
+              "renderer": null,
+              "controlsHeight": 0
+            },
+            {
+              "type": 8,
+              "title": "Spy on Aaron",
+              "controller": [
+                "Xbox Controller (White)",
+                "None",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "vq7jahv74r1sz5yyhraa0towueisnsns",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 5,
+              "title": "Software's Fails",
+              "controller": null,
+              "controllerUUID": "hzx0arfzlzd38ki4y0lulllad3by388v",
+              "renderer": {
+                "highlight": false
+              },
+              "controlsHeight": 0
+            },
+            {
+              "type": 4,
+              "title": "Useful Info (Not)",
+              "controller": [],
+              "controllerUUID": "wb71bnf32hkytkd3a4aqu11jxuzfec1a",
+              "renderer": null,
+              "controlsHeight": 0
+            },
+            {
+              "type": 1,
+              "title": "Test Values",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Current Pose/translation/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Target Pose/translation/x",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Target Pose/translation/y",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Current Pose/translation/y",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Target Pose/rotation/value",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/AlignToPose/Current Pose/rotation/value",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "1dv625h3h1hyy8s9w9yazdjx8927ixsv",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.2"
+}

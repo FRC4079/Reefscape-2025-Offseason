@@ -1,31 +1,106 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import static edu.wpi.first.wpilibj.RobotController.*;
+import static edu.wpi.first.wpilibj.Threads.*;
+import static frc.robot.commands.Kommand.flipPidgey;
+import static frc.robot.utils.RobotParameters.LiveRobotValues.*;
+
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.Kommand.*;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.Swerve;
+import frc.robot.utils.LocalADStarAK;
+import frc.robot.utils.RobotParameters;
+import frc.robot.utils.RobotParameters.FieldParameters.*;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
  */
-public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+@SuppressWarnings("resource")
+public class Robot extends LoggedRobot {
+  private Command autonomousCommand;
+  private RobotContainer robotContainer;
 
-  private final RobotContainer m_robotContainer;
+  private Timer garbageTimer;
+  private Timer batteryTimer;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+  @Override
+  public void robotInit() {
+    // Set a metadata value
+    RobotParameters.Info.logInfo();
+
+    // Calls LEDs to activate
+    LED.getInstance();
+
+    // Records useful but random info
+    Logger.recordMetadata("Reefscape", "Logging");
+
+    // Set the pathfinder
+    Pathfinding.setPathfinder(new LocalADStarAK());
+
+    if (isReal()) {
+      // Log to NetworkTables
+      Logger.addDataReceiver(new NT4Publisher());
+
+      // WARNING: PowerDistribution resource leak
+      // Enables power distribution logging
+      new PowerDistribution(1, ModuleType.kRev);
+
+    } else {
+      // Run as fast as possible
+      setUseTiming(false);
+
+      // Pull the replay log from AdvantageScope (or prompt the user)
+      String logPath = LogFileUtil.findReplayLog();
+
+      // Read replay log
+      Logger.setReplaySource(new WPILOGReader(logPath));
+
+      // Save outputs to a new log
+      Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+    }
+
+    // Start the logger
+    Logger.start();
+
+    // Call addCoralPosList
+    RobotPoses.addCoralPosList();
+
+    // Initialize the garbage timer
+    garbageTimer = new Timer();
+    batteryTimer = new Timer();
+    garbageTimer.start();
+
+    // Configure auto builder
+    Swerve.getInstance().configureAutoBuilder();
+
+    // Initialize the robot container
+    robotContainer = new RobotContainer();
+
+    // Schedule the warmup command
+    PathfindingCommand.warmupCommand().schedule();
+
+    CommandScheduler.getInstance().enable();
   }
 
   /**
@@ -37,65 +112,44 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
+    setCurrentThreadPriority(true, 99);
+
     CommandScheduler.getInstance().run();
+    if (garbageTimer.advanceIfElapsed(5)) System.gc();
+
+    // Checks for low battery
+    if (getBatteryVoltage() < LOW_BATTERY_VOLTAGE) {
+      batteryTimer.start();
+      if (batteryTimer.advanceIfElapsed(1.5)) {
+        lowBattery = true;
+      }
+    } else {
+      batteryTimer.stop();
+      lowBattery = false;
+    }
+
+    setCurrentThreadPriority(false, 99);
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. **/
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    //    autonomousCommand = robotContainer.networkChooser.getSelected();
+    flipPidgey();
+    autonomousCommand = new PathPlannerAuto("4l4autoA");
+    autonomousCommand.schedule();
   }
 
-  /** This function is called periodically during autonomous. */
-  @Override
-  public void autonomousPeriodic() {}
-
+  /** This function is called once when teleop mode is initialized. */
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    if (autonomousCommand != null) autonomousCommand.cancel();
+//    flipPidgey();
   }
 
-  /** This function is called periodically during operator control. */
-  @Override
-  public void teleopPeriodic() {}
-
+  /** This function is called once when test mode is initialized. */
   @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
-
-  /** This function is called periodically during test mode. */
-  @Override
-  public void testPeriodic() {}
-
-  /** This function is called once when the robot is first started up. */
-  @Override
-  public void simulationInit() {}
-
-  /** This function is called periodically whilst in simulation. */
-  @Override
-  public void simulationPeriodic() {}
 }

@@ -1,0 +1,66 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.698662451361868,
+        "y": 7.4522008754863815
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.9317548379632221,
+        "y": 7.205476964928228
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.6976484058521404,
+        "y": 5.07231543081778
+      },
+      "prevControl": {
+        "x": 3.4302540206405623,
+        "y": 5.409873648441809
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "MoveElevatorL4Auto",
+      "waypointRelativePos": 0.3590604026845634,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "MoveElevatorL4Auto"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -60.01102678637353
+  },
+  "reversed": false,
+  "folder": "4L4a",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -51.374542759735974
+  },
+  "useDefaultConstraints": true
+}
