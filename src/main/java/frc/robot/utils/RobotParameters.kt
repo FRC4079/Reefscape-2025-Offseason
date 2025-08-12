@@ -66,7 +66,6 @@ object RobotParameters {
         private const val WHEEL_DIAMETER: Double = 0.106
         // new treads so i increased
 
-
         // TODO CALIBRATE WHEELS
         const val METERS_PER_REV: Double = WHEEL_DIAMETER * PI * 0.99
 
