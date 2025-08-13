@@ -425,4 +425,8 @@ public class Elevator extends SubsystemBase {
       elevatorMotorRight.setControl(voltageOut.withOutput(0.5));
     }
   }
+
+  public static void setElvatorToBeSetState(ElevatorState state) {
+    elevatorToBeSetState = state;
+  }
 }

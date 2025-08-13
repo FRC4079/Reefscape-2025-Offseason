@@ -1,21 +1,5 @@
 package frc.robot.utils.emu
 
-import frc.robot.utils.emu.State.Algae
-import frc.robot.utils.emu.State.Algae.High
-import frc.robot.utils.emu.State.Algae.Low
-import frc.robot.utils.emu.State.Algae.Processor
-import frc.robot.utils.emu.State.Algae.Score
-import frc.robot.utils.emu.State.Auto
-import frc.robot.utils.emu.State.Climb
-import frc.robot.utils.emu.State.ScoreAlign
-import frc.robot.utils.emu.State.ScoreAlign.L1
-import frc.robot.utils.emu.State.ScoreAlign.L2
-import frc.robot.utils.emu.State.ScoreAlign.L3
-import frc.robot.utils.emu.State.ScoreAlign.L4
-import frc.robot.utils.emu.State.ScoreManual
-import frc.robot.utils.emu.State.TeleOpDrive
-import kotlin.random.Random
-
 sealed class State {
     // Top-level Auto option
     object Auto : State()

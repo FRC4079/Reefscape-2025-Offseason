@@ -14,6 +14,16 @@ object SuperStructure : SubsystemBase() {
     private var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
+    @JvmStatic
+    fun queueState(state: State) {
+        wantedState.add(state)
+    }
+
+    @JvmStatic
+    fun resetState() {
+        currentState = State.TeleOpDrive.Base
+    }
+
     fun handleStateTransition() {
         when (wantedState.removeFirst()) {
             // TODO: add state transition handling

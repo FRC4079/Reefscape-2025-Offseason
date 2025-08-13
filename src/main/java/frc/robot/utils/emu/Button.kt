@@ -31,4 +31,9 @@ enum class Button(
     LEFT_TRIGGER({ it.leftTriggerAxis > 0.5 }),
 
     RIGHT_TRIGGER({ it.rightTriggerAxis > 0.5 }),
+
+    DPAD_UP({ it.pov == 0 }),
+    DPAD_RIGHT({ it.pov == 90 }),
+    DPAD_DOWN({ it.pov == 180 }),
+    DPAD_LEFT({ it.pov == 270 }),
 }
