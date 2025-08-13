@@ -63,12 +63,12 @@ public class RobotContainer {
             bind(DPAD_UP, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L1))),
 
             //Stow Elevator
-            bind(A, () -> new InstantCommand(() -> Elevator.setState(DEFAULT)))
+            bind(A, () -> new InstantCommand(() -> Elevator.getInstance().setState(DEFAULT))),
 
             //Intake
 
             //Algae
-            // left trigger
+            bind(LEFT_TRIGGER, () -> new InstantCommand(Elevator::setAlgaeLevel))
     );
 
 

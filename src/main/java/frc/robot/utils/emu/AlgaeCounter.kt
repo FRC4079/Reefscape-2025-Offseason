@@ -5,6 +5,9 @@ package frc.robot.utils.emu
  */
 enum class AlgaeCounter {
     INTAKE, // State when algae is being intaken
+
+    HOLDING, // State when algae is being held
+
     DEFAULT, // Default state
 
     ;

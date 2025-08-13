@@ -257,7 +257,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /** Sets the elevator state */
-  public static void setState(ElevatorState currentState) {
+  public void setState(ElevatorState currentState) {
     this.currentState = currentState;
   }
 
@@ -430,8 +430,16 @@ public class Elevator extends SubsystemBase {
     elevatorToBeSetState = state;
   }
 
-  public void stowElevator() {
-    getInstance().currentState = ElevatorState.DEFAULT;
-    SuperStructure.queueState(State.TeleOpDrive.Base);
+  public static void setAlgaeLevel() {
+    switch (elevatorToBeSetState) {
+      case L2 -> {
+        getInstance().currentState = ElevatorState.ALGAE_LOW;
+      }
+      case L3 -> {
+        getInstance().currentState = ElevatorState.ALGAE_HIGH;
+      }
+    }
+
   }
+
 }
