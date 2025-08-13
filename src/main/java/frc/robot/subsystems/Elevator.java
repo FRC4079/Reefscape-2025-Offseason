@@ -257,7 +257,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /** Sets the elevator state */
-  public void setState(ElevatorState currentState) {
+  public static void setState(ElevatorState currentState) {
     this.currentState = currentState;
   }
 
@@ -428,5 +428,10 @@ public class Elevator extends SubsystemBase {
 
   public static void setElvatorToBeSetState(ElevatorState state) {
     elevatorToBeSetState = state;
+  }
+
+  public void stowElevator() {
+    getInstance().currentState = ElevatorState.DEFAULT;
+    SuperStructure.queueState(State.TeleOpDrive.Base);
   }
 }

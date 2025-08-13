@@ -56,11 +56,19 @@ public class RobotContainer {
             // Alignment
             bind(LEFT_BUMPER, () -> new InstantCommand(() -> SuperStructure.queueState(new State.ScoreAlign(LEFT)))),
             bind(RIGHT_BUMPER, () -> new InstantCommand(() -> SuperStructure.queueState(new State.ScoreAlign(RIGHT)))),
-            //Elvator States
+            //Elevator States
             bind(Y, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L4))),
             bind(X, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L3))),
             bind(B, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L2))),
-            bind(DPAD_UP, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L1)))
+            bind(DPAD_UP, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L1))),
+
+            //Stow Elevator
+            bind(A, () -> new InstantCommand(() -> Elevator.setState(DEFAULT)))
+
+            //Intake
+
+            //Algae
+            // left trigger
     );
 
 
