@@ -196,7 +196,7 @@ public class Elevator extends SubsystemBase {
     AlertPingu.add(elevatorMotorLeft, "left elevator");
     AlertPingu.add(elevatorMotorRight, "right elevator");
 
-    initializeLoggedNetworkPID();
+    initizalizeLoggedNetworkPID();
   }
 
   // This method will be called once per scheduler run
@@ -347,7 +347,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotorRight.setControl(motionMagicVoltage.withPosition(state.pos));
   }
 
-  public void initializeLoggedNetworkPID() {
+  public void initizalizeLoggedNetworkPID() {
     elevatorP =
         new LoggedNetworkNumber("Tuning/Elevator/Elevator P", elevatorRightConfigs.Slot0.kP);
     elevatorI =
@@ -426,12 +426,20 @@ public class Elevator extends SubsystemBase {
     }
   }
 
-  public static void setElevatorToBeSetState(ElevatorState state) {
+  public static void setElvatorToBeSetState(ElevatorState state) {
     elevatorToBeSetState = state;
   }
 
-  public void stowElevator() {
-    getInstance().currentState = ElevatorState.DEFAULT;
-    SuperStructure.queueState(State.TeleOpDrive.Base.INSTANCE);
+  public static void setAlgaeLevel() {
+    switch (elevatorToBeSetState) {
+      case L2 -> {
+        getInstance().currentState = ElevatorState.ALGAE_LOW;
+      }
+      case L3 -> {
+        getInstance().currentState = ElevatorState.ALGAE_HIGH;
+      }
+    }
+
   }
+
 }
