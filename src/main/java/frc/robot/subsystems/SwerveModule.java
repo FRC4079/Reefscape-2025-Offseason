@@ -6,7 +6,7 @@ import static frc.robot.utils.ExtensionsKt.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.*;
 import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
-import static frc.robot.utils.pingu.LogPingu.*;
+import static xyz.malefic.frc.pingu.LogPingu.*;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -21,8 +21,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.utils.RobotParameters.*;
-import frc.robot.utils.pingu.*;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import xyz.malefic.frc.pingu.*;
 
 /** Represents a swerve module used in a swerve drive system. */
 public class SwerveModule {

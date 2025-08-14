@@ -27,6 +27,7 @@ import frc.robot.utils.emu.ElevatorState
 import xyz.malefic.frc.pingu.LogPingu.metaLogs
 import xyz.malefic.frc.pingu.MagicPingu
 import xyz.malefic.frc.pingu.Pingu
+import xyz.malefic.frc.pingu.ProfiledPingu
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -79,6 +80,9 @@ object RobotParameters {
         /** Class containing PID constants for the swerve drive system.  */
         object PinguParameters {
             @JvmField
+            val PROFILE_CONSTRAINTS = Constraints(0.4, 0.4)
+
+            @JvmField
             val STEER_PINGU_TELE = Pingu(750.0, 5.000, 15.0, 0.0)
 
             @JvmField
@@ -91,19 +95,16 @@ object RobotParameters {
             val DRIVE_PINGU_TELE = Pingu(5.0, 0.0, 0.0, 0.7)
 
             @JvmField
-            val ROTATIONAL_PINGU = Pingu(0.15, 0.0, 0.01)
+            val ROTATIONAL_PINGU = ProfiledPingu(0.15, 0.0, 0.01, profile = PROFILE_CONSTRAINTS)
 
             @JvmField
-            val Y_PINGU = Pingu(4.079, 0.0, 0.0)
+            val Y_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
             @JvmField
-            val X_PINGU = Pingu(4.079, 0.0, 0.0)
+            val X_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
             @JvmField
             val DIST_PINGU = Pingu(0.2910, 0.0, 0.0)
-
-            @JvmField
-            val PROFILE_CONSTRAINTS = Constraints(0.4, 0.4)
 
             // TODO remember to update path planner config values and measure everything (cameras etc)
             @JvmField
@@ -239,8 +240,7 @@ object RobotParameters {
     object AlgaeManipulatorParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
-        @JvmField
-        val ALGAE_SENSOR_ID: Int = 1
+        const val ALGAE_SENSOR_ID: Int = 1
         // TODO: FIX
 
         @JvmField

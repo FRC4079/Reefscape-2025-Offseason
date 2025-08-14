@@ -1,8 +1,8 @@
 package frc.robot.subsystems;
 
 import static frc.robot.utils.RobotParameters.ElevatorParameters.*;
-import static frc.robot.utils.pingu.LogPingu.log;
-import static frc.robot.utils.pingu.LogPingu.logs;
+import static xyz.malefic.frc.pingu.LogPingu.log;
+import static xyz.malefic.frc.pingu.LogPingu.logs;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;

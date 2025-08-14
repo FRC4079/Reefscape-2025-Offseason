@@ -7,8 +7,8 @@ import static frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSet
 import static frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList;
 import static frc.robot.utils.RobotParameters.LiveRobotValues.visionDead;
 import static frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.*;
-import static frc.robot.utils.pingu.LogPingu.log;
-import static frc.robot.utils.pingu.LogPingu.logs;
+import static xyz.malefic.frc.pingu.LogPingu.log;
+import static xyz.malefic.frc.pingu.LogPingu.logs;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,8 +21,8 @@ import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.Swerve;
 import frc.robot.utils.emu.Direction;
 import frc.robot.utils.emu.ElevatorState;
-import frc.robot.utils.pingu.NetworkPingu;
 import org.photonvision.PhotonCamera;
+import xyz.malefic.frc.pingu.NetworkPingu;
 
 public class AlignToPoseAuto extends Command {
   private double yaw;

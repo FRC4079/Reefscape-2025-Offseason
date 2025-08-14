@@ -24,6 +24,7 @@ import frc.robot.utils.emu.ElevatorState.L2
 import frc.robot.utils.emu.ElevatorState.L3
 import frc.robot.utils.emu.ElevatorState.L4
 import frc.robot.utils.emu.State
+import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.A
 import xyz.malefic.frc.emu.Button.B
 import xyz.malefic.frc.emu.Button.DPAD_UP
@@ -103,7 +104,11 @@ class RobotContainer {
                 }
                 // Intake
                 // Algae
-                // left trigger
+                press(Button.LEFT_TRIGGER) {
+                    cmd {
+                        Elevator.setAlgaeLevel()
+                    }
+                }
                 press(RIGHT_STICK) {
                     if (visionDead) {
                         onVision()

@@ -4,7 +4,7 @@ import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIn
 import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.emu.CoralState.*;
-import static frc.robot.utils.pingu.LogPingu.*;
+import static xyz.malefic.frc.pingu.LogPingu.*;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,7 +15,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
-import frc.robot.utils.pingu.*;
+import xyz.malefic.frc.pingu.*;
 
 public class Coral extends SubsystemBase {
   private final TalonFX coralFeederMotor;

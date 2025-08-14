@@ -5,7 +5,8 @@ import static frc.robot.utils.ExtensionsKt.*;
 import static frc.robot.utils.RobotParameters.ElevatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.emu.ElevatorMotor.*;
-import static frc.robot.utils.pingu.LogPingu.*;
+import static xyz.malefic.frc.pingu.LogPingu.log;
+import static xyz.malefic.frc.pingu.LogPingu.logs;
 
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
@@ -14,8 +15,9 @@ import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.RobotParameters.*;
 import frc.robot.utils.emu.*;
-import frc.robot.utils.pingu.*;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import xyz.malefic.frc.pingu.*;
+import xyz.malefic.frc.pingu.AlertPingu;
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -426,20 +428,15 @@ public class Elevator extends SubsystemBase {
     }
   }
 
-  public static void setElvatorToBeSetState(ElevatorState state) {
+  public static void setElevatorToBeSetState(ElevatorState state) {
     elevatorToBeSetState = state;
   }
 
   public static void setAlgaeLevel() {
-    switch (elevatorToBeSetState) {
-      case L2 -> {
-        getInstance().currentState = ElevatorState.ALGAE_LOW;
-      }
-      case L3 -> {
-        getInstance().currentState = ElevatorState.ALGAE_HIGH;
-      }
+    if (elevatorToBeSetState == ElevatorState.L2) {
+      getInstance().currentState = ElevatorState.ALGAE_LOW;
+    } else if (elevatorToBeSetState == ElevatorState.L3) {
+      getInstance().currentState = ElevatorState.ALGAE_HIGH;
     }
-
   }
-
 }

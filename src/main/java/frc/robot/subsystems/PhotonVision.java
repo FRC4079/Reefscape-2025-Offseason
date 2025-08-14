@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.utils.ExtensionsKt.*;
 import static frc.robot.utils.RobotParameters.PhotonVisionConstants.*;
-import static frc.robot.utils.pingu.LogPingu.*;
+import static xyz.malefic.frc.pingu.LogPingu.*;
 
 import edu.wpi.first.apriltag.*;
 import edu.wpi.first.math.geometry.*;
