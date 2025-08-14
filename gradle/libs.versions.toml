@@ -3,7 +3,7 @@ dokka = "2.0.0"
 spotless = "7.1.0"
 gradleRIO = "2025.3.2"
 junit = "5.13.4"
-malefix = "1.1.0"
+malefix = "1.1.1"
 
 [libraries]
 dokka-java = { group = "org.jetbrains.dokka", name = "kotlin-as-java-plugin", version.ref = "dokka"}

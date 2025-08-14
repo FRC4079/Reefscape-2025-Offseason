@@ -1,0 +1,23 @@
+# Simple Conventional Commit Configuration
+
+types:
+  - feat: A new feature
+  - fix: A bug fix
+  - docs: Documentation only changes
+  - refactor: A code change that neither fixes a bug nor adds a feature
+  - chore: Other changes that don't modify src or test files
+
+scopes:
+  all:
+    - core
+    - ui
+    - api
+    - docs
+
+options:
+  allowBreakingChanges:
+    - feat
+    - fix
+  allowIssues:
+    - feat
+    - fix

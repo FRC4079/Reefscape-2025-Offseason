@@ -30,11 +30,11 @@ import xyz.malefic.frc.emu.Button.A
 import xyz.malefic.frc.emu.Button.B
 import xyz.malefic.frc.emu.Button.DPAD_UP
 import xyz.malefic.frc.emu.Button.LEFT_BUMPER
+import xyz.malefic.frc.emu.Button.LEFT_TRIGGER
 import xyz.malefic.frc.emu.Button.RIGHT_BUMPER
 import xyz.malefic.frc.emu.Button.RIGHT_STICK
 import xyz.malefic.frc.emu.Button.X
 import xyz.malefic.frc.emu.Button.Y
-import xyz.malefic.frc.extension.Kommand.cmd
 import xyz.malefic.frc.pingu.Bingu.bindings
 import xyz.malefic.frc.pingu.CommandPingu
 
@@ -48,17 +48,18 @@ class RobotContainer {
         Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
         Swerve.getInstance().defaultCommand = drive(aacrn)
 
-        CommandPingu()
-            .bind("ScoreL4Left", fullScoreAuto(LEFT))
-            .bind("ScoreL4Right", fullScoreAuto(RIGHT))
-            .bind("HasPieceFalse", hasPieceFalse())
-            .bind("MoveElevatorL4Auto", moveElevatorState(L4))
-            .bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
-            .bind("SetL1", setElevatorState(L1))
-            .bind("SetL2", setElevatorState(L2))
-            .bind("SetL3", setElevatorState(L3))
-            .bind("SetL4", setElevatorState(L4))
-            .bind("MoveElevatorDown", setElevatorState(DEFAULT))
+        CommandPingu.registerCommands {
+            bind("ScoreL4Left", fullScoreAuto(LEFT))
+            bind("ScoreL4Right", fullScoreAuto(RIGHT))
+            bind("HasPieceFalse", hasPieceFalse())
+            bind("MoveElevatorL4Auto", moveElevatorState(L4))
+            bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
+            bind("SetL1", setElevatorState(L1))
+            bind("SetL2", setElevatorState(L2))
+            bind("SetL3", setElevatorState(L3))
+            bind("SetL4", setElevatorState(L4))
+            bind("MoveElevatorDown", setElevatorState(DEFAULT))
+        }
 
         networkChooser = AutoBuilder.buildAutoChooser()
 
@@ -66,63 +67,41 @@ class RobotContainer {
     }
 
     private fun configureBindings() {
-        aacrn // Alignment
-            .bindings {
-                press(
-                    LEFT_BUMPER,
-                ) { cmd { SuperStructure.queueState(State.ScoreAlign(LEFT)) } }
-                press(
-                    RIGHT_BUMPER,
-                ) { cmd { SuperStructure.queueState(State.ScoreAlign(RIGHT)) } }
-                // Elevator States
-                press(Y) {
-                    cmd {
-                        Elevator.setElevatorToBeSetState(
-                            L4,
-                        )
-                    }
-                }
-                press(X) {
-                    cmd {
-                        Elevator.setElevatorToBeSetState(
-                            L3,
-                        )
-                    }
-                }
-                press(B) {
-                    cmd {
-                        Elevator.setElevatorToBeSetState(
-                            L2,
-                        )
-                    }
-                }
-                press(DPAD_UP) { cmd { Elevator.setElevatorToBeSetState(L1) } }
-                // Stow Elevator
-                press(A) {
-                    cmd {
-                        Elevator.getInstance().state = DEFAULT
-                    }
-                }
-                // Intake
-                // Algae
-                press(Button.LEFT_TRIGGER) {
-                    cmd {
-                        Algae.getInstance().intakeAlgae()
-                    }
-                }
-
-                release(Button.LEFT_TRIGGER) {
-                    cmd {
-                        Algae.getInstance().stopIntake()
-                    }
-                }
-                press(RIGHT_STICK) {
-                    if (visionDead) {
-                        onVision()
-                    } else {
-                        offVision()
-                    }
-                }
+        aacrn.bindings {
+            press(LEFT_BUMPER) {
+                SuperStructure.queueState(State.ScoreAlign(LEFT))
             }
+            press(RIGHT_BUMPER) {
+                SuperStructure.queueState(State.ScoreAlign(RIGHT))
+            }
+            press(Y) {
+                Elevator.setElevatorToBeSetState(L4)
+            }
+            press(X) {
+                Elevator.setElevatorToBeSetState(L3)
+            }
+            press(B) {
+                Elevator.setElevatorToBeSetState(L2)
+            }
+            press(DPAD_UP) {
+                Elevator.setElevatorToBeSetState(L1)
+            }
+            press(A) {
+                Elevator.getInstance().state = DEFAULT
+            }
+            press(LEFT_TRIGGER) {
+                Elevator.setAlgaeLevel()
+            }
+            release(LEFT_TRIGGER) {
+                Algae.getInstance().stopIntake()
+            }
+            press(RIGHT_STICK) {
+                if (visionDead) {
+                    onVision()
+                } else {
+                    offVision()
+                }.schedule()
+            }
+        }
     }
 }
