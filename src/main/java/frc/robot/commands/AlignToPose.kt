@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.commands.Kommand.moveToClosestCoralScore
 import frc.robot.commands.Kommand.moveToClosestCoralScoreNotL4
 import frc.robot.subsystems.Swerve
+import frc.robot.utils.PathPingu.clearCoralScoringPositions
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -18,10 +19,9 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.X_PINGU
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.pingu.LogPingu.log
-import frc.robot.utils.pingu.LogPingu.logs
-import frc.robot.utils.pingu.PathPingu.clearCoralScoringPositions
-import java.sql.Driver
+import frc.robot.utils.profiledPIDController
+import xyz.malefic.frc.pingu.LogPingu.log
+import xyz.malefic.frc.pingu.LogPingu.logs
 
 /**
  * Command to align the robot to a specific pose.
@@ -104,11 +104,9 @@ open class AlignToPose(
     override fun execute() {
         currentPose = Swerve.getInstance().pose2Dfrom3D
         if (
-            ((DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) && DriverStation.isTeleop())
-            ||
+            ((DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) && DriverStation.isTeleop()) ||
             ((DriverStation.getAlliance().get() == DriverStation.Alliance.Red) && DriverStation.isAutonomous())
-            )
-        {
+        ) {
             Swerve
                 .getInstance()
                 .setDriveSpeeds(

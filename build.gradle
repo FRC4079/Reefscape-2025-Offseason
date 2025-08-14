@@ -1,4 +1,5 @@
 import edu.wpi.first.gradlerio.GradleRIOPlugin
+import groovy.json.JsonSlurper
 
 plugins {
 	id "java"
@@ -7,8 +8,6 @@ plugins {
 	alias(libs.plugins.spotless)
 	alias(libs.plugins.dokka)
 }
-
-java {}
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -48,7 +47,7 @@ deploy {
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 
-task(replayWatch, type: JavaExec) {
+tasks.register('replayWatch', JavaExec) {
 	mainClass = "org.littletonrobotics.junction.ReplayWatch"
 	classpath = sourceSets.main.runtimeClasspath
 }
@@ -83,9 +82,10 @@ dependencies {
 	testImplementation libs.junit.jupiter
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+	implementation libs.malefix
 
 	dokkaHtmlPlugin(libs.dokka.java)
-	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
+	def akitJson = new JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
@@ -124,6 +124,15 @@ tasks.withType(JavaCompile).configureEach {
 
 repositories {
 	mavenCentral()
+	maven { url = uri("https://frcmaven.wpi.edu/artifactory/release/") }
+	maven { url = uri("https://plugins.gradle.org/m2/") }
+	maven { url = uri("https://maven.ctr-electronics.com/release/") }
+	maven { url = uri("https://maven.revrobotics.com/") }
+	maven { url = uri("https://maven.photonvision.org/repository/internal") }
+	maven { url = uri("https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/") }
+	maven { url = uri("https://lib.choreo.autos/dep") }
+	maven { url = uri("https://shenzhen-robotics-alliance.github.io/maple-sim/vendordep/repos/releases") }
+	maven { url = uri("https://3015rangerrobotics.github.io/pathplannerlib/repo") }
 }
 
 kotlin {

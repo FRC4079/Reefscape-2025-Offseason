@@ -1,40 +1,52 @@
-package frc.robot;
+package frc.robot
 
-import static frc.robot.commands.Kommand.*;
-import static frc.robot.commands.sequencing.Sequences.*;
-import static frc.robot.utils.emu.Button.*;
-import static frc.robot.utils.emu.Direction.*;
-import static frc.robot.utils.emu.ElevatorState.*;
-import static frc.robot.utils.pingu.Bingu.*;
-import static frc.robot.subsystems.SuperStructure.*;
-import static frc.robot.utils.emu.State.*;
+import com.pathplanner.lib.auto.AutoBuilder
+import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.commands.Kommand.drive
+import frc.robot.commands.Kommand.hasPieceFalse
+import frc.robot.commands.Kommand.moveElevatorState
+import frc.robot.commands.Kommand.offVision
+import frc.robot.commands.Kommand.onVision
+import frc.robot.commands.Kommand.padElevator
+import frc.robot.commands.Kommand.setElevatorState
+import frc.robot.commands.sequencing.Sequences.fullScoreAuto
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.SuperStructure
+import frc.robot.subsystems.Swerve
+import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
+import frc.robot.utils.emu.Direction.LEFT
+import frc.robot.utils.emu.Direction.RIGHT
+import frc.robot.utils.emu.ElevatorState.DEFAULT
+import frc.robot.utils.emu.ElevatorState.L1
+import frc.robot.utils.emu.ElevatorState.L2
+import frc.robot.utils.emu.ElevatorState.L3
+import frc.robot.utils.emu.ElevatorState.L4
+import frc.robot.utils.emu.State
+import xyz.malefic.frc.emu.Button.A
+import xyz.malefic.frc.emu.Button.B
+import xyz.malefic.frc.emu.Button.DPAD_UP
+import xyz.malefic.frc.emu.Button.LEFT_BUMPER
+import xyz.malefic.frc.emu.Button.RIGHT_BUMPER
+import xyz.malefic.frc.emu.Button.RIGHT_STICK
+import xyz.malefic.frc.emu.Button.X
+import xyz.malefic.frc.emu.Button.Y
+import xyz.malefic.frc.extension.Kommand.cmd
+import xyz.malefic.frc.pingu.Bingu.bindings
+import xyz.malefic.frc.pingu.CommandPingu
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.*;
-import frc.robot.commands.*;
-import frc.robot.commands.sequencing.*;
-import frc.robot.subsystems.*;
-import frc.robot.utils.emu.ElevatorState;
-import frc.robot.utils.emu.State;
-import frc.robot.utils.pingu.*;
+class RobotContainer {
+    val networkChooser: SendableChooser<Command?>
+    val aacrn: XboxController = XboxController(0)
+    val calamityCow: XboxController = XboxController(1)
 
-public class RobotContainer {
-  public final SendableChooser<Command> networkChooser;
-  public final XboxController aacrn;
-  public final XboxController calamityCow;
+    init {
 
-  public RobotContainer() {
-    aacrn = new XboxController(0);
-    calamityCow = new XboxController(1);
+        Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
+        Swerve.getInstance().defaultCommand = drive(aacrn)
 
-    Elevator.getInstance().setDefaultCommand(padElevator(aacrn, calamityCow));
-    Swerve.getInstance().setDefaultCommand(drive(aacrn));
-
-    new CommandPingu()
+        CommandPingu()
             .bind("ScoreL4Left", fullScoreAuto(LEFT))
             .bind("ScoreL4Right", fullScoreAuto(RIGHT))
             .bind("HasPieceFalse", hasPieceFalse())
@@ -44,36 +56,61 @@ public class RobotContainer {
             .bind("SetL2", setElevatorState(L2))
             .bind("SetL3", setElevatorState(L3))
             .bind("SetL4", setElevatorState(L4))
-            .bind("MoveElevatorDown", setElevatorState(DEFAULT));
+            .bind("MoveElevatorDown", setElevatorState(DEFAULT))
 
-    networkChooser = AutoBuilder.buildAutoChooser();
+        networkChooser = AutoBuilder.buildAutoChooser()
 
-    configureBindings();
-  }
+        configureBindings()
+    }
 
-  private void configureBindings() {
-    bindings(aacrn,
-            // Alignment
-            bind(LEFT_BUMPER, () -> new InstantCommand(() -> SuperStructure.queueState(new State.ScoreAlign(LEFT)))),
-            bind(RIGHT_BUMPER, () -> new InstantCommand(() -> SuperStructure.queueState(new State.ScoreAlign(RIGHT)))),
-            //Elevator States
-            bind(Y, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L4))),
-            bind(X, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L3))),
-            bind(B, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L2))),
-            bind(DPAD_UP, () -> new InstantCommand(() -> Elevator.setElvatorToBeSetState(ElevatorState.L1))),
-
-            //Stow Elevator
-            bind(A, () -> new InstantCommand(() -> Elevator.setState(DEFAULT)))
-
-            //Intake
-
-            //Algae
-            // left trigger
-    );
-
-
-
-    bindings(calamityCow, bind(A, Kommand::offVision));
-    bindings(calamityCow, bind(B, Kommand::onVision));
-  }
+    private fun configureBindings() {
+        aacrn // Alignment
+            .bindings {
+                press(
+                    LEFT_BUMPER,
+                ) { cmd { SuperStructure.queueState(State.ScoreAlign(LEFT)) } }
+                press(
+                    RIGHT_BUMPER,
+                ) { cmd { SuperStructure.queueState(State.ScoreAlign(RIGHT)) } }
+                // Elevator States
+                press(Y) {
+                    cmd {
+                        Elevator.setElevatorToBeSetState(
+                            L4,
+                        )
+                    }
+                }
+                press(X) {
+                    cmd {
+                        Elevator.setElevatorToBeSetState(
+                            L3,
+                        )
+                    }
+                }
+                press(B) {
+                    cmd {
+                        Elevator.setElevatorToBeSetState(
+                            L2,
+                        )
+                    }
+                }
+                press(DPAD_UP) { cmd { Elevator.setElevatorToBeSetState(L1) } }
+                // Stow Elevator
+                press(A) {
+                    cmd {
+                        Elevator.getInstance().state = DEFAULT
+                    }
+                }
+                // Intake
+                // Algae
+                // left trigger
+                press(RIGHT_STICK) {
+                    if (visionDead) {
+                        onVision()
+                    } else {
+                        offVision()
+                    }
+                }
+            }
+    }
 }

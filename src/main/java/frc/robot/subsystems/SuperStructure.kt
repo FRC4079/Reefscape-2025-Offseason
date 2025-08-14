@@ -1,9 +1,7 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.commands.sequencing.Sequences
 import frc.robot.utils.emu.State
-import java.util.Queue
 
 object SuperStructure : SubsystemBase() {
     private val swerve = Swerve.getInstance()
@@ -16,6 +14,10 @@ object SuperStructure : SubsystemBase() {
 
     @JvmStatic
     fun queueState(state: State) {
+        wantedState.add(state)
+    }
+
+    operator fun plus(state: State) {
         wantedState.add(state)
     }
 
@@ -73,6 +75,6 @@ object SuperStructure : SubsystemBase() {
     }
 
     override fun periodic() {
-        // This method will be called once per scheduler run
+        applyState()
     }
 }

@@ -1,12 +1,14 @@
 [versions]
 dokka = "2.0.0"
-spotless = "7.2.1"
+spotless = "7.1.0"
 gradleRIO = "2025.3.2"
 junit = "5.13.4"
+malefix = "1.1.0"
 
 [libraries]
 dokka-java = { group = "org.jetbrains.dokka", name = "kotlin-as-java-plugin", version.ref = "dokka"}
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+malefix = { group = "xyz.malefic.frc", name = "malefix", version.ref = "malefix" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

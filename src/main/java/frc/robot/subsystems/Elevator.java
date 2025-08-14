@@ -196,7 +196,7 @@ public class Elevator extends SubsystemBase {
     AlertPingu.add(elevatorMotorLeft, "left elevator");
     AlertPingu.add(elevatorMotorRight, "right elevator");
 
-    initizalizeLoggedNetworkPID();
+    initializeLoggedNetworkPID();
   }
 
   // This method will be called once per scheduler run
@@ -257,7 +257,7 @@ public class Elevator extends SubsystemBase {
   }
 
   /** Sets the elevator state */
-  public static void setState(ElevatorState currentState) {
+  public void setState(ElevatorState currentState) {
     this.currentState = currentState;
   }
 
@@ -347,7 +347,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotorRight.setControl(motionMagicVoltage.withPosition(state.pos));
   }
 
-  public void initizalizeLoggedNetworkPID() {
+  public void initializeLoggedNetworkPID() {
     elevatorP =
         new LoggedNetworkNumber("Tuning/Elevator/Elevator P", elevatorRightConfigs.Slot0.kP);
     elevatorI =
@@ -426,12 +426,12 @@ public class Elevator extends SubsystemBase {
     }
   }
 
-  public static void setElvatorToBeSetState(ElevatorState state) {
+  public static void setElevatorToBeSetState(ElevatorState state) {
     elevatorToBeSetState = state;
   }
 
   public void stowElevator() {
     getInstance().currentState = ElevatorState.DEFAULT;
-    SuperStructure.queueState(State.TeleOpDrive.Base);
+    SuperStructure.queueState(State.TeleOpDrive.Base.INSTANCE);
   }
 }

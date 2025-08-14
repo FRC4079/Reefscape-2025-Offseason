@@ -24,11 +24,9 @@ import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.AlgaePivotState
 import frc.robot.utils.emu.CoralState
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.pingu.CoralScore
-import frc.robot.utils.pingu.LogPingu.metaLogs
-import frc.robot.utils.pingu.MagicPingu
-import frc.robot.utils.pingu.PathPingu
-import frc.robot.utils.pingu.Pingu
+import xyz.malefic.frc.pingu.LogPingu.metaLogs
+import xyz.malefic.frc.pingu.MagicPingu
+import xyz.malefic.frc.pingu.Pingu
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

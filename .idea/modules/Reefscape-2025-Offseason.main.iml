@@ -6,9 +6,6 @@
     </content>
   </component>
   <component name="FacetManager">
-    <facet type="FRC_FACET" name="FRC">
-      <configuration />
-    </facet>
     <facet type="FRC_FACET" name="FRC2">
       <configuration />
     </facet>

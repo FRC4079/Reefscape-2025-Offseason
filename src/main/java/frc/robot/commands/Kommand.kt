@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.robot.subsystems.Coral
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Swerve
+import frc.robot.utils.PathPingu.findClosestScoringPosition
+import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralState
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -21,8 +23,7 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CON
 import frc.robot.utils.emu.CoralState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.pingu.PathPingu.findClosestScoringPosition
-import frc.robot.utils.pingu.PathPingu.findClosestScoringPositionNotL4
+import xyz.malefic.frc.extension.Kommand.cmd
 import kotlin.math.abs
 
 /**
@@ -32,18 +33,6 @@ import kotlin.math.abs
  * This is called for instant commands instead of functions
  */
 object Kommand {
-    /**
-     * Creates an [InstantCommand] that executes the given function.
-     *
-     * @param function The function to execute.
-     * @return An [InstantCommand] that executes the given function.
-     */
-    @JvmStatic
-    fun cmd(
-        vararg reqs: Subsystem,
-        function: () -> Unit,
-    ) = InstantCommand(function, *reqs)
-
     /**
      * Creates a [WaitCommand] to wait for a specified number of seconds.
      *
@@ -299,7 +288,6 @@ object Kommand {
      */
     @JvmStatic
     fun offVision() = cmd { visionDead = false }
-
 
     /**
      * Toggles the vision kill switch state.

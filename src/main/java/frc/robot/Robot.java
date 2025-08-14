@@ -131,7 +131,9 @@ public class Robot extends LoggedRobot {
     setCurrentThreadPriority(false, 99);
   }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. **/
+  /**
+   * This autonomous runs the autonomous command selected by your {@link RobotContainer} class. *
+   */
   @Override
   public void autonomousInit() {
     //    autonomousCommand = robotContainer.networkChooser.getSelected();
@@ -144,7 +146,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     if (autonomousCommand != null) autonomousCommand.cancel();
-//    flipPidgey();
+    //    flipPidgey();
   }
 
   /** This function is called once when test mode is initialized. */

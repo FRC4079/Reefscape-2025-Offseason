@@ -1,12 +1,14 @@
 package frc.robot.utils
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
 import frc.robot.subsystems.PhotonModule
-import frc.robot.utils.pingu.NetworkPingu
-import frc.robot.utils.pingu.Pingu
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.targeting.PhotonPipelineResult
+import xyz.malefic.frc.pingu.NetworkPingu
+import xyz.malefic.frc.pingu.Pingu
 import java.util.Optional
 
 /**
@@ -115,3 +117,16 @@ fun TalonFXConfiguration.setPingu(pingu: NetworkPingu) =
         s ?. run { Slot0.kS = s!!.get() }
         g ?. run { Slot0.kG = g!!.get() }
     }
+
+/**
+ * Extension property to create a ProfiledPIDController using the Pingu object's PID values.
+ *
+ * This property initializes a ProfiledPIDController with the proportional (p), integral (i),
+ * and derivative (d) gains from the Pingu object, as well as the profile constraints defined
+ * in PROFILE_CONSTRAINTS.
+ *
+ * @receiver Pingu The Pingu object containing the PID values.
+ * @return ProfiledPIDController The initialized ProfiledPIDController.
+ */
+val Pingu.profiledPIDController
+    get() = ProfiledPIDController(p, i, d, PROFILE_CONSTRAINTS)

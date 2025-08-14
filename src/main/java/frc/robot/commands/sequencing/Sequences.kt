@@ -1,7 +1,6 @@
 package frc.robot.commands.sequencing
 
 import frc.robot.commands.Kommand.align
-import frc.robot.commands.Kommand.alignAuto
 import frc.robot.commands.Kommand.cancel
 import frc.robot.commands.Kommand.coralScoreFalse
 import frc.robot.commands.Kommand.coralScoring

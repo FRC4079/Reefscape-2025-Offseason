@@ -216,8 +216,8 @@ public class Coral extends SubsystemBase {
   }
 
   /**
-   * Sets the voltage output to -3.0 and controls the coral score motor
-   * to slow down the algae scoring process.
+   * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
+   * scoring process.
    */
   public void slowAlgaeScoreMotors() {
     voltageOut.Output = -3.0;
