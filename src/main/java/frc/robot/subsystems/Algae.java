@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.RobotParameters.*;
 import frc.robot.utils.emu.AlgaePivotState;
+import frc.robot.utils.emu.ElevatorState;
 import xyz.malefic.frc.pingu.*;
 import xyz.malefic.frc.pingu.AlertPingu;
 
@@ -162,21 +163,39 @@ public class Algae extends SubsystemBase {
     algaeIntakeMotor.setControl(voltageOut);
   }
 
-  public void intakeAlgae() {
-    algaeIntaking = true;
-    algaeCounter = INTAKE;
-  }
-
-  public void handleAlgaeIntake() {
-    if (algaeIntaking && algaeCounter == INTAKE) {
-      setIntakeSpeed(30.0);
-    }
+  private void stopAlgaeMotor()
+  {
+    algaeIntakeMotor.stopMotor();
   }
 
   public void checkAlgaeSensor() {
     if (algaeSensor.get()) {
       algaeCounter = HOLDING;
-      algaeIntaking = false;
+    }
+
+    else {
+      algaeCounter = DEFAULT;
     }
   }
+
+  public boolean getAlgaeSensor() {
+    return !algaeSensor.get();
+  }
+
+  public void intakeAlgae() {
+    Elevator.setAlgaeLevel();
+    setIntakeSpeed(30.0);
+    algaeIntaking = true;
+  }
+
+  public void stopIntake() {
+    Elevator.getInstance().setElevatorPosition(ElevatorState.DEFAULT);
+    stopAlgaeMotor();
+    algaeIntaking = false;
+  }
+
+  public void shootAlgae() {
+    setIntakeSpeed(-30.0);
+  }
 }
+

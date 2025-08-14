@@ -1,6 +1,7 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
@@ -30,6 +31,18 @@ object SuperStructure : SubsystemBase() {
         when (wantedState.removeFirst()) {
             // TODO: add state transition handling
             else -> {}
+        }
+    }
+
+    fun handleDriveState() {
+        if (currentState is State.TeleOpDrive) {
+            if (Algae.getInstance().algaeSensor) {
+                currentState = State.TeleOpDrive.Algae
+            } else if (Coral.getInstance().coralSensor) {
+                currentState = State.TeleOpDrive.Coral
+            } else {
+                currentState = State.TeleOpDrive.Base
+            }
         }
     }
 
@@ -75,6 +88,10 @@ object SuperStructure : SubsystemBase() {
     }
 
     override fun periodic() {
+        handleDriveState()
+        if (!wantedState.isEmpty()) {
+            handleStateTransition()
+        }
         applyState()
     }
 }

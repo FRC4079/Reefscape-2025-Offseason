@@ -12,6 +12,7 @@ import frc.robot.commands.Kommand.onVision
 import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.sequencing.Sequences.fullScoreAuto
+import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
@@ -106,7 +107,13 @@ class RobotContainer {
                 // Algae
                 press(Button.LEFT_TRIGGER) {
                     cmd {
-                        Elevator.setAlgaeLevel()
+                        Algae.getInstance().intakeAlgae()
+                    }
+                }
+
+                release(Button.LEFT_TRIGGER) {
+                    cmd {
+                        Algae.getInstance().stopIntake()
                     }
                 }
                 press(RIGHT_STICK) {
