@@ -171,9 +171,7 @@ public class Algae extends SubsystemBase {
   public void checkAlgaeSensor() {
     if (algaeSensor.get()) {
       algaeCounter = HOLDING;
-    }
-
-    else {
+    } else {
       algaeCounter = DEFAULT;
     }
   }

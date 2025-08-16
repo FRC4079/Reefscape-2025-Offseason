@@ -27,8 +27,6 @@ sealed class State {
         object Low : Algae()
 
         object Score : Algae()
-
-        object Processor : Algae()
     }
 
     object Climb : State()

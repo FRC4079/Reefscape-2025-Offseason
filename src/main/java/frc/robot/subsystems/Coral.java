@@ -154,7 +154,7 @@ public class Coral extends SubsystemBase {
           log("Coral/Coral State", coralState.toString());
         });
 
-    coralState.block.run();
+    coralState.block.invoke();
   }
 
   /** Stops the coral manipulator motors */

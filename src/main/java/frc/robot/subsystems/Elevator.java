@@ -273,15 +273,6 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * Gets the state of the elevator motor as a double in terms of its height in the parameters file
-   *
-   * @return double, the state of the elevator motor as a double
-   */
-  public double getStateDouble() {
-    return this.currentState.pos;
-  }
-
-  /**
    * Get the position of the elevator motor
    *
    * @param motor "left" or "right | The motor to get the position of

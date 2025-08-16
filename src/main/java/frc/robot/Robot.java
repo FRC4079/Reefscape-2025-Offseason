@@ -34,7 +34,6 @@ import xyz.malefic.frc.path.LocalADStarAK;
 @SuppressWarnings("resource")
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
-  private RobotContainer robotContainer;
 
   private Timer garbageTimer;
   private Timer batteryTimer;
@@ -94,7 +93,7 @@ public class Robot extends LoggedRobot {
     Swerve.getInstance().configureAutoBuilder();
 
     // Initialize the robot container
-    robotContainer = new RobotContainer();
+    RobotContainer.INSTANCE.getAacrn();
 
     // Schedule the warmup command
     PathfindingCommand.warmupCommand().schedule();
