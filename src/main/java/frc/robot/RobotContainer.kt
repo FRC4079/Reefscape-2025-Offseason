@@ -14,6 +14,7 @@ import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.sequencing.Sequences.fullScoreAuto
 import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -38,7 +39,7 @@ import xyz.malefic.frc.emu.Button.Y
 import xyz.malefic.frc.pingu.Bingu.bindings
 import xyz.malefic.frc.pingu.CommandPingu
 
-class RobotContainer {
+object RobotContainer {
     val networkChooser: SendableChooser<Command?>
     val aacrn: XboxController = XboxController(0)
     val calamityCow: XboxController = XboxController(1)
@@ -69,31 +70,38 @@ class RobotContainer {
     private fun configureBindings() {
         aacrn.bindings {
             press(LEFT_BUMPER) {
-                SuperStructure.queueState(State.ScoreAlign(LEFT))
+                SuperStructure + State.ScoreAlign(LEFT)
             }
             press(RIGHT_BUMPER) {
-                SuperStructure.queueState(State.ScoreAlign(RIGHT))
+                SuperStructure + State.ScoreAlign(RIGHT)
             }
             press(Y) {
-                Elevator.setElevatorToBeSetState(L4)
+                setElevatorToBeSetState(L4)
             }
             press(X) {
-                Elevator.setElevatorToBeSetState(L3)
+                setElevatorToBeSetState(L3)
             }
             press(B) {
-                Elevator.setElevatorToBeSetState(L2)
+                setElevatorToBeSetState(L2)
             }
             press(DPAD_UP) {
-                Elevator.setElevatorToBeSetState(L1)
+                setElevatorToBeSetState(L1)
             }
             press(A) {
-                Elevator.getInstance().state = DEFAULT
+                setElevatorToBeSetState(DEFAULT)
             }
             press(LEFT_TRIGGER) {
                 Algae.getInstance().intakeAlgae()
             }
             release(LEFT_TRIGGER) {
                 Algae.getInstance().stopIntake()
+            }
+            press(Button.RIGHT_TRIGGER) {
+                when (SuperStructure.currentState) {
+                    State.TeleOpDrive.Algae -> SuperStructure + State.Algae.Score
+                    State.TeleOpDrive.Coral -> SuperStructure + State.ScoreManual
+                    else -> { /* no-op */ }
+                }
             }
             press(RIGHT_STICK) {
                 if (visionDead) {
