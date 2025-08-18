@@ -58,6 +58,10 @@ object RobotParameters {
         const val STAR_FEEDER_ID: Int = 18
         const val CORAL_FEEDER_ID: Int = 19
 
+        const val CLIMB_PIVOT_MOTOR_ID: Int = 21
+
+        const val CAGE_LOCK_MOTOR_ID: Int = 22
+
         // Motor Property Values
         const val MAX_SPEED: Double = 5.76
         const val MAX_ANGULAR_SPEED: Double = (14 * PI) / 3

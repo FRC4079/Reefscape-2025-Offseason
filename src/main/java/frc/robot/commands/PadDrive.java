@@ -30,18 +30,18 @@ public class PadDrive extends Command {
    */
   @Override
   public void execute() {
-    Pair<Double, Double> position = positionSet(pad);
-
-    double rotation = Math.abs(pad.getRightX()) >= 0.1 ? -pad.getRightX() * MAX_ANGULAR_SPEED : 0.0;
-
-    logs(
-        () -> {
-          log("X Joystick", position.getFirst());
-          log("Y Joystick", position.getSecond());
-          log("Rotation", rotation);
-        });
-
-    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
+//    Pair<Double, Double> position = positionSet(pad);
+//
+//    double rotation = Math.abs(pad.getRightX()) >= 0.1 ? -pad.getRightX() * MAX_ANGULAR_SPEED : 0.0;
+//
+//    logs(
+//        () -> {
+//          log("X Joystick", position.getFirst());
+//          log("Y Joystick", position.getSecond());
+//          log("Rotation", rotation);
+//        });
+//
+//    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
   }
 
   /**
@@ -61,13 +61,7 @@ public class PadDrive extends Command {
    * @return The coordinate representing the position. The first element is the x-coordinate, and
    *     the second element is the y-coordinate.
    */
-  public static Pair<Double, Double> positionSet(XboxController pad) {
-    double x = -pad.getLeftX() * MAX_SPEED;
-    if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
-
-    double y = -pad.getLeftY() * MAX_SPEED;
-    if (Math.abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0;
-
-    return new Pair<>(x, y);
-  }
+//  public static Pair<Double, Double> positionSet(XboxController pad) {
+//    return getDoubleDoublePair(pad);
+//  }
 }

@@ -49,7 +49,7 @@ object SuperStructure : SubsystemBase() {
     fun applyState() {
         when (currentState) {
             is State.TeleOpDrive -> {
-                // TODO: do drive
+                swerve.padDrive()
                 when (currentState) {
                     is State.TeleOpDrive.Algae -> {
                         // TODO: idk
@@ -60,6 +60,7 @@ object SuperStructure : SubsystemBase() {
                     else -> {}
                 }
             }
+
             is State.ScoreAlign -> {
                 val dir = (currentState as State.ScoreAlign).dir
                 // TODO: Full scoring sequence

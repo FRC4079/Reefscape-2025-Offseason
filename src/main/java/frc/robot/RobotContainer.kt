@@ -90,7 +90,7 @@ class RobotContainer {
                 Elevator.getInstance().state = DEFAULT
             }
             press(LEFT_TRIGGER) {
-                Elevator.setAlgaeLevel()
+                Algae.getInstance().intakeAlgae()
             }
             release(LEFT_TRIGGER) {
                 Algae.getInstance().stopIntake()

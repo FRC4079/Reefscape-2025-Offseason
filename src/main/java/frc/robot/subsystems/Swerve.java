@@ -31,10 +31,15 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
+
+import kotlin.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.photonvision.EstimatedRobotPose;
@@ -49,6 +54,8 @@ public class Swerve extends SubsystemBase {
   private SwerveModuleState[] setStates = new SwerveModuleState[4];
   private final SwerveModule[] modules;
   private final PhotonVision photonVision;
+
+  private final XboxController aacrn;
 
   // Auto Align Pingu Values
   private NetworkPingu networkPinguXAutoAlign;
@@ -80,6 +87,27 @@ public class Swerve extends SubsystemBase {
   PathConstraints constraints =
       new PathConstraints(2.0, 3.0, degreesToRadians(540), degreesToRadians(720));
 
+
+
+  /**
+   * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
+   * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
+   */
+  private Swerve() {
+    this.modules = initializeModules();
+    this.pidgey.reset();
+    this.poseEstimator = initializePoseEstimator();
+    this.poseEstimator3d = initializePoseEstimator3d();
+    this.aacrn = new XboxController(0);
+    //    configureAutoBuilder();
+    initializePathPlannerLogging();
+    photonVision = PhotonVision.getInstance();
+
+    //    swerveLoggingThread.start();
+
+    initializationAlignPing();
+  }
+
   /**
    * The Singleton instance of this SwerveSubsystem. Code should use the {@link #getInstance()}
    * method to get the single instance (rather than trying to construct an instance of this class.)
@@ -96,24 +124,9 @@ public class Swerve extends SubsystemBase {
     return INSTANCE;
   }
 
-  /**
-   * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
-   * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
-   */
-  private Swerve() {
-    this.modules = initializeModules();
-    this.pidgey.reset();
-    this.poseEstimator = initializePoseEstimator();
-    this.poseEstimator3d = initializePoseEstimator3d();
-    //    configureAutoBuilder();
-    initializePathPlannerLogging();
-    photonVision = PhotonVision.getInstance();
-
-    //    swerveLoggingThread.start();
-
-    initializationAlignPing();
+  public static XboxController getAacrnController() {
+    return INSTANCE.aacrn;
   }
-
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
    * in kinematics.
@@ -519,5 +532,31 @@ public class Swerve extends SubsystemBase {
 
   protected Rotation3d getPidgeyRotation3d() {
     return pidgey.getRotation3d();
+  }
+
+  public void padDrive() {
+    Pair<Double, Double> position = positionSet(aacrn);
+
+    double rotation = Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
+
+    logs(
+            () -> {
+              log("X Joystick", position.getFirst());
+              log("Y Joystick", position.getSecond());
+              log("Rotation", rotation);
+            });
+
+    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
+  }
+
+  @NotNull
+  private static Pair<Double, Double> positionSet(XboxController pad) {
+    double x = -pad.getLeftX() * MAX_SPEED;
+    if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
+
+    double y = -pad.getLeftY() * MAX_SPEED;
+    if (Math.abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0;
+
+    return new Pair<>(x, y);
   }
 }
