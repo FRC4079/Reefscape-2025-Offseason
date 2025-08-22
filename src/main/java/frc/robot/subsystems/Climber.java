@@ -15,6 +15,7 @@ import xyz.malefic.frc.pingu.AlertPingu;
 import xyz.malefic.frc.pingu.VoltagePingu;
 
 import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking;
+import static frc.robot.utils.RobotParameters.ClimberParameters.CLIMBER_PINGU;
 import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.emu.CoralState.*;
@@ -57,60 +58,38 @@ public class Climber extends SubsystemBase {
     climbPivotMotor = new TalonFX(CLIMB_PIVOT_MOTOR_ID);
     cageLockMotor = new PWMTalonSRX(CAGE_LOCK_MOTOR_ID);
 
+    coralSensor = new DigitalInput(CORAL_SENSOR_ID);
 
     TalonFXConfiguration climbPivotConfiguration = new TalonFXConfiguration();
-    PW
+//    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
 
-    coralFeederConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    coralScoreConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    starFeederConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    climbPivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    coralFeederConfiguration.Slot0.kP = CORAL_FEEDER_PINGU.getP();
-    coralFeederConfiguration.Slot0.kI = CORAL_FEEDER_PINGU.getI();
-    coralFeederConfiguration.Slot0.kD = CORAL_FEEDER_PINGU.getD();
-    coralFeederConfiguration.Slot0.kV = CORAL_FEEDER_PINGU.getV();
+    climbPivotConfiguration.Slot0.kP = CLIMBER_PINGU.getP();
+    climbPivotConfiguration.Slot0.kI = CLIMBER_PINGU.getI();
+    climbPivotConfiguration.Slot0.kD = CLIMBER_PINGU.getD();
+    climbPivotConfiguration.Slot0.kV = CLIMBER_PINGU.getV();
 
-    coralFeederMotor.getConfigurator().apply(coralFeederConfiguration);
-    coralScoreMotor.getConfigurator().apply(coralFeederConfiguration);
+    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
 
-    CurrentLimitsConfigs upMotorCurrentConfig = new CurrentLimitsConfigs();
-    CurrentLimitsConfigs coralScoreCurrentConfig = new CurrentLimitsConfigs();
-    CurrentLimitsConfigs starFeederCurrentConfig = new CurrentLimitsConfigs();
+    CurrentLimitsConfigs climbPivotCurrentConfig = new CurrentLimitsConfigs();
 
-    upMotorCurrentConfig.SupplyCurrentLimit = 40;
-    upMotorCurrentConfig.SupplyCurrentLimitEnable = true;
-    upMotorCurrentConfig.StatorCurrentLimit = 40;
-    upMotorCurrentConfig.StatorCurrentLimitEnable = true;
+    climbPivotCurrentConfig.SupplyCurrentLimit = 40;
+    climbPivotCurrentConfig.SupplyCurrentLimitEnable = true;
+    climbPivotCurrentConfig.StatorCurrentLimit = 40;
+    climbPivotCurrentConfig.StatorCurrentLimitEnable = true;
 
-    coralScoreCurrentConfig.SupplyCurrentLimit = 40;
-    coralScoreCurrentConfig.SupplyCurrentLimitEnable = true;
-    coralScoreCurrentConfig.StatorCurrentLimit = 40;
-    coralScoreCurrentConfig.StatorCurrentLimitEnable = true;
-
-    starFeederCurrentConfig.SupplyCurrentLimit = 40;
-    starFeederCurrentConfig.SupplyCurrentLimitEnable = true;
-    starFeederCurrentConfig.StatorCurrentLimit = 40;
-    starFeederCurrentConfig.StatorCurrentLimitEnable = true;
-
-    coralFeederMotor.getConfigurator().apply(upMotorCurrentConfig);
-    coralScoreMotor.getConfigurator().apply(coralScoreCurrentConfig);
-    starFeederMotor.getConfigurator().apply(starFeederCurrentConfig);
+    climbPivotMotor.getConfigurator().apply(climbPivotCurrentConfig);
 
     // on
-    coralFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    coralScoreConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    starFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    climbPivotConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    coralScoreMotor.getConfigurator().apply(coralScoreConfiguration);
-    coralFeederMotor.getConfigurator().apply(coralFeederConfiguration);
-    starFeederMotor.getConfigurator().apply(starFeederConfiguration);
+    x.getConfigurator().apply(climbPivotConfiguration);
 
     voltageOut = new VoltageOut(0);
     voltageOutFeeder = new VoltageOut(0);
 
-    AlertPingu.add(coralFeederMotor, "coral feeder");
-    AlertPingu.add(coralScoreMotor, "coral score");
-    AlertPingu.add(starFeederMotor, "Star Feeder Motor");
+    AlertPingu.add(climbPivotMotor, "climber pivot motor");
   }
 
   /**
@@ -125,42 +104,16 @@ public class Climber extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    voltageOutFeeder.Output = 5;
-    coralFeederMotor.setControl(voltageOutFeeder);
-    starFeederMotor.setControl(voltageOutFeeder);
 
-    if (!algaeIntaking && !coralScoring) {
-      if (!getCoralSensor() && !hasPiece) {
-        coralState = CORAL_INTAKE;
-      } else if (getCoralSensor() && !hasPiece) {
-        // Stop the motors if the manipulator has a piece, but the sensor no longer
-        // detects it
-        coralState = CORAL_SLOW;
-        setHasPiece(true);
-      } else if (!getCoralSensor() && hasPiece) {
-        coralState = CORAL_HOLD;
-      } else {
-        coralState = CORAL_SLOW;
-      }
-    }
 
-    logs(
-        () -> {
-          log("Coral/Coral Sensor", getCoralSensor());
-          log("Coral/Has Piece", hasPiece);
-          log("Coral/Coral Scoring", coralScoring);
-          log("Coral/motorsRunning", this.motorsRunning);
-          log("Coral/Coral State", coralState.toString());
-        });
 
-    coralState.block.run();
+
   }
-
+`
   /** Stops the coral manipulator motors */
-  public void stopMotors() {
+  public void stopClimbPivotMotor() {
     //    coralFeederMotor.stopMotor();
-    coralScoreMotor.stopMotor();
-    this.motorsRunning = false;
+    climbPivotMotor.stopMotor();
   }
 
   /** Starts the coral manipulator motors */
