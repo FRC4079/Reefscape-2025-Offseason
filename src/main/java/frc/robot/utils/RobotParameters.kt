@@ -284,10 +284,14 @@ object RobotParameters {
         const val FIELD_LENGTH_METERS = 17.5483 // 57 feet + 6 7/8 inches
         const val FIELD_WIDTH_METERS = 8.0518 // 26 feet + 5 inches
 
-        val AprilTagFieldLayout = AprilTagFields.k2025ReefscapeWelded
+        val AprilTagField = AprilTagFields.k2025ReefscapeWelded
 
         val FIELD_LENGTH: Distance = Feet.of(57.0).plus(Inches.of(6.0 + 7.0 / 8.0))
         val FIELD_WIDTH: Distance = Feet.of(26.0).plus(Inches.of(5.0))
+
+        const val X_OFFSET_FROM_TAG_FOR_SCORING_INCHES: Double = 22.0
+
+        const val Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES: Double = 6.5
 
         @Suppress("MemberVisibilityCanBePrivate")
         object RobotPoses {

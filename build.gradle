@@ -83,6 +83,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 	implementation libs.malefix
+    implementation libs.kermit
 
 	dokkaHtmlPlugin(libs.dokka.java)
 	def akitJson = new JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)

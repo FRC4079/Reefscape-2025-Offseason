@@ -1,9 +1,12 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.RobotContainer.aacrn
 import frc.robot.commands.Kommand
 import frc.robot.commands.sequencing.Sequences
+import frc.robot.utils.Pose.getDesiredScorePose
+import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
@@ -45,28 +48,32 @@ object SuperStructure : SubsystemBase() {
     fun applyState() {
         when (val state = currentState) {
             is State.TeleOpDrive -> {
-<<<<<<< HEAD
                 swerve.padDrive()
+
                 when (currentState) {
-=======
-                Kommand.drive(aacrn)
-                when (state) {
->>>>>>> b458a2cd3cab3cd0e0aa957d60ec8505997dd50a
-                    is State.TeleOpDrive.Algae -> {
-                        Algae.getInstance().stopIntake()
+                    is State.TeleOpDrive -> {
+                        Kommand.drive(aacrn)
+                        when (state) {
+                            is State.TeleOpDrive.Algae -> {
+                                Algae.getInstance().stopIntake()
+                            }
+                            is State.TeleOpDrive.Coral -> {
+                                Coral.getInstance().stopMotors()
+                            }
+                            else -> { /* no-op */ }
+                        }
                     }
-                    is State.TeleOpDrive.Coral -> {
-                        Coral.getInstance().stopMotors()
-                    }
-                    else -> { /* no-op */ }
+
+                    else -> {}
                 }
             }
 
             is State.ScoreAlign -> {
-                val dir = state.dir
+                val dir = state.dir // Ensure `dir` exists in `ScoreAlign`
                 Sequences.fullScore(dir)
             }
-            is State.Algae ->
+
+            is State.Algae -> {
                 when (state) {
                     is State.Algae.High -> {
                         // TODO: high algae sequence
@@ -79,10 +86,22 @@ object SuperStructure : SubsystemBase() {
                         // TODO: algae scoring sequence
                     }
                 }
+            }
+
             State.Climb -> TODO()
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
+            else -> { /* Handle unexpected states */ }
         }
+    }
+
+    fun driveToScoringPose(dir: Direction) {
+        val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
+        // TODO: Thanks Jack in the Bots; we're at https://github.com/FRCTeam2910/2025CompetitionRobot-Public/blob/main/src/main/java/org/frc2910/robot/subsystems/Superstructure.java#L1392
+    }
+
+    fun teleopScoringSequence() {
+        // fun do the drive stuff here
     }
 
     override fun periodic() {

@@ -27,6 +27,7 @@ public class PhotonVision extends SubsystemBase {
   private double yaw = 0.0;
   private double y = 0.0;
   private double dist = 0.0;
+  private int id = 0;
   private int logCount = 0;
   private List<Pair<PhotonModule, PhotonPipelineResult>> currentResultPair;
 
@@ -98,30 +99,25 @@ public class PhotonVision extends SubsystemBase {
         });
 
     if (currentResultPair != null) {
-      logs("Photonvision/Best target list is empty", currentResultPair.isEmpty());
+      logs("Photonvision/Best Target list is empty", currentResultPair.isEmpty());
 
       if (!currentResultPair.isEmpty()) {
         logCount++;
-        logs("Photonvision/BestTarget updated counter", logCount);
+        logs("Photonvision/Best Target updated counter", logCount);
         PhotonTrackedTarget bestTarget = currentResultPair.get(0).getSecond().getBestTarget();
-        logs("Photonvision/BestTarget is not null", bestTarget != null);
-
-        logs("Photonvision/Best Target is not null", bestTarget != null);
         logs("Photonvision/Best Target is not null", bestTarget != null);
 
         if (bestTarget != null) {
           yaw = bestTarget.getYaw();
           y = bestTarget.getBestCameraToTarget().getX();
           dist = bestTarget.getBestCameraToTarget().getZ();
+          id = bestTarget.getFiducialId();
         }
 
-        if (bestTarget != null) {
-          yaw = bestTarget.getYaw();
-          y = bestTarget.getBestCameraToTarget().getX();
-          dist = bestTarget.getBestCameraToTarget().getZ();
-        }
-
-        logs("Yaw", yaw);
+        logs("Photonvision/Best Target Yaw", yaw);
+        logs("Photonvision/Best Target Y", y);
+        logs("Photonvision/Best Target Dist", dist);
+        logs("Photonvision/Best Target ID", id);
       }
 
       logStdDev();
@@ -159,6 +155,10 @@ public class PhotonVision extends SubsystemBase {
    */
   public double getDist() {
     return dist;
+  }
+
+  public int getBestTargetID() {
+    return id;
   }
 
   /**
