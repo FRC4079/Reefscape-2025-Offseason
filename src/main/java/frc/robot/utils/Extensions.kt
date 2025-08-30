@@ -6,8 +6,8 @@ import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.util.Units.*
-import edu.wpi.first.units.Units
+import edu.wpi.first.math.util.Units.inchesToMeters
+import edu.wpi.first.math.util.Units.metersToInches
 import frc.robot.subsystems.PhotonModule
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
 import org.photonvision.EstimatedRobotPose

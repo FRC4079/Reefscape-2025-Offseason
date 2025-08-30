@@ -1,5 +1,6 @@
 package frc.robot.utils
 
+import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.signals.InvertedValue
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.path.PathConstraints
@@ -127,6 +128,7 @@ object RobotParameters {
                 try {
                     config = RobotConfig.fromGUISettings()
                 } catch (e: Exception) {
+                    Logger.e("RobotParameters", e) { "Failed to load robot config" }
                     throw RuntimeException("Failed to load robot config", e)
                 }
             }

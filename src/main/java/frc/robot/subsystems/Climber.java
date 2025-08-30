@@ -9,17 +9,13 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.RobotParameters;
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
 import xyz.malefic.frc.pingu.AlertPingu;
 import xyz.malefic.frc.pingu.VoltagePingu;
 
-import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking;
 import static frc.robot.utils.RobotParameters.ClimberParameters.CLIMBER_PINGU;
 import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.emu.CoralState.*;
-import static xyz.malefic.frc.pingu.LogPingu.log;
 import static xyz.malefic.frc.pingu.LogPingu.logs;
 
 public class Climber extends SubsystemBase {
@@ -117,26 +113,11 @@ public class Climber extends SubsystemBase {
   }
 
   /** Starts the coral manipulator motors */
-  public void startCoralIntake() {
+  public void startClimbPivotMotor() {
     voltageOut.Output = 5.0;
-    coralScoreMotor.setControl(voltageOut);
-    this.setHasPiece(false);
-    //    isCoralIntaking = true;
-  }
-
-  /** Scores the coral motors */
-  public void scoreCoral() {
-    voltageOut.Output = 3.0;
-    coralScoreMotor.setControl(voltageOut);
-    this.motorsRunning = true;
-    this.setHasPiece(false);
-  }
-
-  /** Starts the coral manipulator motors */
-  public void slowCoralIntake() {
-    coralScoreMotor.setControl(VoltagePingu.setOutput(4.0));
-    //    coralFeederMotor.setControl(VoltagePingu.setOutput(4.0));
-    this.setHasPiece(true);
+    climbPivotMotor.setControl(voltageOut);
+    setHasPiece(false);
+    motorsRunning = true;
   }
 
   /** Starts the coral manipulator motors */

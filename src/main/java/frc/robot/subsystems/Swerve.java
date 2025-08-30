@@ -16,7 +16,6 @@ import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
 import static xyz.malefic.frc.pingu.LogPingu.*;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -33,14 +32,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 
-import frc.robot.utils.RobotParameters;
 import frc.robot.utils.emu.Direction;
 import frc.robot.utils.emu.State;
 import kotlin.Pair;
@@ -211,17 +208,13 @@ public class Swerve extends SubsystemBase {
         this);
   }
 
-  private void applySwerveStats()
-  {
-
+  private void applySwerveState() {
      // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
-      if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive)
-      {
+      if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
           padDrive();
       }
-      else if( SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign)
-      {
+      else if( SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
           //Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
           var translationToDesiredPoint =
                   desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
@@ -246,16 +239,9 @@ public class Swerve extends SubsystemBase {
           var xComponent = velocityOutput * directionOfTravel.getCos();
           var yComponent = velocityOutput * directionOfTravel.getSin();
 
-          if (Double.isNaN(maximumAngularVelocityForDriveToPoint)) {
-              this.setDriveSpeeds(yComponent, xComponent,desiredPoseForDriveToPoint.getRotation(), false);
-          } else {
-              io.setSwerveState(driveAtAngle
-                      .withVelocityX(xComponent)
-                      .withVelocityY(yComponent)
-                      .withTargetDirection(desiredPoseForDriveToPoint.getRotation())
-                      .withMaxAbsRotationalRate(maximumAngularVelocityForDriveToPoint));
-          }
-          break;
+          double currentAngle = this.getPose().getRotation().getDegrees();
+
+          this.setDriveSpeeds(yComponent, xComponent, Math.min(Math.abs(ROTATIONAL_PINGU.getProfiledPIDController().calculate(currentAngle, desiredPoseForDriveToPoint.getRotation().getDegrees())), MAX_ANGULAR_SPEED), false);
       }
   }
 
@@ -296,6 +282,7 @@ public class Swerve extends SubsystemBase {
           log("Swerve/Robot Pose 2D extra", robotPos);
           //          log("Swerve/Swerve Module States", getModuleStates());
         });
+    applySwerveState();
   }
 
   /**
