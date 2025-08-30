@@ -95,8 +95,13 @@ object SuperStructure : SubsystemBase() {
         }
     }
 
+    fun setWantedState(state: State) {
+        wantedState.add(state)
+    }
+
     fun driveToScoringPose(dir: Direction) {
         val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
+
         // TODO: Thanks Jack in the Bots; we're at https://github.com/FRCTeam2910/2025CompetitionRobot-Public/blob/main/src/main/java/org/frc2910/robot/subsystems/Superstructure.java#L1392
     }
 

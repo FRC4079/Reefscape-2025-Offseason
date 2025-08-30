@@ -41,7 +41,7 @@ import xyz.malefic.frc.pingu.CommandPingu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
-    val aacrn: XboxController = XboxController(0)
+    val aacrn = Swerve.getAacrnController()
     val calamityCow: XboxController = XboxController(1)
 
     init {

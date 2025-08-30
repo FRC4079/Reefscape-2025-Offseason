@@ -16,6 +16,7 @@ import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
 import static xyz.malefic.frc.pingu.LogPingu.*;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -29,6 +30,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -38,6 +40,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 
+import frc.robot.utils.RobotParameters;
+import frc.robot.utils.emu.Direction;
+import frc.robot.utils.emu.State;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -63,6 +68,10 @@ public class Swerve extends SubsystemBase {
   private NetworkPingu networkPinguRotAutoAlign;
 
   private LoggedDashboardChooser reefChooser;
+  private Pose2d desiredPoseForDriveToPoint;
+  private double maxVelocityOutputForDriveToPoint;
+  private double maximumAngularVelocityForDriveToPoint;
+
   //
   //  Thread swerveLoggingThread =
   //      new Thread(
@@ -99,6 +108,9 @@ public class Swerve extends SubsystemBase {
     this.poseEstimator = initializePoseEstimator();
     this.poseEstimator3d = initializePoseEstimator3d();
     this.aacrn = new XboxController(0);
+    this.desiredPoseForDriveToPoint = new Pose2d();
+    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
+    this.maximumAngularVelocityForDriveToPoint = 0.0;
     //    configureAutoBuilder();
     initializePathPlannerLogging();
     photonVision = PhotonVision.getInstance();
@@ -125,7 +137,7 @@ public class Swerve extends SubsystemBase {
   }
 
   public static XboxController getAacrnController() {
-    return INSTANCE.aacrn;
+    return getInstance().aacrn;
   }
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
@@ -180,11 +192,11 @@ public class Swerve extends SubsystemBase {
     setLogTargetPoseCallback(pose -> field.getObject("target pose").setPose(pose));
     setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
   }
-
   /**
    * Configures the AutoBuilder for autonomous driving. READ DOCUMENTATION TO PUT IN CORRECT VALUES
    * Allows PathPlanner to get pose and output robot-relative chassis speeds Needs tuning
    */
+
   public void configureAutoBuilder() {
     assert PinguParameters.config != null;
     AutoBuilder.configure(
@@ -199,7 +211,62 @@ public class Swerve extends SubsystemBase {
         this);
   }
 
-  /**
+  private void applySwerveStats()
+  {
+
+     // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
+
+      if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive)
+      {
+          padDrive();
+      }
+      else if( SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign)
+      {
+          //Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
+          var translationToDesiredPoint =
+                  desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
+          var linearDistance = translationToDesiredPoint.getNorm();
+          var frictionCoefficient = 0.1; // this is a guess
+          if (linearDistance >= Units.inchesToMeters(0.5)) {
+              frictionCoefficient = frictionCoefficient * MAX_SPEED;
+          }
+
+          var directionOfTravel = translationToDesiredPoint.getAngle();
+          var velocityOutput = 0.0;
+
+          if (DriverStation.isAutonomous()) {
+              velocityOutput = Math.min(
+                      Math.abs(DRIVE_PINGU_AUTO.getPidController().calculate(linearDistance, 0)) + frictionCoefficient,
+                      maxVelocityOutputForDriveToPoint);
+          } else {
+              velocityOutput = Math.min(
+                      Math.abs(DRIVE_PINGU_TELE.getPidController().calculate(linearDistance, 0)) + frictionCoefficient,
+                      maxVelocityOutputForDriveToPoint);
+          }
+          var xComponent = velocityOutput * directionOfTravel.getCos();
+          var yComponent = velocityOutput * directionOfTravel.getSin();
+
+          if (Double.isNaN(maximumAngularVelocityForDriveToPoint)) {
+              this.setDriveSpeeds(yComponent, xComponent,desiredPoseForDriveToPoint.getRotation(), false);
+          } else {
+              io.setSwerveState(driveAtAngle
+                      .withVelocityX(xComponent)
+                      .withVelocityY(yComponent)
+                      .withTargetDirection(desiredPoseForDriveToPoint.getRotation())
+                      .withMaxAbsRotationalRate(maximumAngularVelocityForDriveToPoint));
+          }
+          break;
+      }
+  }
+
+
+//    public void setSwerveState(SwerveRequest request) {
+//        this.setControl(request);
+//    }
+
+
+
+    /**
    * This method is called periodically by the scheduler. It updates the pose estimator and
    * dashboard values.
    */
@@ -468,6 +535,8 @@ public class Swerve extends SubsystemBase {
     for (SwerveModule module : modules) {
       module.setAutoPID();
     }
+
+
   }
 
   /** Sets the PID constants for teleoperated driving. */
@@ -559,6 +628,14 @@ public class Swerve extends SubsystemBase {
 
     return new Pair<>(x, y);
   }
+
+    public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
+            Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
+        this.desiredPoseForDriveToPoint = pose;
+        SuperStructure.INSTANCE.setWantedState(new State.ScoreAlign(direction));
+        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
+        this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
+    }
 
 
 
