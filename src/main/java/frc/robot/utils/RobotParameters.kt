@@ -1,5 +1,6 @@
 package frc.robot.utils
 
+import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.signals.InvertedValue
 import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.path.PathConstraints
@@ -20,6 +21,7 @@ import edu.wpi.first.units.Units.Feet
 import edu.wpi.first.units.Units.Inches
 import edu.wpi.first.units.measure.Distance
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.XboxController
 import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.AlgaePivotState
 import frc.robot.utils.emu.CoralState
@@ -34,6 +36,11 @@ import kotlin.math.sin
 
 /** Class containing global values for the robot.  */
 object RobotParameters {
+    object ControllerConstants {
+        val aacrn = XboxController(0)
+        val testPad = XboxController(1)
+    }
+
     /** Class containing global values related to motors.  */
     object MotorParameters {
         // Motor CAN ID Values
@@ -57,6 +64,10 @@ object RobotParameters {
         const val ALGAE_INTAKE_MOTOR_ID: Int = 20
         const val STAR_FEEDER_ID: Int = 18
         const val CORAL_FEEDER_ID: Int = 19
+
+        const val CLIMB_PIVOT_MOTOR_ID: Int = 21
+
+        const val CAGE_LOCK_MOTOR_ID: Int = 22
 
         // Motor Property Values
         const val MAX_SPEED: Double = 5.76
@@ -123,6 +134,7 @@ object RobotParameters {
                 try {
                     config = RobotConfig.fromGUISettings()
                 } catch (e: Exception) {
+                    Logger.e("RobotParameters", e) { "Failed to load robot config" }
                     throw RuntimeException("Failed to load robot config", e)
                 }
             }
@@ -241,7 +253,6 @@ object RobotParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
         const val ALGAE_SENSOR_ID: Int = 1
-        // TODO: FIX
 
         @JvmField
         var isSoftLimitEnabled: Boolean = false
@@ -257,7 +268,8 @@ object RobotParameters {
     }
 
     object CoralManipulatorParameters {
-        const val CORAL_SENSOR_ID: Int = 0
+        const val CORAL_SENSOR_ID_1: Int = 0
+        const val CORAL_SENSOR_ID_2: Int = 0
 
         @JvmField
         val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
@@ -280,10 +292,14 @@ object RobotParameters {
         const val FIELD_LENGTH_METERS = 17.5483 // 57 feet + 6 7/8 inches
         const val FIELD_WIDTH_METERS = 8.0518 // 26 feet + 5 inches
 
-        val AprilTagFieldLayout = AprilTagFields.k2025ReefscapeWelded
+        val AprilTagField = AprilTagFields.k2025ReefscapeWelded
 
         val FIELD_LENGTH: Distance = Feet.of(57.0).plus(Inches.of(6.0 + 7.0 / 8.0))
         val FIELD_WIDTH: Distance = Feet.of(26.0).plus(Inches.of(5.0))
+
+        const val X_OFFSET_FROM_TAG_FOR_SCORING_INCHES: Double = 22.0
+
+        const val Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES: Double = 6.5
 
         @Suppress("MemberVisibilityCanBePrivate")
         object RobotPoses {

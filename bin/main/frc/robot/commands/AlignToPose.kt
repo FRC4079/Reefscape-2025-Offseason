@@ -21,7 +21,6 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.pingu.LogPingu.log
 import frc.robot.utils.pingu.LogPingu.logs
 import frc.robot.utils.pingu.PathPingu.clearCoralScoringPositions
-import java.sql.Driver
 
 /**
  * Command to align the robot to a specific pose.
@@ -104,11 +103,9 @@ open class AlignToPose(
     override fun execute() {
         currentPose = Swerve.getInstance().pose2Dfrom3D
         if (
-            ((DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) && DriverStation.isTeleop())
-            ||
+            ((DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) && DriverStation.isTeleop()) ||
             ((DriverStation.getAlliance().get() == DriverStation.Alliance.Red) && DriverStation.isAutonomous())
-            )
-        {
+        ) {
             Swerve
                 .getInstance()
                 .setDriveSpeeds(

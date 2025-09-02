@@ -8,26 +8,26 @@ import frc.robot.subsystems.Coral.getInstance
  * @property block The function associated with the coral state
  */
 enum class CoralState(
-    @JvmField val block: Runnable,
+    @JvmField val block: () -> Unit,
 ) {
     /** Represents the state when the coral manipulator is intaking a coral piece. */
-    CORAL_INTAKE(Runnable { getInstance().startCoralIntake() }),
+    CORAL_INTAKE({ getInstance().startCoralIntake() }),
 
     /** Represents the state when the coral manipulator is holding a coral piece. */
-    CORAL_HOLD(Runnable { getInstance().stopMotors() }),
+    CORAL_HOLD({ getInstance().stopMotors() }),
 
     /** Represents the state when the coral manipulator is slowing down to hold a coral piece. */
-    CORAL_SLOW(Runnable { getInstance().slowCoralIntake() }),
+    CORAL_SLOW({ getInstance().slowCoralIntake() }),
 
     /** Represents the state when the coral manipulator is releasing a coral piece. */
-    CORAL_RELEASE(Runnable { getInstance().scoreCoral() }),
+    CORAL_RELEASE({ getInstance().scoreCoral() }),
 
     /** Represents the state when the coral manipulator is intaking algae. */
-    ALGAE_INTAKE(Runnable { getInstance().algaeIntake() }),
+    ALGAE_INTAKE({ getInstance().algaeIntake() }),
 
     /** Represents the state when the coral manipulator is holding algae. */
-    ALGAE_HOLD(Runnable { getInstance().slowAlgaeScoreMotors() }),
+    ALGAE_HOLD({ getInstance().slowAlgaeScoreMotors() }),
 
     /** Represents the state when the coral manipulator is releasing algae. */
-    ALGAE_RELEASE(Runnable { getInstance().ejectAlgae() }),
+    ALGAE_RELEASE({ getInstance().ejectAlgae() }),
 }

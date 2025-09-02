@@ -1,0 +1,13 @@
+Elevator:
+2 kraken done
+
+Coral(intake):
+2 motor flacon done
+
+climber
+1 775 not done
+1 kraken not done
+
+wrist
+1 kraken  (pivot) not done
+1 falcon (intake) not done

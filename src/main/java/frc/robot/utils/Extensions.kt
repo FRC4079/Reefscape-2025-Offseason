@@ -1,8 +1,13 @@
 package frc.robot.utils
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.util.Units.inchesToMeters
+import edu.wpi.first.math.util.Units.metersToInches
 import frc.robot.subsystems.PhotonModule
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
 import org.photonvision.EstimatedRobotPose
@@ -130,3 +135,39 @@ fun TalonFXConfiguration.setPingu(pingu: NetworkPingu) =
  */
 val Pingu.profiledPIDController
     get() = ProfiledPIDController(p, i, d, PROFILE_CONSTRAINTS)
+
+/**
+ * Extension property to get a new Pose2d rotated by 180 degrees from the current pose.
+ *
+ * @receiver Pose2d The original pose.
+ * @return Pose2d The pose rotated by 180 degrees.
+ */
+val Pose2d.rotated180: Pose2d
+    get() = Pose2d(this.translation, this.rotation.plus(Rotation2d.k180deg))
+
+/**
+ * Extension property to convert a value in inches to meters.
+ *
+ * @receiver Double The value in inches.
+ * @return Double The value converted to meters.
+ */
+val Double.inchesToMeters: Double
+    get() = inchesToMeters(this)
+
+/**
+ * Extension property to convert a value in meters to inches.
+ *
+ * @receiver Double The value in meters.
+ * @return Double The value converted to inches.
+ */
+val Double.metersToInches: Double
+    get() = metersToInches(this)
+
+/**
+ * Extension property to load the `AprilTagFieldLayout` for the given `AprilTagFields` enum value.
+ *
+ * @receiver AprilTagFields The enum value representing a specific AprilTag field.
+ * @return AprilTagFieldLayout The loaded field layout for the specified field.
+ */
+val AprilTagFields.layout: AprilTagFieldLayout
+    get() = AprilTagFieldLayout.loadField(this)

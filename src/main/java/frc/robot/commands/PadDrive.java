@@ -1,13 +1,8 @@
 package frc.robot.commands;
 
-import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
-import static xyz.malefic.frc.pingu.LogPingu.*;
-
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.*;
-import kotlin.*;
 
 /** Command to control the robot's swerve drive using a Logitech gaming pad. */
 public class PadDrive extends Command {
@@ -30,18 +25,20 @@ public class PadDrive extends Command {
    */
   @Override
   public void execute() {
-    Pair<Double, Double> position = positionSet(pad);
-
-    double rotation = Math.abs(pad.getRightX()) >= 0.1 ? -pad.getRightX() * MAX_ANGULAR_SPEED : 0.0;
-
-    logs(
-        () -> {
-          log("X Joystick", position.getFirst());
-          log("Y Joystick", position.getSecond());
-          log("Rotation", rotation);
-        });
-
-    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
+    //    Pair<Double, Double> position = positionSet(pad);
+    //
+    //    double rotation = Math.abs(pad.getRightX()) >= 0.1 ? -pad.getRightX() * MAX_ANGULAR_SPEED
+    // : 0.0;
+    //
+    //    logs(
+    //        () -> {
+    //          log("X Joystick", position.getFirst());
+    //          log("Y Joystick", position.getSecond());
+    //          log("Rotation", rotation);
+    //        });
+    //
+    //    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation *
+    // 0.5);
   }
 
   /**
@@ -54,20 +51,14 @@ public class PadDrive extends Command {
     return false;
   }
 
-  /**
-   * Sets the position based on the input from the Logitech gaming pad.
-   *
-   * @param pad The Logitech gaming pad.
-   * @return The coordinate representing the position. The first element is the x-coordinate, and
-   *     the second element is the y-coordinate.
-   */
-  public static Pair<Double, Double> positionSet(XboxController pad) {
-    double x = -pad.getLeftX() * MAX_SPEED;
-    if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
-
-    double y = -pad.getLeftY() * MAX_SPEED;
-    if (Math.abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0;
-
-    return new Pair<>(x, y);
-  }
+//  /**
+//   * Sets the position based on the input from the Logitech gaming pad.
+//   *
+//   * @param pad The Logitech gaming pad.
+//   * @return The coordinate representing the position. The first element is the x-coordinate, and
+//   *     the second element is the y-coordinate.
+//   */
+  //  public static Pair<Double, Double> positionSet(XboxController pad) {
+  //    return getDoubleDoublePair(pad);
+  //  }
 }

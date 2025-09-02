@@ -129,14 +129,14 @@ object Kommand {
      */
     @JvmStatic
     fun moveElevatorState(state: ElevatorState) =
-        SequentialCommandGroup(
-            cmd(Elevator.getInstance()) {
+        sequential {
+            +cmd(Elevator.getInstance()) {
                 Elevator.getInstance().state = state
-            },
-            waitUntil {
+            }
+            +waitUntil {
                 abs(Elevator.getInstance().elevatorPosAvg - state.pos) < 0.3
-            },
-        )
+            }
+        }
 
     /**
      * Creates an [InstantCommand] to set the state of the coral manipulator.

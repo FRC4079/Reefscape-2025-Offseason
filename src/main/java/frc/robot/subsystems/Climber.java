@@ -1,0 +1,126 @@
+package frc.robot.subsystems;
+
+import static frc.robot.utils.RobotParameters.ClimberParameters.CLIMBER_PINGU;
+import static frc.robot.utils.RobotParameters.MotorParameters.*;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
+import xyz.malefic.frc.pingu.AlertPingu;
+import xyz.malefic.frc.pingu.VoltagePingu;
+
+public class Climber extends SubsystemBase {
+  private final TalonFX climbPivotMotor;
+  private final PWMTalonSRX cageLockMotor;
+  private final VoltageOut voltageOut;
+  private final VoltageOut voltageOutFeeder;
+
+  private boolean motorsRunning = false;
+
+  /**
+   * The Singleton instance of this CoralManipulatorSubsystem. Code should use the {@link
+   * #getInstance()} method to get the single instance (rather than trying to construct an instance
+   * of this class.)
+   */
+  private static final Climber INSTANCE = new Climber();
+
+  /**
+   * Returns the Singleton instance of this CoralManipulatorSubsystem. This static method should be
+   * used, rather than the constructor, to get the single instance of this class. For example:
+   * {@code CoralManipulatorSubsystem.getInstance();}
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static Climber getInstance() {
+    return INSTANCE;
+  }
+
+  /**
+   * Creates a new instance of this CoralManipulatorSubsystem. This constructor is private since
+   * this class is a Singleton. Code should use the {@link #getInstance()} method to get the
+   * singleton instance.
+   */
+  private Climber() {
+    climbPivotMotor = new TalonFX(CLIMB_PIVOT_MOTOR_ID);
+    cageLockMotor = new PWMTalonSRX(CAGE_LOCK_MOTOR_ID);
+
+    TalonFXConfiguration climbPivotConfiguration = new TalonFXConfiguration();
+    //    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
+
+    climbPivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    climbPivotConfiguration.Slot0.kP = CLIMBER_PINGU.getP();
+    climbPivotConfiguration.Slot0.kI = CLIMBER_PINGU.getI();
+    climbPivotConfiguration.Slot0.kD = CLIMBER_PINGU.getD();
+    climbPivotConfiguration.Slot0.kV = CLIMBER_PINGU.getV();
+
+    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
+
+    CurrentLimitsConfigs climbPivotCurrentConfig = new CurrentLimitsConfigs();
+
+    climbPivotCurrentConfig.SupplyCurrentLimit = 40;
+    climbPivotCurrentConfig.SupplyCurrentLimitEnable = true;
+    climbPivotCurrentConfig.StatorCurrentLimit = 40;
+    climbPivotCurrentConfig.StatorCurrentLimitEnable = true;
+
+    climbPivotMotor.getConfigurator().apply(climbPivotCurrentConfig);
+
+    // on
+    climbPivotConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
+
+    voltageOut = new VoltageOut(0);
+    voltageOutFeeder = new VoltageOut(0);
+
+    AlertPingu.add(climbPivotMotor, "climber pivot motor");
+  }
+
+  /**
+   * If the coral sensor is triggered, set the hasPiece boolean to true. (hasPiece = true,
+   * sensorDetect = true), motors spinning If the manipulator has a piece, but the sensor no longer
+   * detects it, stop the motors. (hasPiece = true, sensorDetect = false), motors stop If the
+   * manipulator should start, but the motors are not running, start the motors (hasPiece = false,
+   * sensorDetect = false), motors spinning by setting if it has a piece to false, due to the fact
+   * that the manipulator should not have a piece after the motors are started again.
+   *
+   * <p>The manipulator motors should be on by default, as per Aaron's request.
+   */
+  @Override
+  public void periodic() {}
+
+  /** Stops the coral manipulator motors */
+  public void stopClimbPivotMotor() {
+    //    coralFeederMotor.stopMotor();
+    climbPivotMotor.stopMotor();
+  }
+
+  /** Starts the coral manipulator motors */
+  public void startClimbPivotMotor() {
+    voltageOut.Output = 5.0;
+    climbPivotMotor.setControl(voltageOut);
+    setHasPiece(false);
+    motorsRunning = true;
+  }
+
+  /** Starts the coral manipulator motors */
+  public void reverseMotors() {
+    climbPivotMotor.setControl(VoltagePingu.setOutput(-4.5));
+    cageLockMotor.setVoltage(VoltagePingu.setOutput(-4.5).getOutputMeasure());
+    this.motorsRunning = true;
+  }
+
+  /**
+   * Sets the state of whether the manipulator has a piece.
+   *
+   * @param hasPiece true if the manipulator has a piece, false otherwise
+   */
+  public void setHasPiece(boolean hasPiece) {
+    CoralManipulatorParameters.hasPiece = hasPiece;
+  }
+}

@@ -7,6 +7,7 @@ import static edu.wpi.first.math.kinematics.ChassisSpeeds.*;
 import static edu.wpi.first.math.kinematics.SwerveDriveKinematics.*;
 import static edu.wpi.first.math.util.Units.*;
 import static frc.robot.utils.ExtensionsKt.*;
+import static frc.robot.utils.RobotParameters.ControllerConstants.aacrn;
 import static frc.robot.utils.RobotParameters.LiveRobotValues.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.RobotParameters.SwerveParameters.*;
@@ -29,12 +30,18 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.emu.Direction;
+import frc.robot.utils.emu.State;
 import java.util.Optional;
+import kotlin.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.photonvision.EstimatedRobotPose;
@@ -56,6 +63,10 @@ public class Swerve extends SubsystemBase {
   private NetworkPingu networkPinguRotAutoAlign;
 
   private LoggedDashboardChooser reefChooser;
+  private Pose2d desiredPoseForDriveToPoint;
+  private double maxVelocityOutputForDriveToPoint;
+  private double maximumAngularVelocityForDriveToPoint;
+
   //
   //  Thread swerveLoggingThread =
   //      new Thread(
@@ -81,6 +92,27 @@ public class Swerve extends SubsystemBase {
       new PathConstraints(2.0, 3.0, degreesToRadians(540), degreesToRadians(720));
 
   /**
+   * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
+   * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
+   */
+  private Swerve() {
+    this.modules = initializeModules();
+    this.pidgey.reset();
+    this.poseEstimator = initializePoseEstimator();
+    this.poseEstimator3d = initializePoseEstimator3d();
+    this.desiredPoseForDriveToPoint = new Pose2d();
+    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
+    this.maximumAngularVelocityForDriveToPoint = 0.0;
+    //    configureAutoBuilder();
+    initializePathPlannerLogging();
+    photonVision = PhotonVision.getInstance();
+
+    //    swerveLoggingThread.start();
+
+    initializationAlignPing();
+  }
+
+  /**
    * The Singleton instance of this SwerveSubsystem. Code should use the {@link #getInstance()}
    * method to get the single instance (rather than trying to construct an instance of this class.)
    */
@@ -96,24 +128,19 @@ public class Swerve extends SubsystemBase {
     return INSTANCE;
   }
 
-  /**
-   * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
-   * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
-   */
-  private Swerve() {
-    this.modules = initializeModules();
-    this.pidgey.reset();
-    this.poseEstimator = initializePoseEstimator();
-    this.poseEstimator3d = initializePoseEstimator3d();
-    //    configureAutoBuilder();
-    initializePathPlannerLogging();
-    photonVision = PhotonVision.getInstance();
-
-    //    swerveLoggingThread.start();
-
-    initializationAlignPing();
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+  public static XboxController getAacrnController() {
+    return getInstance().aacrn;
   }
 
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
    * in kinematics.
@@ -186,6 +213,60 @@ public class Swerve extends SubsystemBase {
         this);
   }
 
+  private void applySwerveState() {
+    // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
+
+    if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
+      padDrive();
+    } else if (SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
+      // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
+      var translationToDesiredPoint =
+          desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
+      var linearDistance = translationToDesiredPoint.getNorm();
+      var frictionCoefficient = 0.1; // this is a guess
+      if (linearDistance >= Units.inchesToMeters(0.5)) {
+        frictionCoefficient = frictionCoefficient * MAX_SPEED;
+      }
+
+      var directionOfTravel = translationToDesiredPoint.getAngle();
+      var velocityOutput = 0.0;
+
+      if (DriverStation.isAutonomous()) {
+        velocityOutput =
+            Math.min(
+                Math.abs(DRIVE_PINGU_AUTO.getPidController().calculate(linearDistance, 0))
+                    + frictionCoefficient,
+                maxVelocityOutputForDriveToPoint);
+      } else {
+        velocityOutput =
+            Math.min(
+                Math.abs(DRIVE_PINGU_TELE.getPidController().calculate(linearDistance, 0))
+                    + frictionCoefficient,
+                maxVelocityOutputForDriveToPoint);
+      }
+      var xComponent = velocityOutput * directionOfTravel.getCos();
+      var yComponent = velocityOutput * directionOfTravel.getSin();
+
+      double currentAngle = this.getPose().getRotation().getDegrees();
+
+      this.setDriveSpeeds(
+          yComponent,
+          xComponent,
+          Math.min(
+              Math.abs(
+                  ROTATIONAL_PINGU
+                      .getProfiledPIDController()
+                      .calculate(
+                          currentAngle, desiredPoseForDriveToPoint.getRotation().getDegrees())),
+              MAX_ANGULAR_SPEED),
+          false);
+    }
+  }
+
+  //    public void setSwerveState(SwerveRequest request) {
+  //        this.setControl(request);
+  //    }
+
   /**
    * This method is called periodically by the scheduler. It updates the pose estimator and
    * dashboard values.
@@ -216,6 +297,7 @@ public class Swerve extends SubsystemBase {
           log("Swerve/Robot Pose 2D extra", robotPos);
           //          log("Swerve/Swerve Module States", getModuleStates());
         });
+    applySwerveState();
   }
 
   /**
@@ -519,5 +601,39 @@ public class Swerve extends SubsystemBase {
 
   protected Rotation3d getPidgeyRotation3d() {
     return pidgey.getRotation3d();
+  }
+
+  public void padDrive() {
+    Pair<Double, Double> position = positionSet(aacrn);
+
+    double rotation =
+        Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
+
+    logs(
+        () -> {
+          log("X Joystick", position.getFirst());
+          log("Y Joystick", position.getSecond());
+          log("Rotation", rotation);
+        });
+
+    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
+  }
+
+  @NotNull private static Pair<Double, Double> positionSet(XboxController pad) {
+    double x = -pad.getLeftX() * MAX_SPEED;
+    if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
+
+    double y = -pad.getLeftY() * MAX_SPEED;
+    if (Math.abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0;
+
+    return new Pair<>(x, y);
+  }
+
+  public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
+      Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
+    this.desiredPoseForDriveToPoint = pose;
+    SuperStructure.INSTANCE.setWantedState(new State.ScoreAlign(direction));
+    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
+    this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
   }
 }

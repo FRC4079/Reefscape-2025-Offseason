@@ -1,7 +1,11 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.emu.AlgaeCounter
+import frc.robot.commands.Kommand
+import frc.robot.commands.sequencing.Sequences
+import frc.robot.utils.Pose.getDesiredScorePose
+import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Coral
@@ -13,13 +17,13 @@ object SuperStructure : SubsystemBase() {
     private val coral = Coral.getInstance()
     private val elevator = Elevator.getInstance()
 
+<<<<<<< HEAD
     private var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque<State>()
-
-    @JvmStatic
-    fun queueState(state: State) {
-        wantedState.add(state)
-    }
+=======
+    var currentState: State = State.TeleOpDrive.Base
+    private var wantedState: ArrayDeque<State> = ArrayDeque()
+>>>>>>> f9452bef63f5d2097c36e0c7bcd44f073ec0e8e4
 
     operator fun plus(state: State) {
         wantedState.add(state)
@@ -39,36 +43,45 @@ object SuperStructure : SubsystemBase() {
 
     fun handleDriveState() {
         if (currentState is State.TeleOpDrive) {
-            if (Algae.getInstance().algaeSensor) {
-                currentState = State.TeleOpDrive.Algae
-            } else if (Coral.getInstance().coralSensor) {
-                currentState = State.TeleOpDrive.Coral
-            } else {
-                currentState = State.TeleOpDrive.Base
-            }
+            currentState =
+                when {
+                    Algae.getInstance().algaeSensor -> State.TeleOpDrive.Algae
+                    Coral.getInstance().coralSensors -> State.TeleOpDrive.Coral
+                    else -> State.TeleOpDrive.Base
+                }
         }
     }
 
     fun applyState() {
-        when (currentState) {
+        when (val state = currentState) {
             is State.TeleOpDrive -> {
-                // TODO: do drive
+                swerve.padDrive()
+
                 when (currentState) {
-                    is State.TeleOpDrive.Algae -> {
-                        // TODO: idk
+                    is State.TeleOpDrive -> {
+                        Kommand.drive(aacrn)
+                        when (state) {
+                            is State.TeleOpDrive.Algae -> {
+                                Algae.getInstance().stopIntake()
+                            }
+                            is State.TeleOpDrive.Coral -> {
+                                Coral.getInstance().stopMotors()
+                            }
+                            else -> { /* no-op */ }
+                        }
                     }
-                    is State.TeleOpDrive.Coral -> {
-                        // TODO: turn off intake
-                    }
+
                     else -> {}
                 }
             }
+
             is State.ScoreAlign -> {
-                val dir = (currentState as State.ScoreAlign).dir
-                // TODO: Full scoring sequence
+                val dir = state.dir // Ensure `dir` exists in `ScoreAlign`
+                Sequences.fullScore(dir)
             }
-            is State.Algae ->
-                when (currentState as State.Algae) {
+
+            is State.Algae -> {
+                when (state) {
                     is State.Algae.High -> {
                         // TODO: high algae sequence
                     }
@@ -76,23 +89,45 @@ object SuperStructure : SubsystemBase() {
                         // TODO: low algae sequence
                     }
                     is State.Algae.Score -> {
+                        Algae.getInstance().shootAlgae()
                         // TODO: algae scoring sequence
                     }
-                    is State.Algae.Processor -> {
-                        // TODO: algae processor sequence
-                    }
                 }
-            State.Climb -> {
-                // TODO: climb sequence
             }
+
+            State.Climb -> TODO()
             State.ScoreManual -> TODO()
-            State.Auto -> {}
+            State.Auto -> { /* no-op */ }
+            else -> { /* Handle unexpected states */ }
         }
+    }
+
+    fun setWantedState(state: State) {
+        wantedState.add(state)
+    }
+
+    fun driveToScoringPose(dir: Direction) {
+        val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
+        swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
+
+        // TODO: Thanks Jack in the Bots; we're at https://github.com/FRCTeam2910/2025CompetitionRobot-Public/blob/main/src/main/java/org/frc2910/robot/subsystems/Superstructure.java#L1392
+    }
+
+    fun teleopScoringSequence() {
+        // fun do the drive stuff here
+    }
+
+    fun cancel() {
+        wantedState.clear()
+        currentState = State.TeleOpDrive.Base
+        swerve.stop()
+        algae.stopIntake()
+        coral.stopMotors()
     }
 
     override fun periodic() {
         handleDriveState()
-        if (!wantedState.isEmpty()) {
+        if (wantedState.isNotEmpty()) {
             handleStateTransition()
         }
         applyState()

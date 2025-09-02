@@ -37,15 +37,15 @@ val toggleIntakeAlgae =
                     }
                 }
 
+            HOLDING -> {
+                // TODO: Handle holding
+            }
+
             DEFAULT -> {
                 algaePivotState = AlgaePivotState.UP
                 coralState = CoralState.CORAL_INTAKE
                 algaeIntaking = false
                 elevator.state = ElevatorState.DEFAULT
-            }
-
-            HOLDING -> {
-                // TODO: Handle holding
             }
         }
         algaeCounter = algaeCounter.next

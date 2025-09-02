@@ -19,7 +19,6 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.X_PINGU
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.profiledPIDController
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
 

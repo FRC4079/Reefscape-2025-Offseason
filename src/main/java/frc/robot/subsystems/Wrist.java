@@ -4,7 +4,8 @@ import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIn
 import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.emu.CoralState.*;
-import static xyz.malefic.frc.pingu.LogPingu.*;
+import static xyz.malefic.frc.pingu.LogPingu.log;
+import static xyz.malefic.frc.pingu.LogPingu.logs;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,11 +16,15 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
-import kotlin.Pair;
-import kotlin.TuplesKt.*;
-import xyz.malefic.frc.pingu.*;
+import xyz.malefic.frc.pingu.AlertPingu;
+import xyz.malefic.frc.pingu.VoltagePingu;
 
-public class Coral extends SubsystemBase {
+public class Wrist extends SubsystemBase {
+
+  // pivot motor
+  // feeder motor
+  // two sensors
+
   private final TalonFX coralFeederMotor;
   private final TalonFX coralScoreMotor;
   private final TalonFX starFeederMotor;
@@ -27,7 +32,7 @@ public class Coral extends SubsystemBase {
   private final VoltageOut voltageOut;
   private final VoltageOut voltageOutFeeder;
 
-  private final Pair<DigitalInput, DigitalInput> coralSensors;
+  private final DigitalInput coralSensor;
 
   private boolean motorsRunning = false;
 
@@ -36,7 +41,7 @@ public class Coral extends SubsystemBase {
    * #getInstance()} method to get the single instance (rather than trying to construct an instance
    * of this class.)
    */
-  private static final Coral INSTANCE = new Coral();
+  private static final Wrist INSTANCE = new Wrist();
 
   /**
    * Returns the Singleton instance of this CoralManipulatorSubsystem. This static method should be
@@ -44,7 +49,7 @@ public class Coral extends SubsystemBase {
    * {@code CoralManipulatorSubsystem.getInstance();}
    */
   @SuppressWarnings("WeakerAccess")
-  public static Coral getInstance() {
+  public static Wrist getInstance() {
     return INSTANCE;
   }
 
@@ -53,15 +58,12 @@ public class Coral extends SubsystemBase {
    * this class is a Singleton. Code should use the {@link #getInstance()} method to get the
    * singleton instance.
    */
-  private Coral() {
+  private Wrist() {
     coralFeederMotor = new TalonFX(CORAL_FEEDER_ID);
     coralScoreMotor = new TalonFX(CORAL_SCORE_ID);
     starFeederMotor = new TalonFX(STAR_FEEDER_ID);
 
-    coralSensors =
-        new Pair<>(
-            new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID_1),
-            new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID_2));
+    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID_1);
 
     TalonFXConfiguration coralFeederConfiguration = new TalonFXConfiguration();
     TalonFXConfiguration coralScoreConfiguration = new TalonFXConfiguration();
@@ -136,14 +138,14 @@ public class Coral extends SubsystemBase {
     starFeederMotor.setControl(voltageOutFeeder);
 
     if (!algaeIntaking && !coralScoring) {
-      if (!getCoralSensors() && !hasPiece) {
+      if (!getCoralSensor() && !hasPiece) {
         coralState = CORAL_INTAKE;
-      } else if (getCoralSensors() && !hasPiece) {
+      } else if (getCoralSensor() && !hasPiece) {
         // Stop the motors if the manipulator has a piece, but the sensor no longer
         // detects it
         coralState = CORAL_SLOW;
         setHasPiece(true);
-      } else if (!getCoralSensors() && hasPiece) {
+      } else if (!getCoralSensor() && hasPiece) {
         coralState = CORAL_HOLD;
       } else {
         coralState = CORAL_SLOW;
@@ -152,7 +154,7 @@ public class Coral extends SubsystemBase {
 
     logs(
         () -> {
-          log("Coral/Coral Sensor", getCoralSensors());
+          log("Coral/Coral Sensor", getCoralSensor());
           log("Coral/Has Piece", hasPiece);
           log("Coral/Coral Scoring", coralScoring);
           log("Coral/motorsRunning", this.motorsRunning);
@@ -242,7 +244,7 @@ public class Coral extends SubsystemBase {
    *
    * @return The state of the coral manipulator
    */
-  public boolean getCoralSensors() {
-    return !coralSensors.getFirst().get() && !coralSensors.getSecond().get();
+  public boolean getCoralSensor() {
+    return !coralSensor.get();
   }
 }
