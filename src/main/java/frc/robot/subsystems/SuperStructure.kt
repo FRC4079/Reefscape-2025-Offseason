@@ -3,6 +3,9 @@ package frc.robot.subsystems
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.State
+import frc.robot.subsystems.Algae
+import frc.robot.subsystems.Coral
+import frc.robot.subsystems.Elevator
 
 object SuperStructure : SubsystemBase() {
     private val swerve = Swerve.getInstance()
@@ -11,7 +14,7 @@ object SuperStructure : SubsystemBase() {
     private val elevator = Elevator.getInstance()
 
     private var currentState: State = State.TeleOpDrive.Base
-    private var wantedState: ArrayDeque<State> = ArrayDeque()
+    private var wantedState: ArrayDeque<State> = ArrayDeque<State>()
 
     @JvmStatic
     fun queueState(state: State) {
