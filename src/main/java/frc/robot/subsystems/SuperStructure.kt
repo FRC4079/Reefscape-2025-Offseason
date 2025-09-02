@@ -6,6 +6,9 @@ import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
+import frc.robot.subsystems.Algae
+import frc.robot.subsystems.Coral
+import frc.robot.subsystems.Elevator
 
 object SuperStructure : SubsystemBase() {
     private val swerve = Swerve.getInstance()
@@ -13,8 +16,13 @@ object SuperStructure : SubsystemBase() {
     private val coral = Coral.getInstance()
     private val elevator = Elevator.getInstance()
 
+<<<<<<< HEAD
+    private var currentState: State = State.TeleOpDrive.Base
+    private var wantedState: ArrayDeque<State> = ArrayDeque<State>()
+=======
     var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
+>>>>>>> f9452bef63f5d2097c36e0c7bcd44f073ec0e8e4
 
     operator fun plus(state: State) {
         wantedState.add(state)
