@@ -130,10 +130,13 @@ public class Swerve extends SubsystemBase {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   public static XboxController getAacrnController() {
     return getInstance().aacrn;
   }
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
