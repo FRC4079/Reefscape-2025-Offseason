@@ -1,5 +1,12 @@
 package frc.robot.subsystems;
 
+import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking;
+import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
+import static frc.robot.utils.RobotParameters.MotorParameters.*;
+import static frc.robot.utils.emu.CoralState.*;
+import static xyz.malefic.frc.pingu.LogPingu.log;
+import static xyz.malefic.frc.pingu.LogPingu.logs;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -12,20 +19,13 @@ import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
 import xyz.malefic.frc.pingu.AlertPingu;
 import xyz.malefic.frc.pingu.VoltagePingu;
 
-import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking;
-import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
-import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.emu.CoralState.*;
-import static xyz.malefic.frc.pingu.LogPingu.log;
-import static xyz.malefic.frc.pingu.LogPingu.logs;
-
 public class Wrist extends SubsystemBase {
 
   // pivot motor
   // feeder motor
   // two sensors
 
-private final TalonFX coralFeederMotor;
+  private final TalonFX coralFeederMotor;
   private final TalonFX coralScoreMotor;
   private final TalonFX starFeederMotor;
 
@@ -63,7 +63,7 @@ private final TalonFX coralFeederMotor;
     coralScoreMotor = new TalonFX(CORAL_SCORE_ID);
     starFeederMotor = new TalonFX(STAR_FEEDER_ID);
 
-    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID);
+    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID_1);
 
     TalonFXConfiguration coralFeederConfiguration = new TalonFXConfiguration();
     TalonFXConfiguration coralScoreConfiguration = new TalonFXConfiguration();
@@ -161,7 +161,7 @@ private final TalonFX coralFeederMotor;
           log("Coral/Coral State", coralState.toString());
         });
 
-    coralState.block.run();
+    coralState.block.invoke();
   }
 
   /** Stops the coral manipulator motors */

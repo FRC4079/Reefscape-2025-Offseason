@@ -247,7 +247,6 @@ object RobotParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
         const val ALGAE_SENSOR_ID: Int = 1
-        // TODO: FIX
 
         @JvmField
         var isSoftLimitEnabled: Boolean = false
@@ -263,7 +262,8 @@ object RobotParameters {
     }
 
     object CoralManipulatorParameters {
-        const val CORAL_SENSOR_ID: Int = 0
+        const val CORAL_SENSOR_ID_1: Int = 0
+        const val CORAL_SENSOR_ID_2: Int = 0
 
         @JvmField
         val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)

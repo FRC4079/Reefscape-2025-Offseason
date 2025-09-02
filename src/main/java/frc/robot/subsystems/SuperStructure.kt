@@ -38,7 +38,7 @@ object SuperStructure : SubsystemBase() {
             currentState =
                 when {
                     Algae.getInstance().algaeSensor -> State.TeleOpDrive.Algae
-                    Coral.getInstance().coralSensor -> State.TeleOpDrive.Coral
+                    Coral.getInstance().coralSensors -> State.TeleOpDrive.Coral
                     else -> State.TeleOpDrive.Base
                 }
         }

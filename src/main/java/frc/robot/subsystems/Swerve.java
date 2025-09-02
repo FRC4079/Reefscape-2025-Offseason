@@ -36,10 +36,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.Optional;
-
 import frc.robot.utils.emu.Direction;
 import frc.robot.utils.emu.State;
+import java.util.Optional;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -93,8 +92,6 @@ public class Swerve extends SubsystemBase {
   PathConstraints constraints =
       new PathConstraints(2.0, 3.0, degreesToRadians(540), degreesToRadians(720));
 
-
-
   /**
    * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
    * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
@@ -136,6 +133,7 @@ public class Swerve extends SubsystemBase {
   public static XboxController getAacrnController() {
     return getInstance().aacrn;
   }
+
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
    * in kinematics.
@@ -189,11 +187,11 @@ public class Swerve extends SubsystemBase {
     setLogTargetPoseCallback(pose -> field.getObject("target pose").setPose(pose));
     setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
   }
+
   /**
    * Configures the AutoBuilder for autonomous driving. READ DOCUMENTATION TO PUT IN CORRECT VALUES
    * Allows PathPlanner to get pose and output robot-relative chassis speeds Needs tuning
    */
-
   public void configureAutoBuilder() {
     assert PinguParameters.config != null;
     AutoBuilder.configure(
@@ -209,50 +207,60 @@ public class Swerve extends SubsystemBase {
   }
 
   private void applySwerveState() {
-     // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
+    // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
-      if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
-          padDrive();
+    if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
+      padDrive();
+    } else if (SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
+      // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
+      var translationToDesiredPoint =
+          desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
+      var linearDistance = translationToDesiredPoint.getNorm();
+      var frictionCoefficient = 0.1; // this is a guess
+      if (linearDistance >= Units.inchesToMeters(0.5)) {
+        frictionCoefficient = frictionCoefficient * MAX_SPEED;
       }
-      else if( SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
-          //Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
-          var translationToDesiredPoint =
-                  desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
-          var linearDistance = translationToDesiredPoint.getNorm();
-          var frictionCoefficient = 0.1; // this is a guess
-          if (linearDistance >= Units.inchesToMeters(0.5)) {
-              frictionCoefficient = frictionCoefficient * MAX_SPEED;
-          }
 
-          var directionOfTravel = translationToDesiredPoint.getAngle();
-          var velocityOutput = 0.0;
+      var directionOfTravel = translationToDesiredPoint.getAngle();
+      var velocityOutput = 0.0;
 
-          if (DriverStation.isAutonomous()) {
-              velocityOutput = Math.min(
-                      Math.abs(DRIVE_PINGU_AUTO.getPidController().calculate(linearDistance, 0)) + frictionCoefficient,
-                      maxVelocityOutputForDriveToPoint);
-          } else {
-              velocityOutput = Math.min(
-                      Math.abs(DRIVE_PINGU_TELE.getPidController().calculate(linearDistance, 0)) + frictionCoefficient,
-                      maxVelocityOutputForDriveToPoint);
-          }
-          var xComponent = velocityOutput * directionOfTravel.getCos();
-          var yComponent = velocityOutput * directionOfTravel.getSin();
-
-          double currentAngle = this.getPose().getRotation().getDegrees();
-
-          this.setDriveSpeeds(yComponent, xComponent, Math.min(Math.abs(ROTATIONAL_PINGU.getProfiledPIDController().calculate(currentAngle, desiredPoseForDriveToPoint.getRotation().getDegrees())), MAX_ANGULAR_SPEED), false);
+      if (DriverStation.isAutonomous()) {
+        velocityOutput =
+            Math.min(
+                Math.abs(DRIVE_PINGU_AUTO.getPidController().calculate(linearDistance, 0))
+                    + frictionCoefficient,
+                maxVelocityOutputForDriveToPoint);
+      } else {
+        velocityOutput =
+            Math.min(
+                Math.abs(DRIVE_PINGU_TELE.getPidController().calculate(linearDistance, 0))
+                    + frictionCoefficient,
+                maxVelocityOutputForDriveToPoint);
       }
+      var xComponent = velocityOutput * directionOfTravel.getCos();
+      var yComponent = velocityOutput * directionOfTravel.getSin();
+
+      double currentAngle = this.getPose().getRotation().getDegrees();
+
+      this.setDriveSpeeds(
+          yComponent,
+          xComponent,
+          Math.min(
+              Math.abs(
+                  ROTATIONAL_PINGU
+                      .getProfiledPIDController()
+                      .calculate(
+                          currentAngle, desiredPoseForDriveToPoint.getRotation().getDegrees())),
+              MAX_ANGULAR_SPEED),
+          false);
+    }
   }
 
+  //    public void setSwerveState(SwerveRequest request) {
+  //        this.setControl(request);
+  //    }
 
-//    public void setSwerveState(SwerveRequest request) {
-//        this.setControl(request);
-//    }
-
-
-
-    /**
+  /**
    * This method is called periodically by the scheduler. It updates the pose estimator and
    * dashboard values.
    */
@@ -522,8 +530,6 @@ public class Swerve extends SubsystemBase {
     for (SwerveModule module : modules) {
       module.setAutoPID();
     }
-
-
   }
 
   /** Sets the PID constants for teleoperated driving. */
@@ -593,20 +599,20 @@ public class Swerve extends SubsystemBase {
   public void padDrive() {
     Pair<Double, Double> position = positionSet(aacrn);
 
-    double rotation = Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
+    double rotation =
+        Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
 
     logs(
-            () -> {
-              log("X Joystick", position.getFirst());
-              log("Y Joystick", position.getSecond());
-              log("Rotation", rotation);
-            });
+        () -> {
+          log("X Joystick", position.getFirst());
+          log("Y Joystick", position.getSecond());
+          log("Rotation", rotation);
+        });
 
     Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
   }
 
-  @NotNull
-  private static Pair<Double, Double> positionSet(XboxController pad) {
+  @NotNull private static Pair<Double, Double> positionSet(XboxController pad) {
     double x = -pad.getLeftX() * MAX_SPEED;
     if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
 
@@ -616,17 +622,11 @@ public class Swerve extends SubsystemBase {
     return new Pair<>(x, y);
   }
 
-    public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
-            Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
-        this.desiredPoseForDriveToPoint = pose;
-        SuperStructure.INSTANCE.setWantedState(new State.ScoreAlign(direction));
-        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
-        this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
-    }
-
-
-
-
+  public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
+      Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
+    this.desiredPoseForDriveToPoint = pose;
+    SuperStructure.INSTANCE.setWantedState(new State.ScoreAlign(direction));
+    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
+    this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
+  }
 }
-
-

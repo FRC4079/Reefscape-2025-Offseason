@@ -1,30 +1,25 @@
 package frc.robot.subsystems;
 
+import static frc.robot.utils.RobotParameters.ClimberParameters.CLIMBER_PINGU;
+import static frc.robot.utils.RobotParameters.MotorParameters.*;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters;
 import xyz.malefic.frc.pingu.AlertPingu;
 import xyz.malefic.frc.pingu.VoltagePingu;
 
-import static frc.robot.utils.RobotParameters.ClimberParameters.CLIMBER_PINGU;
-import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
-import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static xyz.malefic.frc.pingu.LogPingu.logs;
-
 public class Climber extends SubsystemBase {
   private final TalonFX climbPivotMotor;
   private final PWMTalonSRX cageLockMotor;
   private final VoltageOut voltageOut;
   private final VoltageOut voltageOutFeeder;
-
-  private final DigitalInput coralSensor;
 
   private boolean motorsRunning = false;
 
@@ -54,10 +49,8 @@ public class Climber extends SubsystemBase {
     climbPivotMotor = new TalonFX(CLIMB_PIVOT_MOTOR_ID);
     cageLockMotor = new PWMTalonSRX(CAGE_LOCK_MOTOR_ID);
 
-    coralSensor = new DigitalInput(CORAL_SENSOR_ID);
-
     TalonFXConfiguration climbPivotConfiguration = new TalonFXConfiguration();
-//    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
+    //    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
 
     climbPivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -80,7 +73,7 @@ public class Climber extends SubsystemBase {
     // on
     climbPivotConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    x.getConfigurator().apply(climbPivotConfiguration);
+    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
 
     voltageOut = new VoltageOut(0);
     voltageOutFeeder = new VoltageOut(0);
@@ -99,13 +92,8 @@ public class Climber extends SubsystemBase {
    * <p>The manipulator motors should be on by default, as per Aaron's request.
    */
   @Override
-  public void periodic() {
+  public void periodic() {}
 
-
-
-
-  }
-`
   /** Stops the coral manipulator motors */
   public void stopClimbPivotMotor() {
     //    coralFeederMotor.stopMotor();
@@ -122,20 +110,8 @@ public class Climber extends SubsystemBase {
 
   /** Starts the coral manipulator motors */
   public void reverseMotors() {
-    coralFeederMotor.setControl(VoltagePingu.setOutput(-4.5));
-    coralScoreMotor.setControl(VoltagePingu.setOutput(-4.5));
-    starFeederMotor.setControl(VoltagePingu.setOutput(-4.5));
-    this.motorsRunning = true;
-  }
-
-  /**
-   * Activates the algae intake process. This method stops the current motors, sets the voltage
-   * output to 4.5, and starts the coral score motor to intake algae.
-   */
-  public void algaeIntake() {
-    this.stopMotors();
-    voltageOut.Output = -4.5;
-    coralScoreMotor.setControl(voltageOut);
+    climbPivotMotor.setControl(VoltagePingu.setOutput(-4.5));
+    cageLockMotor.setVoltage(VoltagePingu.setOutput(-4.5).getOutputMeasure());
     this.motorsRunning = true;
   }
 
@@ -146,31 +122,5 @@ public class Climber extends SubsystemBase {
    */
   public void setHasPiece(boolean hasPiece) {
     CoralManipulatorParameters.hasPiece = hasPiece;
-  }
-
-  /**
-   * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
-   * scoring process.
-   */
-  public void slowAlgaeScoreMotors() {
-    voltageOut.Output = -3.0;
-    coralScoreMotor.setControl(voltageOut);
-  }
-
-  /**
-   * Ejects the algae by setting the voltage output to 4.0 and controlling the coral score motor.
-   */
-  public void ejectAlgae() {
-    voltageOut.Output = 4.0;
-    coralScoreMotor.setControl(voltageOut);
-  }
-
-  /**
-   * Gets the state of the coral manipulator
-   *
-   * @return The state of the coral manipulator
-   */
-  public boolean getCoralSensor() {
-    return !coralSensor.get();
   }
 }

@@ -163,8 +163,7 @@ public class Algae extends SubsystemBase {
     algaeIntakeMotor.setControl(voltageOut);
   }
 
-  private void stopAlgaeMotor()
-  {
+  private void stopAlgaeMotor() {
     algaeIntakeMotor.stopMotor();
   }
 
@@ -196,4 +195,3 @@ public class Algae extends SubsystemBase {
     setIntakeSpeed(-30.0);
   }
 }
-
