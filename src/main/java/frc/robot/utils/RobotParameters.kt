@@ -21,6 +21,7 @@ import edu.wpi.first.units.Units.Feet
 import edu.wpi.first.units.Units.Inches
 import edu.wpi.first.units.measure.Distance
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.XboxController
 import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.AlgaePivotState
 import frc.robot.utils.emu.CoralState
@@ -35,6 +36,11 @@ import kotlin.math.sin
 
 /** Class containing global values for the robot.  */
 object RobotParameters {
+    object ControllerConstants {
+        val aacrn = XboxController(0)
+        val testPad = XboxController(1)
+    }
+
     /** Class containing global values related to motors.  */
     object MotorParameters {
         // Motor CAN ID Values

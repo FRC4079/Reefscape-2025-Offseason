@@ -1,10 +1,10 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.RobotContainer.aacrn
 import frc.robot.commands.Kommand
 import frc.robot.commands.sequencing.Sequences
 import frc.robot.utils.Pose.getDesiredScorePose
+import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
@@ -100,12 +100,21 @@ object SuperStructure : SubsystemBase() {
 
     fun driveToScoringPose(dir: Direction) {
         val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
+        swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
 
         // TODO: Thanks Jack in the Bots; we're at https://github.com/FRCTeam2910/2025CompetitionRobot-Public/blob/main/src/main/java/org/frc2910/robot/subsystems/Superstructure.java#L1392
     }
 
     fun teleopScoringSequence() {
         // fun do the drive stuff here
+    }
+
+    fun cancel() {
+        wantedState.clear()
+        currentState = State.TeleOpDrive.Base
+        swerve.stop()
+        algae.stopIntake()
+        coral.stopMotors()
     }
 
     override fun periodic() {

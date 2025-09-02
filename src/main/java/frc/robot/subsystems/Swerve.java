@@ -7,6 +7,7 @@ import static edu.wpi.first.math.kinematics.ChassisSpeeds.*;
 import static edu.wpi.first.math.kinematics.SwerveDriveKinematics.*;
 import static edu.wpi.first.math.util.Units.*;
 import static frc.robot.utils.ExtensionsKt.*;
+import static frc.robot.utils.RobotParameters.ControllerConstants.aacrn;
 import static frc.robot.utils.RobotParameters.LiveRobotValues.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
 import static frc.robot.utils.RobotParameters.SwerveParameters.*;
@@ -56,8 +57,6 @@ public class Swerve extends SubsystemBase {
   private final SwerveModule[] modules;
   private final PhotonVision photonVision;
 
-  private final XboxController aacrn;
-
   // Auto Align Pingu Values
   private NetworkPingu networkPinguXAutoAlign;
   private NetworkPingu networkPinguYAutoAlign;
@@ -101,7 +100,6 @@ public class Swerve extends SubsystemBase {
     this.pidgey.reset();
     this.poseEstimator = initializePoseEstimator();
     this.poseEstimator3d = initializePoseEstimator3d();
-    this.aacrn = new XboxController(0);
     this.desiredPoseForDriveToPoint = new Pose2d();
     this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
     this.maximumAngularVelocityForDriveToPoint = 0.0;
@@ -130,10 +128,13 @@ public class Swerve extends SubsystemBase {
     return INSTANCE;
   }
 
+<<<<<<< Updated upstream
   public static XboxController getAacrnController() {
     return getInstance().aacrn;
   }
 
+=======
+>>>>>>> Stashed changes
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
    * in kinematics.

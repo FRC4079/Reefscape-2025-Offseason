@@ -17,6 +17,8 @@ import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
+import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.emu.Direction.LEFT
 import frc.robot.utils.emu.Direction.RIGHT
@@ -41,7 +43,7 @@ import xyz.malefic.frc.pingu.CommandPingu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
-    val aacrn = Swerve.getAacrnController()
+
     val calamityCow: XboxController = XboxController(1)
 
     init {
@@ -111,5 +113,19 @@ object RobotContainer {
                 }.schedule()
             }
         }
+
+        testPad.bindings {
+            press(A) {
+                SuperStructure.driveToScoringPose(LEFT)
+            }
+            release(A) {
+                SuperStructure.cancel()
+            }
+            press(B) {
+                SuperStructure.driveToScoringPose(RIGHT)
+            }
+            release(B) {
+                SuperStructure.cancel()
+            }
     }
 }
