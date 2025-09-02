@@ -87,21 +87,4 @@ public class PadElevator extends Command {
   public boolean isFinished() {
     return false;
   }
-
-  /**
-   * Sets the position based on the input from the Logitech gaming pad.
-   *
-   * @param pad The Logitech gaming pad.
-   * @return The coordinate representing the position. The first element is the x-coordinate, and
-   *     the second element is the y-coordinate.
-   */
-  public static Pair<Double, Double> positionSet(XboxController pad) {
-    double x = pad.getLeftX();
-    if (Math.abs(x) < X_DEADZONE) x = 0.0;
-
-    double y = pad.getLeftY();
-    if (Math.abs(y) < Y_DEADZONE) y = 0.0;
-
-    return new Pair<>(x, y);
-  }
 }

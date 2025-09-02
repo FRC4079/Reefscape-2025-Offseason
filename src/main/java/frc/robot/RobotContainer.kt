@@ -4,7 +4,6 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.commands.Kommand.drive
 import frc.robot.commands.Kommand.hasPieceFalse
 import frc.robot.commands.Kommand.moveElevatorState
 import frc.robot.commands.Kommand.offVision
@@ -16,7 +15,6 @@ import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.SuperStructure
-import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -47,9 +45,7 @@ object RobotContainer {
     val calamityCow: XboxController = XboxController(1)
 
     init {
-
         Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
-        Swerve.getInstance().defaultCommand = drive(aacrn)
 
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
@@ -127,5 +123,6 @@ object RobotContainer {
             release(B) {
                 SuperStructure.cancel()
             }
+        }
     }
 }

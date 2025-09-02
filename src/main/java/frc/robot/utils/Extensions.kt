@@ -8,13 +8,21 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units.inchesToMeters
 import edu.wpi.first.math.util.Units.metersToInches
+import edu.wpi.first.wpilibj.XboxController
 import frc.robot.subsystems.PhotonModule
+import frc.robot.subsystems.Swerve
+import frc.robot.utils.RobotParameters.MotorParameters.MAX_ANGULAR_SPEED
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.targeting.PhotonPipelineResult
+import xyz.malefic.frc.pingu.LogPingu.log
+import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.NetworkPingu
 import xyz.malefic.frc.pingu.Pingu
 import java.util.Optional
+import kotlin.math.abs
 
 /**
  * Extension function for a list of PhotonModule objects to get the best PhotonPipelineResult.
@@ -171,3 +179,20 @@ val Double.metersToInches: Double
  */
 val AprilTagFields.layout: AprilTagFieldLayout
     get() = AprilTagFieldLayout.loadField(this)
+
+/**
+ * Gets the position of the left stick based on the input from the controller.
+ *
+ * @receiver The controller.
+ * @return The coordinate representing the position of the left stick. The first element is the x-coordinate, and
+ * the second element is the y-coordinate.
+ */
+fun XboxController.leftStickPosition(): Pair<Double?, Double?> {
+    var x = leftX
+    if (abs(x) < X_DEADZONE) x = 0.0
+
+    var y = leftY
+    if (abs(y) < Y_DEADZONE) y = 0.0
+
+    return Pair<Double?, Double?>(x, y)
+}

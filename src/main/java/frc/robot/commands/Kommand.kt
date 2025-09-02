@@ -172,15 +172,6 @@ object Kommand {
     fun startCoralMotors() = cmd { Coral.getInstance().startCoralIntake() }
 
     /**
-     * Creates a [PadDrive] command to control the robot's driving mechanism.
-     *
-     * @param controller The gaming controller used to drive the robot.
-     * @return A [PadDrive] command to control the robot's driving mechanism.
-     */
-    @JvmStatic
-    fun drive(controller: XboxController) = PadDrive(controller)
-
-    /**
      * Creates an [InstantCommand] to reset the Pidgey sensor.
      *
      * @return An [InstantCommand] that resets the Pidgey sensor.

@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.RobotParameters;
 import frc.robot.utils.emu.Direction;
 import frc.robot.utils.emu.State;
 import java.util.Optional;
@@ -128,19 +129,6 @@ public class Swerve extends SubsystemBase {
     return INSTANCE;
   }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  public static XboxController getAacrnController() {
-    return getInstance().aacrn;
-  }
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   /**
    * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
    * in kinematics.
@@ -217,7 +205,7 @@ public class Swerve extends SubsystemBase {
     // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
     if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
-      padDrive();
+      stickDrive(aacrn);
     } else if (SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
       // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
       var translationToDesiredPoint =
@@ -604,7 +592,7 @@ public class Swerve extends SubsystemBase {
   }
 
   public void padDrive() {
-    Pair<Double, Double> position = positionSet(aacrn);
+    Pair<Double, Double> position = leftStickPosition(aacrn);
 
     double rotation =
         Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
@@ -619,16 +607,6 @@ public class Swerve extends SubsystemBase {
     Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
   }
 
-  @NotNull private static Pair<Double, Double> positionSet(XboxController pad) {
-    double x = -pad.getLeftX() * MAX_SPEED;
-    if (Math.abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0;
-
-    double y = -pad.getLeftY() * MAX_SPEED;
-    if (Math.abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0;
-
-    return new Pair<>(x, y);
-  }
-
   public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
       Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
     this.desiredPoseForDriveToPoint = pose;
@@ -636,4 +614,23 @@ public class Swerve extends SubsystemBase {
     this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
     this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
   }
+
+    /**
+     * Drives the robot using the Xbox controller's joystick inputs.
+     *
+     * @param controller The XboxController providing joystick input.
+     */
+    public void stickDrive(XboxController controller) {
+        Pair<Double, Double> position = leftStickPosition(controller);
+        double rightX = controller.getRightX();
+        double rotation = (Math.abs(rightX) >= 0.1 ? -rightX * MAX_ANGULAR_SPEED : 0.0) * 0.5;
+
+        logs(() -> {
+            log("X Joystick", position.getFirst());
+            log("Y Joystick", position.getSecond());
+            log("Rotation", rotation);
+        });
+
+        Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
+    }
 }

@@ -1,7 +1,6 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.commands.Kommand
 import frc.robot.commands.sequencing.Sequences
 import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
@@ -51,7 +50,7 @@ object SuperStructure : SubsystemBase() {
 
                 when (currentState) {
                     is State.TeleOpDrive -> {
-                        Kommand.drive(aacrn)
+                        Swerve.getInstance().stickDrive(aacrn)
                         when (state) {
                             is State.TeleOpDrive.Algae -> {
                                 Algae.getInstance().stopIntake()
