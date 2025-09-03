@@ -37,12 +37,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.RobotParameters;
 import frc.robot.utils.emu.Direction;
 import frc.robot.utils.emu.State;
 import java.util.Optional;
 import kotlin.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.photonvision.EstimatedRobotPose;
@@ -615,22 +613,23 @@ public class Swerve extends SubsystemBase {
     this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
   }
 
-    /**
-     * Drives the robot using the Xbox controller's joystick inputs.
-     *
-     * @param controller The XboxController providing joystick input.
-     */
-    public void stickDrive(XboxController controller) {
-        Pair<Double, Double> position = leftStickPosition(controller);
-        double rightX = controller.getRightX();
-        double rotation = (Math.abs(rightX) >= 0.1 ? -rightX * MAX_ANGULAR_SPEED : 0.0) * 0.5;
+  /**
+   * Drives the robot using the Xbox controller's joystick inputs.
+   *
+   * @param controller The XboxController providing joystick input.
+   */
+  public void stickDrive(XboxController controller) {
+    Pair<Double, Double> position = leftStickPosition(controller);
+    double rightX = controller.getRightX();
+    double rotation = (Math.abs(rightX) >= 0.1 ? -rightX * MAX_ANGULAR_SPEED : 0.0) * 0.5;
 
-        logs(() -> {
-            log("X Joystick", position.getFirst());
-            log("Y Joystick", position.getSecond());
-            log("Rotation", rotation);
+    logs(
+        () -> {
+          log("X Joystick", position.getFirst());
+          log("Y Joystick", position.getSecond());
+          log("Rotation", rotation);
         });
 
-        Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
-    }
+    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
+  }
 }

@@ -10,15 +10,11 @@ import edu.wpi.first.math.util.Units.inchesToMeters
 import edu.wpi.first.math.util.Units.metersToInches
 import edu.wpi.first.wpilibj.XboxController
 import frc.robot.subsystems.PhotonModule
-import frc.robot.subsystems.Swerve
-import frc.robot.utils.RobotParameters.MotorParameters.MAX_ANGULAR_SPEED
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.targeting.PhotonPipelineResult
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.NetworkPingu
 import xyz.malefic.frc.pingu.Pingu
 import java.util.Optional

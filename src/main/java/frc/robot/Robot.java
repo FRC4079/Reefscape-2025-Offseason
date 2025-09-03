@@ -93,9 +93,9 @@ public class Robot extends LoggedRobot {
     Swerve.getInstance().configureAutoBuilder();
 
     // Initialize the robot container
-    RobotContainer.INSTANCE.getAacrn();
+    Object unused = RobotContainer.INSTANCE;
 
-    // Schedule the warmup command
+      // Schedule the warmup command
     PathfindingCommand.warmupCommand().schedule();
 
     CommandScheduler.getInstance().enable();
