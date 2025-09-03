@@ -17,7 +17,6 @@ import frc.robot.utils.PathPingu.findClosestScoringPosition
 import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralState
-import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CONSTRAINTS
 import frc.robot.utils.emu.CoralState
 import frc.robot.utils.emu.Direction
@@ -270,22 +269,6 @@ object Kommand {
         direction: Direction,
         pose: Pose2d,
     ) = findClosestScoringPositionNotL4(pose, direction)
-
-    /**
-     * Toggles the vision kill switch state.
-     *
-     * @return An [InstantCommand] that toggles the vision kill switch state.
-     */
-    @JvmStatic
-    fun offVision() = cmd { visionDead = false }
-
-    /**
-     * Toggles the vision kill switch state.
-     *
-     * @return An [InstantCommand] that toggles the vision kill switch state.
-     */
-    @JvmStatic
-    fun onVision() = cmd { visionDead = true }
 
     /**
      * Creates an [AlignToPose] command to align the robot to a specified pose.

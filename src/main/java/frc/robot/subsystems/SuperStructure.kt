@@ -2,9 +2,6 @@ package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.commands.sequencing.Sequences
-import frc.robot.subsystems.Algae
-import frc.robot.subsystems.Coral
-import frc.robot.subsystems.Elevator
 import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.emu.Direction
@@ -19,13 +16,22 @@ object SuperStructure : SubsystemBase() {
     var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
+    /**
+     * Adds a state to the wantedState queue using the plus operator.
+     *
+     * @param state The state to add.
+     */
     operator fun plus(state: State) {
         wantedState.add(state)
     }
 
-    @JvmStatic
-    fun resetState() {
-        currentState = State.TeleOpDrive.Base
+    /**
+     * Adds a state to the wantedState queue.
+     *
+     * @param state The state to add.
+     */
+    fun addWantedState(state: State) {
+        wantedState.add(state)
     }
 
     fun handleStateTransition() {
@@ -35,6 +41,14 @@ object SuperStructure : SubsystemBase() {
         }
     }
 
+    /**
+     * Updates the `currentState` to the appropriate `TeleOpDrive` state based on sensor input.
+     *
+     * If the current state is a `TeleOpDrive` state, checks the status of the algae and coral sensors:
+     * - If the algae sensor is active, sets the state to `TeleOpDrive.Algae`.
+     * - If the coral sensors are active, sets the state to `TeleOpDrive.Coral`.
+     * - Otherwise, sets the state to `TeleOpDrive.Base`.
+     */
     fun handleDriveState() {
         if (currentState is State.TeleOpDrive) {
             currentState =
@@ -49,7 +63,7 @@ object SuperStructure : SubsystemBase() {
     fun applyState() {
         when (val state = currentState) {
             is State.TeleOpDrive -> {
-                swerve.padDrive()
+                swerve.stickDrive(aacrn)
 
                 when (currentState) {
                     is State.TeleOpDrive -> {
@@ -95,21 +109,21 @@ object SuperStructure : SubsystemBase() {
         }
     }
 
-    fun setWantedState(state: State) {
-        wantedState.add(state)
-    }
-
     fun driveToScoringPose(dir: Direction) {
         val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
         swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
-
-        // TODO: Thanks Jack in the Bots; we're at https://github.com/FRCTeam2910/2025CompetitionRobot-Public/blob/main/src/main/java/org/frc2910/robot/subsystems/Superstructure.java#L1392
     }
 
     fun teleopScoringSequence() {
-        // fun do the drive stuff here
+        // TODO: do the drive stuff here
     }
 
+    /**
+     * Cancels all current actions and resets the subsystem to its default state.
+     *
+     * Clears the wantedState queue, sets currentState to TeleOpDrive.Base,
+     * and stops all relevant mechanisms (swerve, algae intake, coral motors).
+     */
     fun cancel() {
         wantedState.clear()
         currentState = State.TeleOpDrive.Base

@@ -95,7 +95,7 @@ public class Robot extends LoggedRobot {
     // Initialize the robot container
     Object unused = RobotContainer.INSTANCE;
 
-      // Schedule the warmup command
+    // Schedule the warmup command
     PathfindingCommand.warmupCommand().schedule();
 
     CommandScheduler.getInstance().enable();

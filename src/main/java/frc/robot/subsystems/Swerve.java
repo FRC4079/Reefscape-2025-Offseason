@@ -44,6 +44,7 @@ import kotlin.Pair;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.photonvision.EstimatedRobotPose;
+import xyz.malefic.frc.pingu.LogPingu;
 import xyz.malefic.frc.pingu.NetworkPingu;
 
 public class Swerve extends SubsystemBase {
@@ -430,7 +431,7 @@ public class Swerve extends SubsystemBase {
    */
   public void newPose(Pose2d pose) {
     poseEstimator.resetPosition(getPidgeyRotation(), getModulePositions(), pose);
-    poseEstimator3d.resetPosition(getPidgeyRotation3d(), getModulePositions(), new Pose3d(pose));
+    poseEstimator3d.resetPosition(pidgey.getRotation3d(), getModulePositions(), new Pose3d(pose));
   }
 
   /**
@@ -585,30 +586,20 @@ public class Swerve extends SubsystemBase {
             new LoggedNetworkNumber("Tuning/Swerve/Align Rot D", ROTATIONAL_PINGU.getD()));
   }
 
-  protected Rotation3d getPidgeyRotation3d() {
-    return pidgey.getRotation3d();
-  }
-
-  public void padDrive() {
-    Pair<Double, Double> position = leftStickPosition(aacrn);
-
-    double rotation =
-        Math.abs(aacrn.getRightX()) >= 0.1 ? -aacrn.getRightX() * MAX_ANGULAR_SPEED : 0.0;
-
-    logs(
-        () -> {
-          log("X Joystick", position.getFirst());
-          log("Y Joystick", position.getSecond());
-          log("Rotation", rotation);
-        });
-
-    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation * 0.5);
-  }
-
+  /**
+   * Sets the desired pose for the robot to drive to, along with the maximum angular velocity and
+   * direction for scoring.
+   *
+   * @param pose The target pose to drive to.
+   * @param maximumAngularVelocityForDriveToPoint The maximum angular velocity allowed for driving
+   *     to the point.
+   * @param direction The direction for score alignment.
+   */
   public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
       Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
+    LogPingu.log("Swerve/Driving to scoring pose", pose);
     this.desiredPoseForDriveToPoint = pose;
-    SuperStructure.INSTANCE.setWantedState(new State.ScoreAlign(direction));
+    SuperStructure.INSTANCE.addWantedState(new State.ScoreAlign(direction));
     this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
     this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
   }
@@ -630,6 +621,6 @@ public class Swerve extends SubsystemBase {
           log("Rotation", rotation);
         });
 
-    Swerve.getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
+    getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
   }
 }

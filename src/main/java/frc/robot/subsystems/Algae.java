@@ -158,15 +158,25 @@ public class Algae extends SubsystemBase {
     return algaePivotMotor.getPosition().getValueAsDouble();
   }
 
+  /**
+   * Sets the speed of the algae intake motor.
+   *
+   * @param speed the desired speed to set for the intake motor
+   */
   public void setIntakeSpeed(double speed) {
     voltageOut.Output = speed;
     algaeIntakeMotor.setControl(voltageOut);
   }
 
+  /** Stops the algae intake motor. */
   private void stopAlgaeMotor() {
     algaeIntakeMotor.stopMotor();
   }
 
+  /**
+   * Checks the state of the algae sensor. Sets the algaeCounter to HOLDING if the sensor is
+   * triggered, otherwise sets it to DEFAULT.
+   */
   public void checkAlgaeSensor() {
     if (algaeSensor.get()) {
       algaeCounter = HOLDING;
@@ -175,16 +185,29 @@ public class Algae extends SubsystemBase {
     }
   }
 
+  /**
+   * Returns the current state of the algae sensor.
+   *
+   * @return true if the algae sensor is triggered, false otherwise
+   */
   public boolean getAlgaeSensor() {
-    return !algaeSensor.get();
+    return algaeSensor.get();
   }
 
+  /**
+   * Initiates the algae intake process. Sets the elevator to the algae level, starts the intake
+   * motor, and marks the algaeIntaking flag as true.
+   */
   public void intakeAlgae() {
     Elevator.setAlgaeLevel();
     setIntakeSpeed(30.0);
     algaeIntaking = true;
   }
 
+  /**
+   * Stops the algae intake process. Resets the elevator position to default, stops the algae intake
+   * motor, and sets the algaeIntaking flag to false.
+   */
   public void stopIntake() {
     Elevator.getInstance().setElevatorPosition(ElevatorState.DEFAULT);
     stopAlgaeMotor();

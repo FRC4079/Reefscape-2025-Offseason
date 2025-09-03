@@ -6,8 +6,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.commands.Kommand.hasPieceFalse
 import frc.robot.commands.Kommand.moveElevatorState
-import frc.robot.commands.Kommand.offVision
-import frc.robot.commands.Kommand.onVision
 import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.sequencing.Sequences.fullScoreAuto
@@ -102,11 +100,7 @@ object RobotContainer {
                 }
             }
             press(RIGHT_STICK) {
-                if (visionDead) {
-                    onVision()
-                } else {
-                    offVision()
-                }.schedule()
+                visionDead = !visionDead
             }
         }
 
