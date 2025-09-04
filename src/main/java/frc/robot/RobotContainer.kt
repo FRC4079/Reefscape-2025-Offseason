@@ -4,38 +4,21 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.commands.Kommand.hasPieceFalse
-import frc.robot.commands.Kommand.moveElevatorState
-import frc.robot.commands.Kommand.padElevator
-import frc.robot.commands.Kommand.setElevatorState
-import frc.robot.commands.sequencing.Sequences.fullScoreAuto
 import frc.robot.subsystems.Algae
-import frc.robot.subsystems.Elevator
-import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.SuperStructure
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.emu.Direction.LEFT
 import frc.robot.utils.emu.Direction.RIGHT
-import frc.robot.utils.emu.ElevatorState.DEFAULT
-import frc.robot.utils.emu.ElevatorState.L1
-import frc.robot.utils.emu.ElevatorState.L2
-import frc.robot.utils.emu.ElevatorState.L3
-import frc.robot.utils.emu.ElevatorState.L4
 import frc.robot.utils.emu.State
 import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.A
 import xyz.malefic.frc.emu.Button.B
-import xyz.malefic.frc.emu.Button.DPAD_UP
 import xyz.malefic.frc.emu.Button.LEFT_BUMPER
-import xyz.malefic.frc.emu.Button.LEFT_TRIGGER
 import xyz.malefic.frc.emu.Button.RIGHT_BUMPER
 import xyz.malefic.frc.emu.Button.RIGHT_STICK
-import xyz.malefic.frc.emu.Button.X
-import xyz.malefic.frc.emu.Button.Y
 import xyz.malefic.frc.pingu.Bingu.bindings
-import xyz.malefic.frc.pingu.CommandPingu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>

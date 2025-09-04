@@ -16,13 +16,13 @@ import xyz.malefic.frc.pingu.AlertPingu;
 import xyz.malefic.frc.pingu.VoltagePingu;
 
 public class Climber extends SubsystemBase {
-  private final TalonFX climbPivotMotor;
-  private final PWMTalonSRX cageLockMotor;
-  private final VoltageOut voltageOut;
-  private final VoltageOut voltageOutFeeder;
-
-  private boolean motorsRunning = false;
-
+//  private final TalonFX climbPivotMotor;
+//  private final PWMTalonSRX cageLockMotor;
+//  private final VoltageOut voltageOut;
+//  private final VoltageOut voltageOutFeeder;
+//
+//  private boolean motorsRunning = false;
+//
   /**
    * The Singleton instance of this CoralManipulatorSubsystem. Code should use the {@link
    * #getInstance()} method to get the single instance (rather than trying to construct an instance
@@ -46,39 +46,39 @@ public class Climber extends SubsystemBase {
    * singleton instance.
    */
   private Climber() {
-    climbPivotMotor = new TalonFX(CLIMB_PIVOT_MOTOR_ID);
-    cageLockMotor = new PWMTalonSRX(CAGE_LOCK_MOTOR_ID);
-
-    TalonFXConfiguration climbPivotConfiguration = new TalonFXConfiguration();
-    //    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
-
-    climbPivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-    climbPivotConfiguration.Slot0.kP = CLIMBER_PINGU.getP();
-    climbPivotConfiguration.Slot0.kI = CLIMBER_PINGU.getI();
-    climbPivotConfiguration.Slot0.kD = CLIMBER_PINGU.getD();
-    climbPivotConfiguration.Slot0.kV = CLIMBER_PINGU.getV();
-
-    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
-
-    CurrentLimitsConfigs climbPivotCurrentConfig = new CurrentLimitsConfigs();
-
-    climbPivotCurrentConfig.SupplyCurrentLimit = 40;
-    climbPivotCurrentConfig.SupplyCurrentLimitEnable = true;
-    climbPivotCurrentConfig.StatorCurrentLimit = 40;
-    climbPivotCurrentConfig.StatorCurrentLimitEnable = true;
-
-    climbPivotMotor.getConfigurator().apply(climbPivotCurrentConfig);
-
-    // on
-    climbPivotConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
-
-    voltageOut = new VoltageOut(0);
-    voltageOutFeeder = new VoltageOut(0);
-
-    AlertPingu.add(climbPivotMotor, "climber pivot motor");
+//    climbPivotMotor = new TalonFX(CLIMB_PIVOT_MOTOR_ID);
+//    cageLockMotor = new PWMTalonSRX(CAGE_LOCK_MOTOR_ID);
+//
+//    TalonFXConfiguration climbPivotConfiguration = new TalonFXConfiguration();
+//    //    PWNTalonSRXConfiguration cageLockConfiguration = new PWMTalonSRXConfiguration();
+//
+//    climbPivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+//
+//    climbPivotConfiguration.Slot0.kP = CLIMBER_PINGU.getP();
+//    climbPivotConfiguration.Slot0.kI = CLIMBER_PINGU.getI();
+//    climbPivotConfiguration.Slot0.kD = CLIMBER_PINGU.getD();
+//    climbPivotConfiguration.Slot0.kV = CLIMBER_PINGU.getV();
+//
+//    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
+//
+//    CurrentLimitsConfigs climbPivotCurrentConfig = new CurrentLimitsConfigs();
+//
+//    climbPivotCurrentConfig.SupplyCurrentLimit = 40;
+//    climbPivotCurrentConfig.SupplyCurrentLimitEnable = true;
+//    climbPivotCurrentConfig.StatorCurrentLimit = 40;
+//    climbPivotCurrentConfig.StatorCurrentLimitEnable = true;
+//
+//    climbPivotMotor.getConfigurator().apply(climbPivotCurrentConfig);
+//
+//    // on
+//    climbPivotConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+//
+//    climbPivotMotor.getConfigurator().apply(climbPivotConfiguration);
+//
+//    voltageOut = new VoltageOut(0);
+//    voltageOutFeeder = new VoltageOut(0);
+//
+//    AlertPingu.add(climbPivotMotor, "climber pivot motor");
   }
 
   /**
@@ -97,22 +97,22 @@ public class Climber extends SubsystemBase {
   /** Stops the coral manipulator motors */
   public void stopClimbPivotMotor() {
     //    coralFeederMotor.stopMotor();
-    climbPivotMotor.stopMotor();
+//    climbPivotMotor.stopMotor();
   }
 
   /** Starts the coral manipulator motors */
   public void startClimbPivotMotor() {
-    voltageOut.Output = 5.0;
-    climbPivotMotor.setControl(voltageOut);
-    setHasPiece(false);
-    motorsRunning = true;
+//    voltageOut.Output = 5.0;
+//    climbPivotMotor.setControl(voltageOut);
+//    setHasPiece(false);
+//    motorsRunning = true;
   }
 
   /** Starts the coral manipulator motors */
   public void reverseMotors() {
-    climbPivotMotor.setControl(VoltagePingu.setOutput(-4.5));
-    cageLockMotor.setVoltage(VoltagePingu.setOutput(-4.5).getOutputMeasure());
-    this.motorsRunning = true;
+//    climbPivotMotor.setControl(VoltagePingu.setOutput(-4.5));
+//    cageLockMotor.setVoltage(VoltagePingu.setOutput(-4.5).getOutputMeasure());
+//    this.motorsRunning = true;
   }
 
   /**

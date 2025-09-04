@@ -26,11 +26,11 @@ import xyz.malefic.frc.pingu.AlertPingu;
  */
 public class Algae extends SubsystemBase {
   /** Creates a new end effector. */
-  private final TalonFX algaePivotMotor;
-
-  private final DigitalInput algaeSensor;
-
-  private final TalonFX algaeIntakeMotor;
+//  private final TalonFX algaePivotMotor;
+//
+//  private final DigitalInput algaeSensor;
+//
+//  private final TalonFX algaeIntakeMotor;
 
   private final VoltageOut voltageOut;
   private final PositionVoltage voltagePos;
@@ -58,58 +58,58 @@ public class Algae extends SubsystemBase {
    * Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
    */
   private Algae() {
-    algaePivotMotor = new TalonFX(ALGAE_PIVOT_MOTOR_ID);
-    algaeIntakeMotor = new TalonFX(ALGAE_INTAKE_MOTOR_ID);
-
-    algaeSensor = new DigitalInput(AlgaeManipulatorParameters.ALGAE_SENSOR_ID);
-
-    TalonFXConfiguration algaePivotConfiguration = new TalonFXConfiguration();
-    TalonFXConfiguration algaeIntakeConfiguration = new TalonFXConfiguration();
-
-    algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-    algaePivotConfiguration.Slot0.kP = AlgaeManipulatorParameters.ALGAE_PINGU.getP();
-    algaePivotConfiguration.Slot0.kI = AlgaeManipulatorParameters.ALGAE_PINGU.getI();
-    algaePivotConfiguration.Slot0.kD = AlgaeManipulatorParameters.ALGAE_PINGU.getD();
-
-    algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-
-    algaePivotMotor.getConfigurator().apply(algaePivotConfiguration);
-    algaeIntakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
-
-    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
-    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    algaePivotConfiguration.CurrentLimits.StatorCurrentLimit = 30;
-    algaePivotConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
-
-    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
-    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimit = 30;
-    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
-
-    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0;
-    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
-    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
-
-    algaePivotMotor.getConfigurator().apply(algaePivotConfiguration);
-    algaeIntakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
-
-    //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
-    // InvertedValue.Clockwise_Positive;
-    //
-    //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
-    // algaeManipulatorMotorSoftLimitConfig;
-
+//    algaePivotMotor = new TalonFX(ALGAE_PIVOT_MOTOR_ID);
+//    algaeIntakeMotor = new TalonFX(ALGAE_INTAKE_MOTOR_ID);
+//
+//    algaeSensor = new DigitalInput(AlgaeManipulatorParameters.ALGAE_SENSOR_ID);
+//
+//    TalonFXConfiguration algaePivotConfiguration = new TalonFXConfiguration();
+//    TalonFXConfiguration algaeIntakeConfiguration = new TalonFXConfiguration();
+//
+//    algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+//    algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+//
+//    algaePivotConfiguration.Slot0.kP = AlgaeManipulatorParameters.ALGAE_PINGU.getP();
+//    algaePivotConfiguration.Slot0.kI = AlgaeManipulatorParameters.ALGAE_PINGU.getI();
+//    algaePivotConfiguration.Slot0.kD = AlgaeManipulatorParameters.ALGAE_PINGU.getD();
+//
+//    algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+//    algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+//
+//    algaePivotMotor.getConfigurator().apply(algaePivotConfiguration);
+//    algaeIntakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
+//
+//    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
+//    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
+//    algaePivotConfiguration.CurrentLimits.StatorCurrentLimit = 30;
+//    algaePivotConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+//
+//    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
+//    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
+//    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimit = 30;
+//    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+//
+//    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0;
+//    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
+//    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
+//    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+//
+//    algaePivotMotor.getConfigurator().apply(algaePivotConfiguration);
+//    algaeIntakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
+//
+//    //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
+//    // InvertedValue.Clockwise_Positive;
+//    //
+//    //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
+//    // algaeManipulatorMotorSoftLimitConfig;
+//
     voltageOut = new VoltageOut(0);
     voltagePos = new PositionVoltage(0);
-
-    algaePivotMotor.setPosition(0);
-
-    AlertPingu.add(algaePivotMotor, "algae pivot");
-    AlertPingu.add(algaeIntakeMotor, "algae intake");
+//
+//    algaePivotMotor.setPosition(0);
+//
+//    AlertPingu.add(algaePivotMotor, "algae pivot");
+//    AlertPingu.add(algaeIntakeMotor, "algae intake");
   }
 
   // This method will be called once per scheduler run
@@ -125,18 +125,18 @@ public class Algae extends SubsystemBase {
           log("Algae/Algae State", algaePivotState.toString());
           log("Algae/IsAlgaeIntaking", algaeIntaking);
           log("Algae/Algae counter", algaeCounter.toString());
-          log(
-              "Algae/Disconnected algaeManipulatorMotor " + algaePivotMotor.getDeviceID(),
-              algaePivotMotor.isConnected());
-          log(
-              "Algae/Algae Pivot Stator Current",
-              algaePivotMotor.getStatorCurrent().getValueAsDouble());
-          log(
-              "Algae/Algae Pivot Supply Current",
-              algaePivotMotor.getSupplyCurrent().getValueAsDouble());
-          log(
-              "Algae/Algae Pivot Stall Current",
-              algaePivotMotor.getMotorStallCurrent().getValueAsDouble());
+//          log(
+//              "Algae/Disconnected algaeManipulatorMotor " + algaePivotMotor.getDeviceID(),
+//              algaePivotMotor.isConnected());
+//          log(
+//              "Algae/Algae Pivot Stator Current",
+//              algaePivotMotor.getStatorCurrent().getValueAsDouble());
+//          log(
+//              "Algae/Algae Pivot Supply Current",
+//              algaePivotMotor.getSupplyCurrent().getValueAsDouble());
+//          log(
+//              "Algae/Algae Pivot Stall Current",
+//              algaePivotMotor.getMotorStallCurrent().getValueAsDouble());
         });
   }
 
@@ -146,7 +146,8 @@ public class Algae extends SubsystemBase {
    * @param state the state to set the algae pivot
    */
   public void setPivotPos(AlgaePivotState state) {
-    algaePivotMotor.setControl(voltagePos.withPosition(state.pos));
+
+//    algaePivotMotor.setControl(voltagePos.withPosition(state.pos));
   }
 
   /**
@@ -155,7 +156,8 @@ public class Algae extends SubsystemBase {
    * @return double, the position of the end effector motor
    */
   public double getPivotPosValue() {
-    return algaePivotMotor.getPosition().getValueAsDouble();
+    return 0.0;
+//    return algaePivotMotor.getPosition().getValueAsDouble();
   }
 
   /**
@@ -164,13 +166,14 @@ public class Algae extends SubsystemBase {
    * @param speed the desired speed to set for the intake motor
    */
   public void setIntakeSpeed(double speed) {
-    voltageOut.Output = speed;
-    algaeIntakeMotor.setControl(voltageOut);
+//    voltageOut.Output = speed;
+//    algaeIntakeMotor.setControl(voltageOut);
   }
 
   /** Stops the algae intake motor. */
   private void stopAlgaeMotor() {
-    algaeIntakeMotor.stopMotor();
+
+//    algaeIntakeMotor.stopMotor();
   }
 
   /**
@@ -178,11 +181,11 @@ public class Algae extends SubsystemBase {
    * triggered, otherwise sets it to DEFAULT.
    */
   public void checkAlgaeSensor() {
-    if (algaeSensor.get()) {
-      algaeCounter = HOLDING;
-    } else {
-      algaeCounter = DEFAULT;
-    }
+//    if (algaeSensor.get()) {
+//      algaeCounter = HOLDING;
+//    } else {
+//      algaeCounter = DEFAULT;
+//    }
   }
 
   /**
@@ -191,7 +194,9 @@ public class Algae extends SubsystemBase {
    * @return true if the algae sensor is triggered, false otherwise
    */
   public boolean getAlgaeSensor() {
-    return algaeSensor.get();
+
+//    return algaeSensor.get();
+    return true;
   }
 
   /**
@@ -199,9 +204,9 @@ public class Algae extends SubsystemBase {
    * motor, and marks the algaeIntaking flag as true.
    */
   public void intakeAlgae() {
-    Elevator.setAlgaeLevel();
-    setIntakeSpeed(30.0);
-    algaeIntaking = true;
+//    Elevator.setAlgaeLevel();
+//    setIntakeSpeed(30.0);
+//    algaeIntaking = true;
   }
 
   /**
@@ -209,9 +214,9 @@ public class Algae extends SubsystemBase {
    * motor, and sets the algaeIntaking flag to false.
    */
   public void stopIntake() {
-    Elevator.getInstance().setElevatorPosition(ElevatorState.DEFAULT);
-    stopAlgaeMotor();
-    algaeIntaking = false;
+//    Elevator.getInstance().setElevatorPosition(ElevatorState.DEFAULT);
+//    stopAlgaeMotor();
+//    algaeIntaking = false;
   }
 
   public void shootAlgae() {

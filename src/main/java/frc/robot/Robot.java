@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Swerve;
 import frc.robot.utils.RobotParameters;
 import frc.robot.utils.RobotParameters.FieldParameters.*;
@@ -47,8 +46,8 @@ public class Robot extends LoggedRobot {
     // Set a metadata value
     RobotParameters.Info.logInfo();
 
-//    // Calls LEDs to activate
-//    LED.getInstance();
+    //    // Calls LEDs to activate
+    //    LED.getInstance();
 
     // Records useful but random info
     Logger.recordMetadata("Reefscape", "Logging");

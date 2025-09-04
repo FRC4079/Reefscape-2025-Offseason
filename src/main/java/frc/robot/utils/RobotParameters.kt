@@ -59,18 +59,18 @@ object RobotParameters {
         const val FRONT_RIGHT_CAN_CODER_ID: Int = 10
         const val BACK_LEFT_CAN_CODER_ID: Int = 11
         const val BACK_RIGHT_CAN_CODER_ID: Int = 12
-        const val ELEVATOR_MOTOR_LEFT_ID: Int = 13
-        const val ELEVATOR_MOTOR_RIGHT_ID: Int = 14
-        const val CORAL_SCORE_ID: Int = 15
-        const val PIDGEY_ID: Int = 16
-        const val ALGAE_PIVOT_MOTOR_ID: Int = 17
-        const val ALGAE_INTAKE_MOTOR_ID: Int = 20
-        const val STAR_FEEDER_ID: Int = 18
-        const val CORAL_FEEDER_ID: Int = 19
+//        const val ELEVATOR_MOTOR_LEFT_ID: Int = 13
+//        const val ELEVATOR_MOTOR_RIGHT_ID: Int = 14
+//        const val CORAL_SCORE_ID: Int = 15
+//        const val PIDGEY_ID: Int = 16
+//        const val ALGAE_PIVOT_MOTOR_ID: Int = 17
+//        const val ALGAE_INTAKE_MOTOR_ID: Int = 20
+//        const val STAR_FEEDER_ID: Int = 18
+//        const val CORAL_FEEDER_ID: Int = 19
 
-        const val CLIMB_PIVOT_MOTOR_ID: Int = 21
+//        const val CLIMB_PIVOT_MOTOR_ID: Int = 21
 
-        const val CAGE_LOCK_MOTOR_ID: Int = 22
+//        const val CAGE_LOCK_MOTOR_ID: Int = 22
 
         // Motor Property Values
         const val MAX_SPEED: Double = 5.76
