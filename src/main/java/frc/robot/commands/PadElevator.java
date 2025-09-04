@@ -1,9 +1,6 @@
 package frc.robot.commands;
 
-import static frc.robot.commands.sequencing.Sequences.*;
 import static frc.robot.utils.RobotParameters.ElevatorParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
-import static frc.robot.utils.emu.Direction.*;
 import static frc.robot.utils.emu.ElevatorState.*;
 
 import edu.wpi.first.wpilibj.*;

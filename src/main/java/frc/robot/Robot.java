@@ -47,8 +47,8 @@ public class Robot extends LoggedRobot {
     // Set a metadata value
     RobotParameters.Info.logInfo();
 
-    // Calls LEDs to activate
-    LED.getInstance();
+//    // Calls LEDs to activate
+//    LED.getInstance();
 
     // Records useful but random info
     Logger.recordMetadata("Reefscape", "Logging");

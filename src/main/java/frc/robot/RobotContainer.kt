@@ -43,20 +43,20 @@ object RobotContainer {
     val calamityCow: XboxController = XboxController(1)
 
     init {
-        Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
-
-        CommandPingu.registerCommands {
-            bind("ScoreL4Left", fullScoreAuto(LEFT))
-            bind("ScoreL4Right", fullScoreAuto(RIGHT))
-            bind("HasPieceFalse", hasPieceFalse())
-            bind("MoveElevatorL4Auto", moveElevatorState(L4))
-            bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
-            bind("SetL1", setElevatorState(L1))
-            bind("SetL2", setElevatorState(L2))
-            bind("SetL3", setElevatorState(L3))
-            bind("SetL4", setElevatorState(L4))
-            bind("MoveElevatorDown", setElevatorState(DEFAULT))
-        }
+//        Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
+//
+//        CommandPingu.registerCommands {
+//            bind("ScoreL4Left", fullScoreAuto(LEFT))
+//            bind("ScoreL4Right", fullScoreAuto(RIGHT))
+//            bind("HasPieceFalse", hasPieceFalse())
+//            bind("MoveElevatorL4Auto", moveElevatorState(L4))
+//            bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
+//            bind("SetL1", setElevatorState(L1))
+//            bind("SetL2", setElevatorState(L2))
+//            bind("SetL3", setElevatorState(L3))
+//            bind("SetL4", setElevatorState(L4))
+//            bind("MoveElevatorDown", setElevatorState(DEFAULT))
+//        }
 
         networkChooser = AutoBuilder.buildAutoChooser()
 
@@ -71,27 +71,27 @@ object RobotContainer {
             press(RIGHT_BUMPER) {
                 SuperStructure + State.ScoreAlign(RIGHT)
             }
-            press(Y) {
-                setElevatorToBeSetState(L4)
-            }
-            press(X) {
-                setElevatorToBeSetState(L3)
-            }
-            press(B) {
-                setElevatorToBeSetState(L2)
-            }
-            press(DPAD_UP) {
-                setElevatorToBeSetState(L1)
-            }
-            press(A) {
-                setElevatorToBeSetState(DEFAULT)
-            }
-            press(LEFT_TRIGGER) {
-                Algae.getInstance().intakeAlgae()
-            }
-            release(LEFT_TRIGGER) {
-                Algae.getInstance().stopIntake()
-            }
+//            press(Y) {
+//                setElevatorToBeSetState(L4)
+//            }
+//            press(X) {
+//                setElevatorToBeSetState(L3)
+//            }
+//            press(B) {
+//                setElevatorToBeSetState(L2)
+//            }
+//            press(DPAD_UP) {
+//                setElevatorToBeSetState(L1)
+//            }
+//            press(A) {
+//                setElevatorToBeSetState(DEFAULT)
+//            }
+//            press(LEFT_TRIGGER) {
+//                Algae.getInstance().intakeAlgae()
+//            }
+//            release(LEFT_TRIGGER) {
+//                Algae.getInstance().stopIntake()
+//            }
             press(Button.RIGHT_TRIGGER) {
                 when (SuperStructure.currentState) {
                     State.TeleOpDrive.Algae -> SuperStructure + State.Algae.Score
