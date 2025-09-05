@@ -37,10 +37,14 @@ import kotlin.math.sin
 /** Class containing global values for the robot.  */
 object RobotParameters {
     object ControllerConstants {
+<<<<<<< Updated upstream
         @JvmField
         val aacrn = XboxController(0)
 
         @JvmField
+=======
+        val aacrn = XboxController(0)
+>>>>>>> Stashed changes
         val testPad = XboxController(1)
     }
 

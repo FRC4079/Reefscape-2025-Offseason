@@ -13,6 +13,10 @@ import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.SuperStructure
+<<<<<<< Updated upstream
+=======
+import frc.robot.subsystems.Swerve
+>>>>>>> Stashed changes
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -118,5 +122,19 @@ object RobotContainer {
                 SuperStructure.cancel()
             }
         }
+
+        testPad.bindings {
+            press(A) {
+                SuperStructure.driveToScoringPose(LEFT)
+            }
+            release(A) {
+                SuperStructure.cancel()
+            }
+            press(B) {
+                SuperStructure.driveToScoringPose(RIGHT)
+            }
+            release(B) {
+                SuperStructure.cancel()
+            }
     }
 }
