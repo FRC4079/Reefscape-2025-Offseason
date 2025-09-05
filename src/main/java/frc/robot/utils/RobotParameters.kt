@@ -38,10 +38,14 @@ import kotlin.math.sin
 object RobotParameters {
     object ControllerConstants {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         @JvmField
         val aacrn = XboxController(0)
 
         @JvmField
+=======
+        val aacrn = XboxController(0)
+>>>>>>> Stashed changes
 =======
         val aacrn = XboxController(0)
 >>>>>>> Stashed changes

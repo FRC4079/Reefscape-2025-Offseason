@@ -16,6 +16,9 @@ import frc.robot.subsystems.SuperStructure
 <<<<<<< Updated upstream
 =======
 import frc.robot.subsystems.Swerve
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
@@ -121,6 +124,7 @@ object RobotContainer {
             release(B) {
                 SuperStructure.cancel()
             }
+<<<<<<< Updated upstream
         }
 
         testPad.bindings {
@@ -136,5 +140,7 @@ object RobotContainer {
             release(B) {
                 SuperStructure.cancel()
             }
+=======
+>>>>>>> Stashed changes
     }
 }
