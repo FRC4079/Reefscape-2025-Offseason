@@ -11,3 +11,18 @@ climber
 wrist
 1 kraken  (pivot) not done
 1 falcon (intake) not done
+
+
+new:
+elevator
+[x] 2 krakens
+intake
+[ ] 2 falkons
+outtake
+[ ] 1 falkon
+[ ] 1 kraken
+climber
+[ ] 1 kraken (pivot)
+[ ] 1 talon srx (clamp)
+swerve
+[x] 8 falkons
