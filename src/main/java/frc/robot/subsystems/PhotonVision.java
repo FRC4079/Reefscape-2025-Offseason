@@ -12,6 +12,7 @@ import java.util.*;
 import kotlin.*;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.*;
+import xyz.malefic.frc.sub.PhotonModule;
 
 /**
  * The PhotonVision class is a subsystem that interfaces with multiple PhotonVision cameras to
@@ -199,7 +200,7 @@ public class PhotonVision extends SubsystemBase {
 
   public double fetchY(PhotonCamera camera) {
     for (Pair<PhotonModule, PhotonPipelineResult> pair : currentResultPair) {
-      if (pair.getFirst().getCamera().equals(camera) && currentResultPair != null) {
+      if (pair.getFirst().getCamera().equals(camera)) {
         return pair.getSecond().getBestTarget().getBestCameraToTarget().getY();
       }
     }
