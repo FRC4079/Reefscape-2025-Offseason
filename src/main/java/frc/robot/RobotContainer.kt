@@ -22,7 +22,6 @@ import xyz.malefic.frc.pingu.Bingu.bindings
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
-
     val calamityCow: XboxController = XboxController(1)
 
     init {
