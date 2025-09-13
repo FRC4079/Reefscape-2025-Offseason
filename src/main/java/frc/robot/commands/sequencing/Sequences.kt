@@ -12,9 +12,9 @@ import frc.robot.commands.Kommand.setCoralState
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.Kommand.waitFor
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
-import frc.robot.utils.emu.CoralState.CORAL_RELEASE
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState.DEFAULT
+import frc.robot.utils.emu.OuttakeState.CORAL_REVERSE
 
 object Sequences {
     /**
@@ -25,7 +25,7 @@ object Sequences {
     @JvmStatic
     fun resetScore() =
         sequential {
-            +setCoralState(CORAL_RELEASE)
+            +setCoralState(CORAL_REVERSE)
             +setElevatorState(DEFAULT)
             +cancel()
             +hasPieceFalse()
@@ -44,7 +44,7 @@ object Sequences {
         sequential {
             +align(offsetSide).withTimeout(1.25)
             +coralScoring()
-            +setCoralState(CORAL_RELEASE)
+            +setCoralState(CORAL_REVERSE)
             +waitFor(0.5)
             +coralScoreFalse()
             +hasPieceFalse()
@@ -65,7 +65,7 @@ object Sequences {
             }
             +waitFor(0.1)
             +coralScoring()
-            +setCoralState(CORAL_RELEASE)
+            +setCoralState(CORAL_REVERSE)
             +waitFor(0.5)
             +setElevatorState(DEFAULT)
             +coralScoreFalse()

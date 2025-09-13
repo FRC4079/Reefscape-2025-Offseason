@@ -21,8 +21,10 @@ intake
 outtake
 [ ] 1 falkon
 [ ] 1 kraken
-climber
-[ ] 1 kraken (pivot)
-[ ] 1 talon srx (clamp)
+[ ] 1 sensor (coral)
+[ ] 1 sensor (algae)
 swerve
 [x] 8 falkons
+climber (bb)
+[ ] 1 kraken (pivot)
+[ ] 1 talon srx (clamp)

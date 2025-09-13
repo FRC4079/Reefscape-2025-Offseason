@@ -25,7 +25,6 @@ import xyz.malefic.frc.pingu.AlertPingu;
  * for the elevator motor.
  */
 public class Elevator extends SubsystemBase {
-
   private final TalonFX elevatorMotorLeft;
   private final TalonFX elevatorMotorRight;
 

@@ -10,17 +10,17 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
-import frc.robot.subsystems.Coral
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.PathPingu.findClosestScoringPosition
 import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralState
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CONSTRAINTS
-import frc.robot.utils.emu.CoralState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.extension.Kommand.cmd
 import kotlin.math.abs
 
@@ -144,7 +144,7 @@ object Kommand {
      * @return An [InstantCommand] that sets the coral manipulator state.
      */
     @JvmStatic
-    fun setCoralState(state: CoralState) = cmd { coralState = state }
+    fun setCoralState(state: OuttakeState) = cmd { outtakeState = state }
 
     /**
      * Creates an [InstantCommand] to set the coral scoring state to true, starting the coral scoring process.
@@ -155,20 +155,12 @@ object Kommand {
     fun coralScoring() = cmd { coralScoring = true }
 
     /**
-     * Creates an new [ReverseIntake] command to reverse the intake.
-     *
-     * @return A [ReverseIntake] command that reverses the intake.
-     */
-    @JvmStatic
-    fun reverseIntake() = ReverseIntake()
-
-    /**
      * Creates an [InstantCommand] to start the coral motors.
      *
      * @return An [InstantCommand] that starts the coral motors.
      */
     @JvmStatic
-    fun startCoralMotors() = cmd { Coral.getInstance().startCoralIntake() }
+    fun startCoralMotors() = cmd { Intake.getInstance().startCoralIntake() }
 
     /**
      * Creates an [InstantCommand] to reset the Pidgey sensor.
@@ -214,14 +206,6 @@ object Kommand {
         )
 
     /**
-     * Creates an [InstantCommand] to set the intake to algae.
-     *
-     * @return An [InstantCommand] that sets the intake to algae.
-     */
-    @JvmStatic
-    fun setIntakeAlgae() = toggleIntakeAlgae
-
-    /**
      * Creates a [PadDrive] command to control the elevator.
      *
      * @param controller The gaming controller used to move the elevator.
@@ -239,7 +223,7 @@ object Kommand {
      * @return An [InstantCommand] that sets the coral intaking state to true.
      */
     @JvmStatic
-    fun hasPieceFalse() = cmd { Coral.getInstance().setHasPiece(false) }
+    fun hasPieceFalse() = cmd { Intake.getInstance().setHasPiece(false) }
 
     @JvmStatic
     fun coralScoreFalse() = cmd { coralScoring = false }

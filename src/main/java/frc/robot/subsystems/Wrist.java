@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking;
 import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
 import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.emu.CoralState.*;
+import static frc.robot.utils.emu.OuttakeState.*;
 import static xyz.malefic.frc.pingu.LogPingu.log;
 import static xyz.malefic.frc.pingu.LogPingu.logs;
 
@@ -63,7 +63,7 @@ public class Wrist extends SubsystemBase {
     coralScoreMotor = new TalonFX(CORAL_SCORE_ID);
     starFeederMotor = new TalonFX(STAR_FEEDER_ID);
 
-    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID_1);
+    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID);
 
     TalonFXConfiguration coralFeederConfiguration = new TalonFXConfiguration();
     TalonFXConfiguration coralScoreConfiguration = new TalonFXConfiguration();
@@ -139,16 +139,16 @@ public class Wrist extends SubsystemBase {
 
     if (!algaeIntaking && !coralScoring) {
       if (!getCoralSensor() && !hasPiece) {
-        coralState = CORAL_INTAKE;
+        outtakeState = CORAL_INTAKE;
       } else if (getCoralSensor() && !hasPiece) {
         // Stop the motors if the manipulator has a piece, but the sensor no longer
         // detects it
-        coralState = CORAL_SLOW;
+        outtakeState = CORAL_SLOW;
         setHasPiece(true);
       } else if (!getCoralSensor() && hasPiece) {
-        coralState = CORAL_HOLD;
+        outtakeState = CORAL_HOLD;
       } else {
-        coralState = CORAL_SLOW;
+        outtakeState = CORAL_SLOW;
       }
     }
 
@@ -158,10 +158,10 @@ public class Wrist extends SubsystemBase {
           log("Coral/Has Piece", hasPiece);
           log("Coral/Coral Scoring", coralScoring);
           log("Coral/motorsRunning", this.motorsRunning);
-          log("Coral/Coral State", coralState.toString());
+          log("Coral/Coral State", outtakeState.toString());
         });
 
-    coralState.block.invoke();
+    outtakeState.block.invoke();
   }
 
   /** Stops the coral manipulator motors */

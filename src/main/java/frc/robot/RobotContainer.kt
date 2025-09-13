@@ -9,9 +9,9 @@ import frc.robot.commands.Kommand.moveElevatorState
 import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.sequencing.Sequences.fullScoreAuto
-import frc.robot.subsystems.Algae
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.SuperStructure
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
@@ -39,7 +39,6 @@ import xyz.malefic.frc.pingu.CommandPingu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
-
     val calamityCow: XboxController = XboxController(1)
 
     init {
@@ -87,10 +86,10 @@ object RobotContainer {
                 setElevatorToBeSetState(DEFAULT)
             }
             press(LEFT_TRIGGER) {
-                Algae.getInstance().intakeAlgae()
+                Intake.getInstance().intakeAlgae()
             }
             release(LEFT_TRIGGER) {
-                Algae.getInstance().stopIntake()
+                Intake.getInstance().stopIntake()
             }
             press(Button.RIGHT_TRIGGER) {
                 when (SuperStructure.currentState) {

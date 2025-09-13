@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
 import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.AlgaePivotState
-import frc.robot.utils.emu.CoralState
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.pingu.LogPingu.metaLogs
 import xyz.malefic.frc.pingu.MagicPingu
 import xyz.malefic.frc.pingu.Pingu
@@ -255,8 +255,6 @@ object RobotParameters {
     object AlgaeManipulatorParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
-        const val ALGAE_SENSOR_ID: Int = 1
-
         @JvmField
         var isSoftLimitEnabled: Boolean = false
 
@@ -271,14 +269,14 @@ object RobotParameters {
     }
 
     object CoralManipulatorParameters {
-        const val CORAL_SENSOR_ID_1: Int = 0
-        const val CORAL_SENSOR_ID_2: Int = 0
+        const val CORAL_SENSOR_ID: Int = 0
+        const val ALGAE_SENSOR_ID: Int = 0
 
         @JvmField
         val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
 
         @JvmField
-        var coralState: CoralState = CoralState.CORAL_INTAKE
+        var outtakeState: OuttakeState = OuttakeState.CORAL_INTAKE
 
         @JvmField
         var hasPiece: Boolean = false

@@ -9,8 +9,8 @@ import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
     private val swerve = Swerve.getInstance()
-    private val algae = Algae.getInstance()
-    private val coral = Coral.getInstance()
+    private val outtake = Outtake.getInstance()
+    private val intake = Intake.getInstance()
     private val elevator = Elevator.getInstance()
 
     var currentState: State = State.TeleOpDrive.Base
@@ -53,8 +53,8 @@ object SuperStructure : SubsystemBase() {
         if (currentState is State.TeleOpDrive) {
             currentState =
                 when {
-                    Algae.getInstance().algaeSensor -> State.TeleOpDrive.Algae
-                    Coral.getInstance().coralSensors -> State.TeleOpDrive.Coral
+                    Outtake.getInstance().algaeSensor -> State.TeleOpDrive.Algae
+                    Intake.getInstance().coralSensors -> State.TeleOpDrive.Coral
                     else -> State.TeleOpDrive.Base
                 }
         }
@@ -70,10 +70,10 @@ object SuperStructure : SubsystemBase() {
                         Swerve.getInstance().stickDrive(aacrn)
                         when (state) {
                             is State.TeleOpDrive.Algae -> {
-                                Algae.getInstance().stopIntake()
+                                Outtake.getInstance().stopIntake()
                             }
                             is State.TeleOpDrive.Coral -> {
-                                Coral.getInstance().stopMotors()
+                                Intake.getInstance().stopMotors()
                             }
                             else -> { /* no-op */ }
                         }
@@ -97,7 +97,7 @@ object SuperStructure : SubsystemBase() {
                         // TODO: low algae sequence
                     }
                     is State.Algae.Score -> {
-                        Algae.getInstance().shootAlgae()
+                        Outtake.getInstance().shootAlgae()
                         // TODO: algae scoring sequence
                     }
                 }
@@ -128,8 +128,8 @@ object SuperStructure : SubsystemBase() {
         wantedState.clear()
         currentState = State.TeleOpDrive.Base
         swerve.stop()
-        algae.stopIntake()
-        coral.stopMotors()
+        outtake.stopIntake()
+        intake.stopMotors()
     }
 
     override fun periodic() {
