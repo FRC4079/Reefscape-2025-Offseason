@@ -1,626 +1,679 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems
 
-import static com.pathplanner.lib.util.PathPlannerLogging.*;
-import static edu.wpi.first.math.VecBuilder.*;
-import static edu.wpi.first.math.geometry.Rotation2d.*;
-import static edu.wpi.first.math.kinematics.ChassisSpeeds.*;
-import static edu.wpi.first.math.kinematics.SwerveDriveKinematics.*;
-import static edu.wpi.first.math.util.Units.*;
-import static frc.robot.utils.ExtensionsKt.*;
-import static frc.robot.utils.RobotParameters.ControllerConstants.aacrn;
-import static frc.robot.utils.RobotParameters.LiveRobotValues.*;
-import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.PhysicalParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.*;
-import static frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.*;
-import static xyz.malefic.frc.pingu.LogPingu.*;
+import com.ctre.phoenix6.hardware.Pigeon2
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.path.PathConstraints
+import com.pathplanner.lib.util.PathPlannerLogging
+import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator3d
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Rotation3d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.util.Units
+import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.DriverStation.Alliance
+import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.subsystems.SuperStructure.addWantedState
+import frc.robot.subsystems.SuperStructure.currentState
+import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_DRIVE_ID
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_STEER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_RIGHT_CAN_CODER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_RIGHT_DRIVE_ID
+import frc.robot.utils.RobotParameters.MotorParameters.BACK_RIGHT_STEER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_LEFT_CAN_CODER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_LEFT_DRIVE_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_LEFT_STEER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_RIGHT_CAN_CODER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_RIGHT_DRIVE_ID
+import frc.robot.utils.RobotParameters.MotorParameters.FRONT_RIGHT_STEER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.MAX_ANGULAR_SPEED
+import frc.robot.utils.RobotParameters.MotorParameters.MAX_SPEED
+import frc.robot.utils.RobotParameters.MotorParameters.PIDGEY_ID
+import frc.robot.utils.RobotParameters.SwerveParameters.PhysicalParameters.kinematics
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PINGU_AUTO
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PINGU_TELE
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.ROTATIONAL_PINGU
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.X_PINGU
+import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL10
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL11
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL12
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL9
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.IS_FIELD_ORIENTED
+import frc.robot.utils.emu.Direction
+import frc.robot.utils.emu.State.ScoreAlign
+import frc.robot.utils.emu.State.TeleOpDrive
+import frc.robot.utils.getEstimatedPose
+import frc.robot.utils.leftStickPosition
+import frc.robot.utils.updateStdDev
+import frc.robot.utils.updateStdDev3d
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
+import org.photonvision.EstimatedRobotPose
+import org.photonvision.targeting.PhotonPipelineResult
+import xyz.malefic.frc.pingu.LogPingu.log
+import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.NetworkPingu
+import xyz.malefic.frc.sub.PhotonModule
+import java.util.Optional
+import java.util.function.Predicate
+import kotlin.math.abs
+import kotlin.math.min
 
-import com.ctre.phoenix6.hardware.Pigeon2;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator3d;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.emu.Direction;
-import frc.robot.utils.emu.State;
-import java.util.Optional;
-import kotlin.Pair;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-import org.photonvision.EstimatedRobotPose;
-import xyz.malefic.frc.pingu.LogPingu;
-import xyz.malefic.frc.pingu.NetworkPingu;
+object Swerve : SubsystemBase() {
+    private val poseEstimator: SwerveDrivePoseEstimator
+    private val poseEstimator3d: SwerveDrivePoseEstimator3d
+    private val field = Field2d()
+    private val pidgey = Pigeon2(PIDGEY_ID)
+    private val states = arrayOfNulls<SwerveModuleState>(4)
+    private var setStates = arrayOfNulls<SwerveModuleState>(4)
+    private val modules: Array<SwerveModule>
+    private val photonVision: PhotonVision
 
-public class Swerve extends SubsystemBase {
-  private final SwerveDrivePoseEstimator poseEstimator;
-  private final SwerveDrivePoseEstimator3d poseEstimator3d;
-  private final Field2d field = new Field2d();
-  private final Pigeon2 pidgey = new Pigeon2(PIDGEY_ID);
-  private final SwerveModuleState[] states = new SwerveModuleState[4];
-  private SwerveModuleState[] setStates = new SwerveModuleState[4];
-  private final SwerveModule[] modules;
-  private final PhotonVision photonVision;
+    // Auto Align Pingu Values
+    private var networkPinguXAutoAlign: NetworkPingu? = null
+    private var networkPinguYAutoAlign: NetworkPingu? = null
+    private var networkPinguRotAutoAlign: NetworkPingu? = null
 
-  // Auto Align Pingu Values
-  private NetworkPingu networkPinguXAutoAlign;
-  private NetworkPingu networkPinguYAutoAlign;
-  private NetworkPingu networkPinguRotAutoAlign;
+    private val reefChooser: LoggedDashboardChooser<*>? = null
+    private var desiredPoseForDriveToPoint: Pose2d
+    private var maxVelocityOutputForDriveToPoint: Double
+    private var maximumAngularVelocityForDriveToPoint: Double
 
-  private LoggedDashboardChooser reefChooser;
-  private Pose2d desiredPoseForDriveToPoint;
-  private double maxVelocityOutputForDriveToPoint;
-  private double maximumAngularVelocityForDriveToPoint;
+    //
+    //  Thread swerveLoggingThread =
+    //      new Thread(
+    //          () -> {
+    //            while (DriverStation.isEnabled()) {
+    //              logs("Swerve Module States", getModuleStates());
+    //              try {
+    //                Thread.sleep(100);
+    //              } catch (InterruptedException e) {
+    //                Thread.currentThread().interrupt();
+    //                break;
+    //              }
+    //            }
+    //          });
+    // from feeder to the goal and align itself
+    // The plan is for it to path towards it then we use a set path to align itself
+    // with the goal and
+    // be more accurate
+    // Use this
+    // https://pathplanner.dev/pplib-pathfinding.html#pathfind-then-follow-path
+    var constraints: PathConstraints =
+        PathConstraints(2.0, 3.0, Units.degreesToRadians(540.0), Units.degreesToRadians(720.0))
 
-  //
-  //  Thread swerveLoggingThread =
-  //      new Thread(
-  //          () -> {
-  //            while (DriverStation.isEnabled()) {
-  //              logs("Swerve Module States", getModuleStates());
-  //              try {
-  //                Thread.sleep(100);
-  //              } catch (InterruptedException e) {
-  //                Thread.currentThread().interrupt();
-  //                break;
-  //              }
-  //            }
-  //          });
-
-  // from feeder to the goal and align itself
-  // The plan is for it to path towards it then we use a set path to align itself
-  // with the goal and
-  // be more accurate
-  // Use this
-  // https://pathplanner.dev/pplib-pathfinding.html#pathfind-then-follow-path
-  PathConstraints constraints =
-      new PathConstraints(2.0, 3.0, degreesToRadians(540), degreesToRadians(720));
-
-  /**
-   * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
-   * a Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
-   */
-  private Swerve() {
-    this.modules = initializeModules();
-    this.pidgey.reset();
-    this.poseEstimator = initializePoseEstimator();
-    this.poseEstimator3d = initializePoseEstimator3d();
-    this.desiredPoseForDriveToPoint = new Pose2d();
-    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
-    this.maximumAngularVelocityForDriveToPoint = 0.0;
-    //    configureAutoBuilder();
-    initializePathPlannerLogging();
-    photonVision = PhotonVision.getInstance();
-
-    //    swerveLoggingThread.start();
-
-    initializationAlignPing();
-  }
-
-  /**
-   * The Singleton instance of this SwerveSubsystem. Code should use the {@link #getInstance()}
-   * method to get the single instance (rather than trying to construct an instance of this class.)
-   */
-  private static final Swerve INSTANCE = new Swerve();
-
-  /**
-   * Returns the Singleton instance of this SwerveSubsystem. This static method should be used,
-   * rather than the constructor, to get the single instance of this class. For example: {@code
-   * SwerveSubsystem.getInstance();}
-   */
-  @SuppressWarnings("WeakerAccess")
-  public static Swerve getInstance() {
-    return INSTANCE;
-  }
-
-  /**
-   * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
-   * in kinematics.
-   *
-   * @return SwerveModule[], An array of initialized SwerveModule objects.
-   */
-  private SwerveModule[] initializeModules() {
-    return new SwerveModule[] {
-      new SwerveModule(
-          FRONT_LEFT_DRIVE_ID, FRONT_LEFT_STEER_ID, FRONT_LEFT_CAN_CODER_ID, CANCODER_VAL9),
-      new SwerveModule(
-          FRONT_RIGHT_DRIVE_ID, FRONT_RIGHT_STEER_ID, FRONT_RIGHT_CAN_CODER_ID, CANCODER_VAL10),
-      new SwerveModule(
-          BACK_LEFT_DRIVE_ID, BACK_LEFT_STEER_ID, BACK_LEFT_CAN_CODER_ID, CANCODER_VAL11),
-      new SwerveModule(
-          BACK_RIGHT_DRIVE_ID, BACK_RIGHT_STEER_ID, BACK_RIGHT_CAN_CODER_ID, CANCODER_VAL12)
-    };
-  }
-
-  /**
-   * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEsimator estimates the robot's
-   * position. This is based on a combination of the robot's movement and vision.
-   *
-   * @return SwerveDrivePoseEstimator, A new SwerveDrivePoseEstimator object.
-   */
-  private SwerveDrivePoseEstimator initializePoseEstimator() {
-    return new SwerveDrivePoseEstimator(
-        kinematics,
-        fromDegrees(getHeading()),
-        getModulePositions(),
-        new Pose2d(0.0, 0.0, fromDegrees(0.0)),
-        fill(0.02, 0.02, degreesToRadians(5)),
-        fill(0.3, 0.3, degreesToRadians(10)));
-  }
-
-  //
-  private SwerveDrivePoseEstimator3d initializePoseEstimator3d() {
-    return new SwerveDrivePoseEstimator3d(
-        kinematics,
-        pidgey.getRotation3d(),
-        getModulePositions(),
-        new Pose3d(0.0, 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0)));
-  }
-
-  /**
-   * Initializes the PathPlannerLogging. This allows the PathPlanner to log the robot's current
-   * pose.
-   */
-  private void initializePathPlannerLogging() {
-    setLogCurrentPoseCallback(field::setRobotPose);
-    setLogTargetPoseCallback(pose -> field.getObject("target pose").setPose(pose));
-    setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
-  }
-
-  /**
-   * Configures the AutoBuilder for autonomous driving. READ DOCUMENTATION TO PUT IN CORRECT VALUES
-   * Allows PathPlanner to get pose and output robot-relative chassis speeds Needs tuning
-   */
-  public void configureAutoBuilder() {
-    assert PinguParameters.config != null;
-    AutoBuilder.configure(
-        this::getPose,
-        this::newPose,
-        this::getAutoSpeeds,
-        this::chassisSpeedsDrive,
-        new PPHolonomicDriveController(
-            new PIDConstants(7.6, 0.0, 0.0), new PIDConstants(10.0, 0.0, 0.0)),
-        PinguParameters.config,
-        () -> DriverStation.getAlliance().filter(value -> value == Alliance.Red).isPresent(),
-        this);
-  }
-
-  private void applySwerveState() {
-    // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
-
-    if (SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive) {
-      stickDrive(aacrn);
-    } else if (SuperStructure.INSTANCE.getCurrentState() instanceof State.ScoreAlign) {
-      // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
-      var translationToDesiredPoint =
-          desiredPoseForDriveToPoint.getTranslation().minus(getPose().getTranslation());
-      var linearDistance = translationToDesiredPoint.getNorm();
-      var frictionCoefficient = 0.1; // this is a guess
-      if (linearDistance >= Units.inchesToMeters(0.5)) {
-        frictionCoefficient = frictionCoefficient * MAX_SPEED;
-      }
-
-      var directionOfTravel = translationToDesiredPoint.getAngle();
-      var velocityOutput = 0.0;
-
-      if (DriverStation.isAutonomous()) {
-        velocityOutput =
-            Math.min(
-                Math.abs(DRIVE_PINGU_AUTO.getPidController().calculate(linearDistance, 0))
-                    + frictionCoefficient,
-                maxVelocityOutputForDriveToPoint);
-      } else {
-        velocityOutput =
-            Math.min(
-                Math.abs(DRIVE_PINGU_TELE.getPidController().calculate(linearDistance, 0))
-                    + frictionCoefficient,
-                maxVelocityOutputForDriveToPoint);
-      }
-      var xComponent = velocityOutput * directionOfTravel.getCos();
-      var yComponent = velocityOutput * directionOfTravel.getSin();
-
-      double currentAngle = this.getPose().getRotation().getDegrees();
-
-      this.setDriveSpeeds(
-          yComponent,
-          xComponent,
-          Math.min(
-              Math.abs(
-                  ROTATIONAL_PINGU
-                      .getProfiledPIDController()
-                      .calculate(
-                          currentAngle, desiredPoseForDriveToPoint.getRotation().getDegrees())),
-              MAX_ANGULAR_SPEED),
-          false);
-    }
-  }
-
-  //    public void setSwerveState(SwerveRequest request) {
-  //        this.setControl(request);
-  //    }
-
-  /**
-   * This method is called periodically by the scheduler. It updates the pose estimator and
-   * dashboard values.
-   */
-  @Override
-  public void periodic() {
-    updatePos();
-
-    /*
-     * Updates the robot position based on movement and rotation from the pidgey and
-     * encoders.
+    /**
+     * Creates a new instance of this SwerveSubsystem. This constructor is private since this class is
+     * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
-    poseEstimator.update(getPidgeyRotation(), getModulePositions());
-    poseEstimator3d.update(pidgey.getRotation3d(), getModulePositions());
+    init {
+        this.modules = initializeModules()
+        this.pidgey.reset()
+        this.poseEstimator = initializePoseEstimator()
+        this.poseEstimator3d = initializePoseEstimator3d()
+        this.desiredPoseForDriveToPoint = Pose2d()
+        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
+        this.maximumAngularVelocityForDriveToPoint = 0.0
+        //    configureAutoBuilder();
+        initializePathPlannerLogging()
+        photonVision = PhotonVision.getInstance()
 
-    field.setRobotPose(poseEstimator.getEstimatedPosition());
-    robotPos = poseEstimator.getEstimatedPosition();
+        //    swerveLoggingThread.start();
+        initializationAlignPing()
+    }
 
-    logs(
-        () -> {
-          log("Swerve/Pidgey Yaw", getPidgeyYaw());
-          log("Swerve/Pidgey Heading", getHeading());
-          log("Swerve/Pidgey Rotation", pidgey.getPitch().getValueAsDouble());
-          log("Swerve/Pidgey Roll", pidgey.getRoll().getValueAsDouble());
-          log("Swerve/Pidgey Rotation2D", pidgey.getRotation2d().getDegrees());
-          log("Swerve/Robot Pose", field.getRobotPose());
-          log("Swerve/Robot Pose 3D", poseEstimator3d.getEstimatedPosition());
-          log("Swerve/Robot Pose 2D extra", robotPos);
-          //          log("Swerve/Swerve Module States", getModuleStates());
-        });
-    applySwerveState();
-  }
+    /**
+     * Initializes the swerve modules. Ensure the swerve modules are initialized in the same order as
+     * in kinematics.
+     *
+     * @return SwerveModule[], An array of initialized SwerveModule objects.
+     */
+    private fun initializeModules(): Array<SwerveModule> =
+        arrayOf<SwerveModule>(
+            SwerveModule(
+                FRONT_LEFT_DRIVE_ID,
+                FRONT_LEFT_STEER_ID,
+                FRONT_LEFT_CAN_CODER_ID,
+                CANCODER_VAL9,
+            ),
+            SwerveModule(
+                FRONT_RIGHT_DRIVE_ID,
+                FRONT_RIGHT_STEER_ID,
+                FRONT_RIGHT_CAN_CODER_ID,
+                CANCODER_VAL10,
+            ),
+            SwerveModule(
+                BACK_LEFT_DRIVE_ID,
+                BACK_LEFT_STEER_ID,
+                BACK_LEFT_CAN_CODER_ID,
+                CANCODER_VAL11,
+            ),
+            SwerveModule(
+                BACK_RIGHT_DRIVE_ID,
+                BACK_RIGHT_STEER_ID,
+                BACK_RIGHT_CAN_CODER_ID,
+                CANCODER_VAL12,
+            ),
+        )
 
-  /**
-   * Updates the robot's position using vision measurements from PhotonVision. This method retrieves
-   * the latest vision results, estimates the robot's pose, updates the standard deviations, and
-   * adds the vision measurement to the pose estimator.
-   */
-  private void updatePos() {
-    if (!photonVision.getResultPairs().isEmpty()) {
-      photonVision
-          .getResultPairs()
-          .forEach(
-              pair -> {
-                EstimatedRobotPose pose =
-                    getEstimatedPose(pair, poseEstimator.getEstimatedPosition());
-                updateStdDev(pair, Optional.ofNullable(pose));
-                updateStdDev3d(pair, Optional.ofNullable(pose));
-                if (pose != null) {
-                  double timestamp = pose.timestampSeconds;
-                  Pose2d visionMeasurement2d = pose.estimatedPose.toPose2d();
-                  Pose3d visionMeasurement3d = pose.estimatedPose;
-                  poseEstimator.addVisionMeasurement(
-                      visionMeasurement2d, timestamp, pair.getFirst().getCurrentStdDevs());
-                  poseEstimator3d.addVisionMeasurement(
-                      visionMeasurement3d, timestamp, pair.getFirst().getCurrentStdDevs3d());
-                  robotPos = poseEstimator.getEstimatedPosition();
+    /**
+     * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEsimator estimates the robot's
+     * position. This is based on a combination of the robot's movement and vision.
+     *
+     * @return SwerveDrivePoseEstimator, A new SwerveDrivePoseEstimator object.
+     */
+    private fun initializePoseEstimator(): SwerveDrivePoseEstimator =
+        SwerveDrivePoseEstimator(
+            kinematics,
+            Rotation2d.fromDegrees(this.heading),
+            this.modulePositions,
+            Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
+            VecBuilder.fill(0.02, 0.02, Units.degreesToRadians(5.0)),
+            VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10.0)),
+        )
+
+    /**
+     * Initializes the SwerveDrivePoseEstimator3d. The SwerveDrivePoseEsimator3d estimates the robot's
+     * position in 3D space. This is based on a combination of the robot's movement and vision.
+     *
+     * @return SwerveDrivePoseEstimator3d, A new SwerveDrivePoseEstimator3d object.
+     */
+    private fun initializePoseEstimator3d(): SwerveDrivePoseEstimator3d =
+        SwerveDrivePoseEstimator3d(
+            kinematics,
+            pidgey.getRotation3d(),
+            this.modulePositions,
+            Pose3d(0.0, 0.0, 0.0, Rotation3d(0.0, 0.0, 0.0)),
+        )
+
+    /**
+     * Initializes the PathPlannerLogging. This allows the PathPlanner to log the robot's current
+     * pose.
+     */
+    private fun initializePathPlannerLogging() {
+        PathPlannerLogging.setLogCurrentPoseCallback { pose: Pose2d? -> field.robotPose = pose }
+        PathPlannerLogging.setLogTargetPoseCallback { pose: Pose2d? ->
+            field.getObject("target pose").pose = pose
+        }
+        PathPlannerLogging.setLogActivePathCallback { poses: MutableList<Pose2d?>? ->
+            field.getObject("path").setPoses(poses)
+        }
+    }
+
+    /**
+     * Configures the AutoBuilder for autonomous driving. READ DOCUMENTATION TO PUT IN CORRECT VALUES
+     * Allows PathPlanner to get pose and output robot-relative chassis speeds Needs tuning
+     */
+    fun configureAutoBuilder() {
+        checkNotNull(PinguParameters.config)
+        AutoBuilder.configure(
+            { this.pose },
+            { pose: Pose2d? -> this.newPose(pose!!) },
+            { this.autoSpeeds },
+            { chassisSpeeds: ChassisSpeeds? -> this.chassisSpeedsDrive(chassisSpeeds) },
+            PPHolonomicDriveController(
+                PIDConstants(7.6, 0.0, 0.0),
+                PIDConstants(10.0, 0.0, 0.0),
+            ),
+            PinguParameters.config,
+            {
+                DriverStation.getAlliance().filter(Predicate { value: Alliance? -> value == Alliance.Red }).isPresent
+            },
+            this,
+        )
+    }
+
+    private fun applySwerveState() {
+        // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
+
+        if (currentState is TeleOpDrive) {
+            stickDrive(aacrn)
+        } else if (currentState is ScoreAlign) {
+            // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
+            val translationToDesiredPoint =
+                desiredPoseForDriveToPoint.translation.minus(this.pose!!.translation)
+            val linearDistance = translationToDesiredPoint.norm
+            var frictionCoefficient = 0.1 // this is a guess
+            if (linearDistance >= Units.inchesToMeters(0.5)) {
+                frictionCoefficient *= MAX_SPEED
+            }
+
+            val directionOfTravel = translationToDesiredPoint.angle
+
+            val velocityOutput: Double =
+                if (DriverStation.isAutonomous()) {
+                    min(
+                        abs(DRIVE_PINGU_AUTO.pidController.calculate(linearDistance, 0.0)) + frictionCoefficient,
+                        maxVelocityOutputForDriveToPoint,
+                    )
+                } else {
+                    min(
+                        abs(DRIVE_PINGU_TELE.pidController.calculate(linearDistance, 0.0)) + frictionCoefficient,
+                        maxVelocityOutputForDriveToPoint,
+                    )
                 }
-              });
+            val xComponent = velocityOutput * directionOfTravel.cos
+            val yComponent = velocityOutput * directionOfTravel.sin
+
+            val currentAngle = this.pose!!.rotation.degrees
+
+            this.setDriveSpeeds(
+                yComponent,
+                xComponent,
+                min(
+                    abs(
+                        ROTATIONAL_PINGU
+                            .profiledPIDController
+                            .calculate(
+                                currentAngle,
+                                desiredPoseForDriveToPoint.rotation.degrees,
+                            ),
+                    ),
+                    MAX_ANGULAR_SPEED,
+                ),
+                false,
+            )
+        }
     }
-  }
 
-  /**
-   * Sets the drive speeds for the swerve modules.3
-   *
-   * @param forwardSpeed The forward speed.
-   * @param leftSpeed The left speed.
-   * @param turnSpeed The turn speed.
-   */
-  public void setDriveSpeeds(double forwardSpeed, double leftSpeed, double turnSpeed) {
-    setDriveSpeeds(forwardSpeed, leftSpeed, turnSpeed, IS_FIELD_ORIENTED);
-  }
-
-  /**
-   * Sets the drive speeds for the swerve modules.
-   *
-   * @param forwardSpeed The forward speed.
-   * @param leftSpeed The left speed.
-   * @param turnSpeed The turn speed.
-   * @param isFieldOriented Whether the robot is field oriented.
-   */
-  public void setDriveSpeeds(
-      double forwardSpeed, double leftSpeed, double turnSpeed, boolean isFieldOriented) {
-    logs(
-        () -> {
-          log("Swerve/Forward speed", forwardSpeed);
-          log("Swerve/Left speed", leftSpeed);
-          log("Swerve/Turn speed", turnSpeed);
-        });
-
-    // Converts to a measure that the robot aktualy understands
-    ChassisSpeeds speeds =
-        isFieldOriented
-            ? fromFieldRelativeSpeeds(forwardSpeed, leftSpeed, turnSpeed, getPidgeyRotation())
-            : new ChassisSpeeds(forwardSpeed, leftSpeed, turnSpeed);
-
-    logs("Swerve/Chassis Speeds", speeds);
-
-    speeds = discretize(speeds, 0.02);
-
-    SwerveModuleState[] newStates = kinematics.toSwerveModuleStates(speeds);
-    desaturateWheelSpeeds(newStates, MAX_SPEED);
-
-    setModuleStates(newStates);
-  }
-
-  /**
-   * Gets the rotation of the Pigeon2 IMU.
-   *
-   * @return Rotation2d, The rotation of the Pigeon2 IMU.
-   */
-  public Rotation2d getPidgeyRotation() {
-    return pidgey.getRotation2d();
-  }
-
-  /**
-   * Gets the heading of the robot.
-   *
-   * @return double, The heading of the robot.
-   */
-  public double getHeading() {
-    return -pidgey.getYaw().getValueAsDouble();
-  }
-
-  /**
-   * Gets the yaw of the Pigeon2 IMU.
-   *
-   * @return double, The yaw of the Pigeon2 IMU.
-   */
-  public double getPidgeyYaw() {
-    return pidgey.getYaw().getValueAsDouble();
-  }
-
-  /** Resets the Pigeon2 IMU. */
-  public void resetPidgey() {
-    //    if (DriverStation.getAlliance().get() == Alliance.Blue) {
-    //      pidgey.setYaw(0.0);
-    //    } else {
-    //      pidgey.setYaw(180.0);
+    //    public void setSwerveState(SwerveRequest request) {
+    //        this.setControl(request);
     //    }
-    // TODO Red side may have a starting angle of 180 instead of 0 for blue side which may mess
-    // stuff up
-    // Check to make sure 180 words or otherwise I can just flip everything
-    // and ignore the flipping of the rotation cause it should be
-    // just a note to future ppl: you should revert x maybe y controls for red side
-    // odometry is seprate from pidgey so path planner should be fine? (it reverts paths
-    // interestingly)
-    pidgey.reset();
-  }
 
-  // om add docs pls
-  public void flipPidgey() {
-    pidgey.setYaw(180.0);
-  }
+    /**
+     * This method is called periodically by the scheduler. It updates the pose estimator and
+     * dashboard values.
+     */
+    override fun periodic() {
+        updatePos()
 
-  /**
-   * Gets the current pose of the robot from the pose estimator.
-   *
-   * @return The current pose of the robot.
-   */
-  public Pose2d getPose() {
-    return poseEstimator.getEstimatedPosition();
-  }
+        /*
+         * Updates the robot position based on movement and rotation from the pidgey and
+         * encoders.
+         */
+        poseEstimator.update(this.pidgeyRotation, this.modulePositions)
+        poseEstimator3d.update(pidgey.getRotation3d(), this.modulePositions)
 
-  /** Resets the pose of the robot to zero. */
-  public void zeroPose() {
-    poseEstimator.resetPosition(
-        fromDegrees(getHeading()), getModulePositions(), new Pose2d(0.0, 0.0, fromDegrees(0.0)));
-  }
+        field.robotPose = poseEstimator.estimatedPosition
+        robotPos = poseEstimator.estimatedPosition
 
-  /**
-   * Sets a new pose for the robot.
-   *
-   * @param pose The new pose.
-   */
-  public void newPose(Pose2d pose) {
-    poseEstimator.resetPosition(getPidgeyRotation(), getModulePositions(), pose);
-    poseEstimator3d.resetPosition(pidgey.getRotation3d(), getModulePositions(), new Pose3d(pose));
-  }
-
-  /**
-   * Gets the chassis speeds for autonomous driving.
-   *
-   * @return ChassisSpeeds, The chassis speeds for autonomous driving.
-   */
-  public ChassisSpeeds getAutoSpeeds() {
-    return kinematics.toChassisSpeeds(getModuleStates());
-  }
-
-  /**
-   * Gets the rotation of the Pigeon2 IMU for PID control.
-   *
-   * @return Rotation2d, The rotation of the Pigeon2 IMU for PID control.
-   */
-  public Rotation2d getRotationPidggy() {
-    return fromDegrees(-pidgey.getRotation2d().getDegrees());
-  }
-
-  /**
-   * Drives the robot using chassis speeds.
-   *
-   * @param chassisSpeeds The chassis speeds.
-   */
-  public void chassisSpeedsDrive(ChassisSpeeds chassisSpeeds) {
-    SwerveModuleState[] newStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-    setModuleStates(newStates);
-  }
-
-  /**
-   * Gets the states of the swerve modules.
-   *
-   * @return SwerveModuleState[], The states of the swerve modules.
-   */
-  public SwerveModuleState[] getModuleStates() {
-    // TODO try returning new states maybe it is calling it too much why is why pp doesnt update
-    SwerveModuleState[] moduleStates = new SwerveModuleState[4];
-    for (int i = 0; i < modules.length; i++) {
-      moduleStates[i] = modules[i].getState();
+        logs {
+            log("Swerve/Pidgey Yaw", this.pidgeyYaw)
+            log("Swerve/Pidgey Heading", this.heading)
+            log("Swerve/Pidgey Rotation", pidgey.pitch.valueAsDouble)
+            log("Swerve/Pidgey Roll", pidgey.roll.valueAsDouble)
+            log("Swerve/Pidgey Rotation2D", pidgey.rotation2d.degrees)
+            log("Swerve/Robot Pose", field.robotPose)
+            log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
+            log("Swerve/Robot Pose 2D extra", robotPos)
+        }
+        applySwerveState()
     }
-    return moduleStates;
-  }
 
-  /**
-   * Gets the states of the swerve modules.
-   *
-   * @return SwerveModuleState[], The states of the swerve modules.
-   */
-  public SwerveModuleState[] getSetModuleStates() {
-    SwerveModuleState[] moduleStates = new SwerveModuleState[4];
-    System.arraycopy(setStates, 0, moduleStates, 0, setStates.length);
-    return moduleStates;
-  }
-
-  /**
-   * Sets the states of the swerve modules.
-   *
-   * @param states The states of the swerve modules.
-   */
-  public void setModuleStates(SwerveModuleState[] states) {
-    setStates = states;
-    for (int i = 0; i < states.length; i++) {
-      modules[i].setState(states[i]);
+    /**
+     * Updates the robot's position using vision measurements from PhotonVision. This method retrieves
+     * the latest vision results, estimates the robot's pose, updates the standard deviations, and
+     * adds the vision measurement to the pose estimator.
+     */
+    private fun updatePos() {
+        if (!photonVision.resultPairs.isEmpty()) {
+            photonVision
+                .resultPairs
+                .forEach { pair: Pair<PhotonModule, PhotonPipelineResult> ->
+                    val pose =
+                        pair.getEstimatedPose(poseEstimator.estimatedPosition)
+                    pair.updateStdDev(Optional.ofNullable<EstimatedRobotPose>(pose))
+                    pair.updateStdDev3d(Optional.ofNullable<EstimatedRobotPose>(pose))
+                    if (pose != null) {
+                        val timestamp = pose.timestampSeconds
+                        val visionMeasurement2d = pose.estimatedPose.toPose2d()
+                        val visionMeasurement3d = pose.estimatedPose
+                        poseEstimator.addVisionMeasurement(
+                            visionMeasurement2d,
+                            timestamp,
+                            pair.first.currentStdDevs,
+                        )
+                        poseEstimator3d.addVisionMeasurement(
+                            visionMeasurement3d,
+                            timestamp,
+                            pair.first.currentStdDevs3d,
+                        )
+                        robotPos = poseEstimator.estimatedPosition
+                    }
+                }
+        }
     }
-  }
 
-  /**
-   * Gets the positions of the swerve modules.
-   *
-   * @return SwerveModulePosition[], The positions of the swerve modules.
-   */
-  public SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] positions = new SwerveModulePosition[states.length];
-    for (int i = 0; i < positions.length; i++) {
-      positions[i] = modules[i].getPosition();
+    /**
+     * Sets the drive speeds for the swerve modules.3
+     *
+     * @param forwardSpeed The forward speed.
+     * @param leftSpeed The left speed.
+     * @param turnSpeed The turn speed.
+     */
+    fun setDriveSpeeds(
+        forwardSpeed: Double,
+        leftSpeed: Double,
+        turnSpeed: Double,
+    ) {
+        setDriveSpeeds(forwardSpeed, leftSpeed, turnSpeed, IS_FIELD_ORIENTED)
     }
-    return positions;
-  }
 
-  /** Stops all swerve modules. */
-  public void stop() {
-    for (SwerveModule module : modules) {
-      module.stop();
+    /**
+     * Sets the drive speeds for the swerve modules.
+     *
+     * @param forwardSpeed The forward speed.
+     * @param leftSpeed The left speed.
+     * @param turnSpeed The turn speed.
+     * @param isFieldOriented Whether the robot is field oriented.
+     */
+    fun setDriveSpeeds(
+        forwardSpeed: Double,
+        leftSpeed: Double,
+        turnSpeed: Double,
+        isFieldOriented: Boolean,
+    ) {
+        logs {
+            log("Swerve/Forward speed", forwardSpeed)
+            log("Swerve/Left speed", leftSpeed)
+            log("Swerve/Turn speed", turnSpeed)
+        }
+
+        // Converts to a measure that the robot aktualy understands
+        var speeds =
+            if (isFieldOriented) {
+                ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed, leftSpeed, turnSpeed, this.pidgeyRotation)
+            } else {
+                ChassisSpeeds(forwardSpeed, leftSpeed, turnSpeed)
+            }
+
+        logs<ChassisSpeeds?>("Swerve/Chassis Speeds", speeds)
+
+        speeds = ChassisSpeeds.discretize(speeds, 0.02)
+
+        val newStates: Array<SwerveModuleState?> = kinematics.toSwerveModuleStates(speeds)
+        SwerveDriveKinematics.desaturateWheelSpeeds(newStates, MAX_SPEED)
+
+        this.moduleStates = newStates
     }
-  }
 
-  /** Sets the PID constants for autonomous driving. */
-  public void setAutoPID() {
-    for (SwerveModule module : modules) {
-      module.setAutoPID();
+    val pidgeyRotation: Rotation2d?
+        /**
+         * Gets the rotation of the Pigeon2 IMU.
+         *
+         * @return Rotation2d, The rotation of the Pigeon2 IMU.
+         */
+        get() = pidgey.rotation2d
+
+    val heading: Double
+        /**
+         * Gets the heading of the robot.
+         *
+         * @return double, The heading of the robot.
+         */
+        get() = -pidgey.yaw.valueAsDouble
+
+    val pidgeyYaw: Double
+        /**
+         * Gets the yaw of the Pigeon2 IMU.
+         *
+         * @return double, The yaw of the Pigeon2 IMU.
+         */
+        get() = pidgey.yaw.valueAsDouble
+
+    /** Resets the Pigeon2 IMU.  */
+    fun resetPidgey() {
+        //    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+        //      pidgey.setYaw(0.0);
+        //    } else {
+        //      pidgey.setYaw(180.0);
+        //    }
+        // TODO Red side may have a starting angle of 180 instead of 0 for blue side which may mess
+        // stuff up
+        // Check to make sure 180 words or otherwise I can just flip everything
+        // and ignore the flipping of the rotation cause it should be
+        // just a note to future ppl: you should revert x maybe y controls for red side
+        // odometry is seprate from pidgey so path planner should be fine? (it reverts paths
+        // interestingly)
+        pidgey.reset()
     }
-  }
 
-  /** Sets the PID constants for teleoperated driving. */
-  public void setTelePID() {
-    for (SwerveModule module : modules) {
-      module.setTelePID();
-      module.applyTelePIDValues();
+    // om add docs pls
+    fun flipPidgey() {
+        pidgey.setYaw(180.0)
     }
-  }
 
-  /** Resets the drive positions of all swerve modules. */
-  public void resetDrive() {
-    for (SwerveModule module : modules) {
-      module.resetDrivePosition();
+    val pose: Pose2d?
+        /**
+         * Gets the current pose of the robot from the pose estimator.
+         *
+         * @return The current pose of the robot.
+         */
+        get() = poseEstimator.estimatedPosition
+
+    /** Resets the pose of the robot to zero.  */
+    fun zeroPose() {
+        poseEstimator.resetPosition(
+            Rotation2d.fromDegrees(this.heading),
+            this.modulePositions,
+            Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
+        )
     }
-  }
 
-  public void updateModuleTelePIDValues() {
-    for (SwerveModule module : modules) {
-      module.updateTelePID();
+    /**
+     * Sets a new pose for the robot.
+     *
+     * @param pose The new pose.
+     */
+    fun newPose(pose: Pose2d) {
+        poseEstimator.resetPosition(this.pidgeyRotation, this.modulePositions, pose)
+        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.modulePositions, Pose3d(pose))
     }
-  }
 
-  public Pose2d getPose2Dfrom3D() {
-    return poseEstimator3d.getEstimatedPosition().toPose2d();
-  }
+    val autoSpeeds: ChassisSpeeds?
+        /**
+         * Gets the chassis speeds for autonomous driving.
+         *
+         * @return ChassisSpeeds, The chassis speeds for autonomous driving.
+         */
+        get() = kinematics.toChassisSpeeds(*this.moduleStates)
 
-  /**
-   * The pose to path find to.
-   *
-   * @return Command, The command to path find to the goal.
-   */
-  public Command pathFindToGoal(Pose2d targetPose) {
-    return AutoBuilder.pathfindToPose(targetPose, constraints);
-  }
+    val rotationPidgey: Rotation2d
+        /**
+         * Gets the rotation of the Pigeon2 IMU for PID control.
+         *
+         * @return [Rotation2d], The rotation of the Pigeon2 IMU for PID control.
+         */
+        get() = Rotation2d.fromDegrees(-pidgey.rotation2d.degrees)
 
-  private static class RobotConfigException extends RuntimeException {
-    public RobotConfigException(String message, Throwable cause) {
-      super(message, cause);
+    /**
+     * Drives the robot using chassis speeds.
+     *
+     * @param chassisSpeeds The chassis speeds.
+     */
+    fun chassisSpeedsDrive(chassisSpeeds: ChassisSpeeds?) {
+        val newStates: Array<SwerveModuleState?> = kinematics.toSwerveModuleStates(chassisSpeeds)
+        this.moduleStates = newStates
     }
-  }
 
-  private void initializationAlignPing() {
-    networkPinguXAutoAlign =
-        new NetworkPingu(
-            new LoggedNetworkNumber("Tuning/Swerve/Align X P", X_PINGU.getP()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align X I", X_PINGU.getI()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.getD()));
+    var moduleStates: Array<SwerveModuleState?>
+        /**
+         * Gets the states of the swerve modules.
+         *
+         * @return SwerveModuleState[], The states of the swerve modules.
+         */
+        get() {
+            // TODO try returning new states maybe it is calling it too much why is why pp doesnt update
+            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
+            for (i in modules.indices) {
+                moduleStates[i] = modules[i].getState()
+            }
+            return moduleStates
+        }
+        /**
+         * Sets the states of the swerve modules.
+         *
+         * @param states The states of the swerve modules.
+         */
+        set(states) {
+            setStates = states
+            for (i in states.indices) {
+                modules[i].setState(states[i]!!)
+            }
+        }
 
-    networkPinguYAutoAlign =
-        new NetworkPingu(
-            new LoggedNetworkNumber("Tuning/Swerve/Align Y P", Y_PINGU.getP()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align Y I", Y_PINGU.getI()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align Y D", Y_PINGU.getD()));
+    val setModuleStates: Array<SwerveModuleState?>
+        /**
+         * Gets the states of the swerve modules.
+         *
+         * @return SwerveModuleState[], The states of the swerve modules.
+         */
+        get() {
+            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
+            System.arraycopy(setStates, 0, moduleStates, 0, setStates.size)
+            return moduleStates
+        }
 
-    networkPinguRotAutoAlign =
-        new NetworkPingu(
-            new LoggedNetworkNumber("Tuning/Swerve/Align Rot P", ROTATIONAL_PINGU.getP()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align Rot I", ROTATIONAL_PINGU.getI()),
-            new LoggedNetworkNumber("Tuning/Swerve/Align Rot D", ROTATIONAL_PINGU.getD()));
-  }
+    val modulePositions: Array<SwerveModulePosition?>
+        /**
+         * Gets the positions of the swerve modules.
+         *
+         * @return SwerveModulePosition[], The positions of the swerve modules.
+         */
+        get() {
+            val positions = arrayOfNulls<SwerveModulePosition>(states.size)
+            for (i in positions.indices) {
+                positions[i] = modules[i].position
+            }
+            return positions
+        }
 
-  /**
-   * Sets the desired pose for the robot to drive to, along with the maximum angular velocity and
-   * direction for scoring.
-   *
-   * @param pose The target pose to drive to.
-   * @param maximumAngularVelocityForDriveToPoint The maximum angular velocity allowed for driving
-   *     to the point.
-   * @param direction The direction for score alignment.
-   */
-  public void setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
-      Pose2d pose, double maximumAngularVelocityForDriveToPoint, Direction direction) {
-    LogPingu.log("Swerve/Driving to scoring pose", pose);
-    this.desiredPoseForDriveToPoint = pose;
-    SuperStructure.INSTANCE.addWantedState(new State.ScoreAlign(direction));
-    this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0);
-    this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint;
-  }
+    /** Stops all swerve modules.  */
+    fun stop() {
+        for (module in modules) {
+            module.stop()
+        }
+    }
 
-  /**
-   * Drives the robot using the Xbox controller's joystick inputs.
-   *
-   * @param controller The XboxController providing joystick input.
-   */
-  public void stickDrive(XboxController controller) {
-    Pair<Double, Double> position = leftStickPosition(controller);
-    double rightX = controller.getRightX();
-    double rotation = (Math.abs(rightX) >= 0.1 ? -rightX * MAX_ANGULAR_SPEED : 0.0) * 0.5;
+    /** Sets the PID constants for autonomous driving.  */
+    fun setAutoPID() {
+        for (module in modules) {
+            module.setAutoPID()
+        }
+    }
 
-    logs(
-        () -> {
-          log("X Joystick", position.getFirst());
-          log("Y Joystick", position.getSecond());
-          log("Rotation", rotation);
-        });
+    /** Sets the PID constants for teleoperated driving.  */
+    fun setTelePID() {
+        for (module in modules) {
+            module.setTelePID()
+            module.applyTelePIDValues()
+        }
+    }
 
-    getInstance().setDriveSpeeds(position.getSecond(), position.getFirst(), rotation);
-  }
+    /** Resets the drive positions of all swerve modules.  */
+    fun resetDrive() {
+        for (module in modules) {
+            module.resetDrivePosition()
+        }
+    }
+
+    fun updateModuleTelePIDValues() {
+        for (module in modules) {
+            module.updateTelePID()
+        }
+    }
+
+    val pose2Dfrom3D: Pose2d?
+        get() = poseEstimator3d.estimatedPosition.toPose2d()
+
+    /**
+     * The pose to path find to.
+     *
+     * @return Command, The command to path find to the goal.
+     */
+    fun pathFindToGoal(targetPose: Pose2d?): Command? = AutoBuilder.pathfindToPose(targetPose, constraints)
+
+    private class RobotConfigException(
+        message: String?,
+        cause: Throwable?,
+    ) : RuntimeException(message, cause)
+
+    private fun initializationAlignPing() {
+        networkPinguXAutoAlign =
+            NetworkPingu(
+                LoggedNetworkNumber("Tuning/Swerve/Align X P", X_PINGU.p),
+                LoggedNetworkNumber("Tuning/Swerve/Align X I", X_PINGU.i),
+                LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.d),
+            )
+
+        networkPinguYAutoAlign =
+            NetworkPingu(
+                LoggedNetworkNumber("Tuning/Swerve/Align Y P", Y_PINGU.p),
+                LoggedNetworkNumber("Tuning/Swerve/Align Y I", Y_PINGU.i),
+                LoggedNetworkNumber("Tuning/Swerve/Align Y D", Y_PINGU.d),
+            )
+
+        networkPinguRotAutoAlign =
+            NetworkPingu(
+                LoggedNetworkNumber("Tuning/Swerve/Align Rot P", ROTATIONAL_PINGU.p),
+                LoggedNetworkNumber("Tuning/Swerve/Align Rot I", ROTATIONAL_PINGU.i),
+                LoggedNetworkNumber("Tuning/Swerve/Align Rot D", ROTATIONAL_PINGU.d),
+            )
+    }
+
+    /**
+     * Sets the desired pose for the robot to drive to, along with the maximum angular velocity and
+     * direction for scoring.
+     *
+     * @param pose The target pose to drive to.
+     * @param maximumAngularVelocityForDriveToPoint The maximum angular velocity allowed for driving
+     * to the point.
+     * @param direction The direction for score alignment.
+     */
+    fun setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
+        pose: Pose2d,
+        maximumAngularVelocityForDriveToPoint: Double,
+        direction: Direction,
+    ) {
+        log("Swerve/Driving to scoring pose", pose)
+        this.desiredPoseForDriveToPoint = pose
+        addWantedState(ScoreAlign(direction))
+        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
+        this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint
+    }
+
+    /**
+     * Drives the robot using the Xbox controller's joystick inputs.
+     *
+     * @param controller The XboxController providing joystick input.
+     */
+    fun stickDrive(controller: XboxController) {
+        val position = controller.leftStickPosition()
+        val rightX = controller.rightX
+        val rotation = (if (abs(rightX) >= 0.1) -rightX * MAX_ANGULAR_SPEED else 0.0) * 0.5
+
+        logs {
+            log("X Joystick", position.first!!)
+            log("Y Joystick", position.second!!)
+            log("Rotation", rotation)
+        }
+
+        setDriveSpeeds(position.second!!, position.first!!, rotation)
+    }
 }
