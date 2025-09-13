@@ -244,13 +244,34 @@ object RobotParameters {
         var isSoftLimitEnabled: Boolean = false
     }
 
-    /** Class containing constants for the CLIMBER subsystem.  */
+    /** Class containing constants for the elevator subsystem.  */
     object ClimberParameters {
-        @JvmField val CLIMBER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+        @JvmField
+        val PIVOT_PINGU: Pingu = Pingu(5.0, 0.0, 0.0, 0.35, 0.5199, 0.42) // g could be 0.42
+
+        // MM ↓
+
+        @JvmField
+        val PIVOT_MAGIC_PINGU = MagicPingu(90.0, 180.0, 0.0)
+
+        const val PIVOT_SOFT_LIMIT_DOWN: Double = 0.0
+
+        const val PIVOT_SOFT_LIMIT_UP: Double = 65.0
+
+        @JvmField
+        var pivotUp: Boolean = true
 
         @JvmField
         var isSoftLimitEnabled: Boolean = false
     }
+
+    /** Class containing constants for the PIVOT subsystem.  */
+//    object ClimberParameters {
+//        @JvmField val PIVOT_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+//
+//        @JvmField
+//        var isSoftLimitEnabled: Boolean = false
+//    }
 
     object AlgaeManipulatorParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)

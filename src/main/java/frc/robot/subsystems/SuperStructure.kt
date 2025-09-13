@@ -10,8 +10,8 @@ import frc.robot.utils.emu.State
 object SuperStructure : SubsystemBase() {
     private val swerve = Swerve.getInstance()
     private val outtake = Outtake.getInstance()
-    private val intake = Intake.getInstance()
-    private val elevator = Elevator.getInstance()
+    private val intake = Intake
+    private val elevator = Elevator
 
     var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
@@ -54,7 +54,7 @@ object SuperStructure : SubsystemBase() {
             currentState =
                 when {
                     Outtake.getInstance().algaeSensor -> State.TeleOpDrive.Algae
-                    Intake.getInstance().coralSensors -> State.TeleOpDrive.Coral
+                    Outtake.getInstance().coralSensor -> State.TeleOpDrive.Coral
                     else -> State.TeleOpDrive.Base
                 }
         }
