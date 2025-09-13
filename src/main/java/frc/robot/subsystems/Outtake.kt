@@ -179,7 +179,7 @@ object Outtake : SubsystemBase() {
     }
 
     /** Stops the algae intake motor.  */
-    private fun stopAlgaeMotor() {
+    fun stopAlgaeMotor() {
         outtakeMotor.stopMotor()
     }
 
@@ -188,10 +188,10 @@ object Outtake : SubsystemBase() {
      * triggered, otherwise sets it to DEFAULT.
      */
     fun checkAlgaeSensor() {
-        if (algaeSensor.get()) {
-            algaeCounter = AlgaeCounter.HOLDING
+        algaeCounter = if (algaeSensor.get()) {
+            AlgaeCounter.HOLDING
         } else {
-            algaeCounter = AlgaeCounter.DEFAULT
+            AlgaeCounter.DEFAULT
         }
     }
 

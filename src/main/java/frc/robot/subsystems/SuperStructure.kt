@@ -59,22 +59,17 @@ object SuperStructure : SubsystemBase() {
     fun applyState() {
         when (val state = currentState) {
             is State.TeleOpDrive -> {
-                swerve.stickDrive(aacrn)
+                Swerve.stickDrive(aacrn)
 
                 when (currentState) {
                     is State.TeleOpDrive -> {
-                        Swerve.getInstance().stickDrive(aacrn)
+                        Swerve.stickDrive(aacrn)
                         when (state) {
-                            is State.TeleOpDrive.Algae -> {
-                                Outtake.).stopIntake()
-                            }(
-                            is State.TeleOpDrive.Coral -> {
-                                Intake.getInstance().stopMotors()
-                            }
-                            else -> { /* no-op */ }
+                            is State.TeleOpDrive.Algae -> {}
+                            is State.TeleOpDrive.Coral -> {}
+                            else -> {}
                         }
                     }
-
                     else -> {}
                 }
             }
@@ -93,7 +88,7 @@ object SuperStructure : SubsystemBase() {
                         // TODO: low algae sequence
                     }
                     is State.Algae.Score -> {
-                        Outtake.getInstance().shootAlgae()
+                        Outtake.shootAlgae()
                         // TODO: algae scoring sequence
                     }
                 }
@@ -102,12 +97,11 @@ object SuperStructure : SubsystemBase() {
             State.Climb -> TODO()
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
-        }
-    }
+        } }
 
     fun driveToScoringPose(dir: Direction) {
         val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
-        swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
+        Swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
     }
 
     fun teleopScoringSequence() {
@@ -123,9 +117,9 @@ object SuperStructure : SubsystemBase() {
     fun cancel() {
         wantedState.clear()
         currentState = State.TeleOpDrive.Base
-        swerve.stop()
-        outtake.stopIntake()
-        intake.stopMotors()
+        Swerve.stop()
+        Outtake.stopAlgaeMotor()
+//        Intake.stopMotors()
     }
 
     override fun periodic() {
@@ -134,5 +128,6 @@ object SuperStructure : SubsystemBase() {
             handleStateTransition()
         }
         applyState()
+
     }
 }
