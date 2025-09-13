@@ -1,248 +1,237 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems
 
-import static frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.*;
-import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.*;
-import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState;
-import static frc.robot.utils.RobotParameters.CoralManipulatorParameters.hasPiece;
-import static frc.robot.utils.RobotParameters.MotorParameters.*;
-import static frc.robot.utils.emu.AlgaeCounter.*;
-import static frc.robot.utils.emu.OuttakeState.*;
-import static xyz.malefic.frc.pingu.LogPingu.log;
-import static xyz.malefic.frc.pingu.LogPingu.logs;
-
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.*;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.RobotParameters.*;
-import frc.robot.utils.emu.AlgaePivotState;
-import xyz.malefic.frc.pingu.AlertPingu;
+import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
+import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters
+import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeCounter
+import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking
+import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaePivotState
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters.hasPiece
+import frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState
+import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_INTAKE_MOTOR_ID
+import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_PIVOT_MOTOR_ID
+import frc.robot.utils.emu.AlgaeCounter
+import frc.robot.utils.emu.AlgaePivotState
+import frc.robot.utils.emu.OuttakeState
+import xyz.malefic.frc.pingu.AlertPingu.add
+import xyz.malefic.frc.pingu.LogPingu.log
+import xyz.malefic.frc.pingu.LogPingu.logs
 
 /**
  * The Outtake class is a subsystem that interfaces with the arm system to provide control
  * over the arm motors. This subsystem is a Singleton, meaning that only one instance of this class
  * is created and shared across the entire robot code.
  */
-public class Outtake extends SubsystemBase {
-  /** Creates a new end effector. */
-  private final TalonFX pivotMotor;
-  private final TalonFX outtakeMotor;
+object Outtake : SubsystemBase() {
+    /** Creates a new end effector.  */
+    private val pivotMotor: TalonFX
+    private val outtakeMotor: TalonFX
 
-  private final VoltageOut voltageOut;
-  private final PositionVoltage voltagePos;
+    private val voltageOut: VoltageOut
+    private val voltagePos: PositionVoltage
 
-  private final DigitalInput coralSensor;
-  private final DigitalInput algaeSensor;
+    private val coralSensor: DigitalInput
+    private val algaeSensor: DigitalInput
 
-  /**
-   * The Singleton instance of this Outtake. Code should use the {@link #getInstance()}
-   * method to get the single instance (rather than trying to construct an instance of this class.)
-   */
-  private static final Outtake INSTANCE = new Outtake();
+    /**
+     * Creates a new instance of this Outtake. This constructor is private since this class is a
+     * Singleton. Code should use the [.getInstance] method to get the singleton instance.
+     */
+    init {
+        pivotMotor = TalonFX(ALGAE_PIVOT_MOTOR_ID)
+        outtakeMotor = TalonFX(ALGAE_INTAKE_MOTOR_ID)
 
-  /**
-   * Returns the Singleton instance of this Outtake. This static method should be used,
-   * rather than the constructor, to get the single instance of this class. For example: {@code
-   * armSubsystem.getInstance();}
-   */
-  @SuppressWarnings("WeakerAccess")
-  public static Outtake getInstance() {
-    return INSTANCE;
-  }
+        coralSensor = DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID)
+        algaeSensor = DigitalInput(CoralManipulatorParameters.ALGAE_SENSOR_ID)
 
-  /**
-   * Creates a new instance of this Outtake. This constructor is private since this class is a
-   * Singleton. Code should use the {@link #getInstance()} method to get the singleton instance.
-   */
-  private Outtake() {
-    pivotMotor = new TalonFX(ALGAE_PIVOT_MOTOR_ID);
-    outtakeMotor = new TalonFX(ALGAE_INTAKE_MOTOR_ID);
+        val algaePivotConfiguration = TalonFXConfiguration()
+        val algaeIntakeConfiguration = TalonFXConfiguration()
 
-    coralSensor = new DigitalInput(CoralManipulatorParameters.CORAL_SENSOR_ID);
-    algaeSensor = new DigitalInput(CoralManipulatorParameters.ALGAE_SENSOR_ID);
+        algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
+        algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
 
-    TalonFXConfiguration algaePivotConfiguration = new TalonFXConfiguration();
-    TalonFXConfiguration algaeIntakeConfiguration = new TalonFXConfiguration();
+        algaePivotConfiguration.Slot0.kP = AlgaeManipulatorParameters.ALGAE_PINGU.p
+        algaePivotConfiguration.Slot0.kI = AlgaeManipulatorParameters.ALGAE_PINGU.i
+        algaePivotConfiguration.Slot0.kD = AlgaeManipulatorParameters.ALGAE_PINGU.d
 
-    algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+        algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
 
-    algaePivotConfiguration.Slot0.kP = AlgaeManipulatorParameters.ALGAE_PINGU.getP();
-    algaePivotConfiguration.Slot0.kI = AlgaeManipulatorParameters.ALGAE_PINGU.getI();
-    algaePivotConfiguration.Slot0.kD = AlgaeManipulatorParameters.ALGAE_PINGU.getD();
+        pivotMotor.getConfigurator().apply(algaePivotConfiguration)
+        outtakeMotor.getConfigurator().apply(algaeIntakeConfiguration)
 
-    algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        algaePivotConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
+        algaePivotConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
+        algaePivotConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
+        algaePivotConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
 
-    pivotMotor.getConfigurator().apply(algaePivotConfiguration);
-    outtakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
+        algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
+        algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
+        algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
+        algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
 
-    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
-    algaePivotConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    algaePivotConfiguration.CurrentLimits.StatorCurrentLimit = 30;
-    algaePivotConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+        algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0
+        algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false
+        algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0
+        algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false
 
-    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimit = 30;
-    algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimit = 30;
-    algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+        pivotMotor.getConfigurator().apply(algaePivotConfiguration)
+        outtakeMotor.getConfigurator().apply(algaeIntakeConfiguration)
 
-    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0;
-    algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
-    algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+        //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
+        // InvertedValue.Clockwise_Positive;
+        //
+        //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
+        // algaeManipulatorMotorSoftLimitConfig;
+        voltageOut = VoltageOut(0.0)
+        voltagePos = PositionVoltage(0.0)
 
-    pivotMotor.getConfigurator().apply(algaePivotConfiguration);
-    outtakeMotor.getConfigurator().apply(algaeIntakeConfiguration);
+        pivotMotor.setPosition(0.0)
 
-    //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
-    // InvertedValue.Clockwise_Positive;
-    //
-    //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
-    // algaeManipulatorMotorSoftLimitConfig;
-
-    voltageOut = new VoltageOut(0);
-    voltagePos = new PositionVoltage(0);
-
-    pivotMotor.setPosition(0);
-
-    AlertPingu.add(pivotMotor, "algae pivot");
-    AlertPingu.add(outtakeMotor, "algae intake");
-  }
-
-  // This method will be called once per scheduler run
-  @Override
-  public void periodic() {
-    setPivotPos(algaePivotState);
-    checkAlgaeSensor();
-    //        setIntakeSpeed(algaePivotState);
-
-    if (!algaeIntaking && !coralScoring) {
-      if (!getCoralSensor() && !hasPiece) {
-        outtakeState = CORAL_INTAKE;
-      } else if (getCoralSensor() && !hasPiece) {
-        // Stop the motors if the manipulator has a piece, but the sensor no longer detects it
-        outtakeState = CORAL_HOLD;
-        setHasPiece(true);
-      } else if (!getAlgaeSensor() && hasPiece) {
-        outtakeState = CORAL_HOLD;
-      } else {
-        outtakeState = STOWED;
-      }
+        add(pivotMotor, "algae pivot")
+        add(outtakeMotor, "algae intake")
     }
 
-      if (getCoralSensor()) {
-          outtakeState = STOWED;
-      } else {
-          outtakeState = CORAL_HOLD;
-      }
+    // This method will be called once per scheduler run
+    override fun periodic() {
+        setPivotPos(algaePivotState)
+        checkAlgaeSensor()
 
-    logs(
-        () -> {
-          log("Algae/Algae Pivot Motor Position", getPivotPosValue());
-          log("Algae/Algae State", algaePivotState.toString());
-          log("Algae/IsAlgaeIntaking", algaeIntaking);
-          log("Algae/Algae counter", algaeCounter.toString());
-          log(
-              "Algae/Disconnected algaeManipulatorMotor " + pivotMotor.getDeviceID(),
-              pivotMotor.isConnected());
-          log(
-              "Algae/Algae Pivot Stator Current",
-              pivotMotor.getStatorCurrent().getValueAsDouble());
-          log(
-              "Algae/Algae Pivot Supply Current",
-              pivotMotor.getSupplyCurrent().getValueAsDouble());
-          log(
-              "Algae/Algae Pivot Stall Current",
-              pivotMotor.getMotorStallCurrent().getValueAsDouble());
-        });
-  }
+        //        setIntakeSpeed(algaePivotState);
+        if (!algaeIntaking && !coralScoring) {
+            if (!getCoralSensor() && !hasPiece) {
+                outtakeState = OuttakeState.CORAL_INTAKE
+            } else if (getCoralSensor() && !hasPiece) {
+                // Stop the motors if the manipulator has a piece, but the sensor no longer detects it
+                outtakeState = OuttakeState.CORAL_HOLD
+                setHasPiece(true)
+            } else if (!getAlgaeSensor() && hasPiece) {
+                outtakeState = OuttakeState.CORAL_HOLD
+            } else {
+                outtakeState = OuttakeState.STOWED
+            }
+        }
 
-  /**
-   * Sets the pivot state *
-   *
-   * @param state the state to set the algae pivot
-   */
-  public void setPivotPos(AlgaePivotState state) {
-    pivotMotor.setControl(voltagePos.withPosition(state.pos));
-  }
+        if (getCoralSensor()) {
+            outtakeState = OuttakeState.STOWED
+        } else {
+            outtakeState = OuttakeState.CORAL_HOLD
+        }
 
-  /**
-   * Get the position of the end effector motor
-   *
-   * @return double, the position of the end effector motor
-   */
-  public double getPivotPosValue() {
-    return pivotMotor.getPosition().getValueAsDouble();
-  }
-
-  /**
-   * Sets the speed of the algae outtake motor.
-   *
-   * @param speed the desired speed to set for the intake motor
-   */
-  public void setOuttakeSpeed(double speed) {
-    voltageOut.Output = speed;
-    outtakeMotor.setControl(voltageOut);
-  }
-
-  /** Stops the algae intake motor. */
-  private void stopAlgaeMotor() {
-    outtakeMotor.stopMotor();
-  }
-
-  /**
-   * Checks the state of the algae sensor. Sets the algaeCounter to HOLDING if the sensor is
-   * triggered, otherwise sets it to DEFAULT.
-   */
-  public void checkAlgaeSensor() {
-    if (algaeSensor.get()) {
-      algaeCounter = HOLDING;
-    } else {
-      algaeCounter = DEFAULT;
+        logs(
+            Runnable {
+                log("Algae/Algae Pivot Motor Position", this.pivotPosValue)
+                log("Algae/Algae State", algaePivotState.toString())
+                log("Algae/IsAlgaeIntaking", algaeIntaking)
+                log("Algae/Algae counter", algaeCounter.toString())
+                log(
+                    "Algae/Disconnected algaeManipulatorMotor " + pivotMotor.getDeviceID(),
+                    pivotMotor.isConnected()
+                )
+                log(
+                    "Algae/Algae Pivot Stator Current",
+                    pivotMotor.getStatorCurrent().getValueAsDouble()
+                )
+                log(
+                    "Algae/Algae Pivot Supply Current",
+                    pivotMotor.getSupplyCurrent().getValueAsDouble()
+                )
+                log(
+                    "Algae/Algae Pivot Stall Current",
+                    pivotMotor.getMotorStallCurrent().getValueAsDouble()
+                )
+            })
     }
-  }
 
-  public void shootAlgae() {
-    setOuttakeSpeed(-30.0);
-  }
+    /**
+     * Sets the pivot state *
+     *
+     * @param state the state to set the algae pivot
+     */
+    fun setPivotPos(state: AlgaePivotState) {
+        pivotMotor.setControl(voltagePos.withPosition(state.pos))
+    }
 
-  /**
-   * Sets the state of whether the manipulator has a piece.
-   *
-   * @param hasPiece true if the manipulator has a piece, false otherwise
-   */
-  public void setHasPiece(boolean hasPiece) {
-    CoralManipulatorParameters.hasPiece = hasPiece;
-  }
+    val pivotPosValue: Double
+        /**
+         * Get the position of the end effector motor
+         *
+         * @return double, the position of the end effector motor
+         */
+        get() = pivotMotor.getPosition().getValueAsDouble()
+
+    /**
+     * Sets the speed of the algae outtake motor.
+     *
+     * @param speed the desired speed to set for the intake motor
+     */
+    fun setOuttakeSpeed(speed: Double) {
+        voltageOut.Output = speed
+        outtakeMotor.setControl(voltageOut)
+    }
+
+    /** Stops the algae intake motor.  */
+    private fun stopAlgaeMotor() {
+        outtakeMotor.stopMotor()
+    }
+
+    /**
+     * Checks the state of the algae sensor. Sets the algaeCounter to HOLDING if the sensor is
+     * triggered, otherwise sets it to DEFAULT.
+     */
+    fun checkAlgaeSensor() {
+        if (algaeSensor.get()) {
+            algaeCounter = AlgaeCounter.HOLDING
+        } else {
+            algaeCounter = AlgaeCounter.DEFAULT
+        }
+    }
+
+    fun shootAlgae() {
+        setOuttakeSpeed(-30.0)
+    }
+
+    /**
+     * Sets the state of whether the manipulator has a piece.
+     *
+     * @param hasPiece true if the manipulator has a piece, false otherwise
+     */
+    fun setHasPiece(hasPiece: Boolean) {
+        CoralManipulatorParameters.hasPiece = hasPiece
+    }
 
     /**
      * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
      * scoring process.
      */
-    public void slowAlgaeScoreMotors() {
-        voltageOut.Output = -3.0;
-        outtakeMotor.setControl(voltageOut);
+    fun slowAlgaeScoreMotors() {
+        voltageOut.Output = -3.0
+        outtakeMotor.setControl(voltageOut)
     }
 
-  /**
-   * Gets the state of the coral sensor
-   *
-   * @return The state of the coral manipulator
-   */
-  public boolean getCoralSensor() {
-    return !coralSensor.get();
-  }
+    /**
+     * Gets the state of the coral sensor
+     *
+     * @return The state of the coral manipulator
+     */
+    fun getCoralSensor(): Boolean {
+        return !coralSensor.get()
+    }
 
-  /**
-   * Gets the state of the algae sensor
-   *
-   * @return The state of the algae sensor
-   */
-  public boolean getAlgaeSensor() {
-    return !algaeSensor.get();
-  }
+    /**
+     * Gets the state of the algae sensor
+     *
+     * @return The state of the algae sensor
+     */
+    fun getAlgaeSensor(): Boolean {
+        return !algaeSensor.get()
+    }
 }

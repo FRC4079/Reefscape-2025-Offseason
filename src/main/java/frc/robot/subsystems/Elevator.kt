@@ -28,7 +28,7 @@ import kotlin.math.abs
  * sets the motor positions, gets the motor positions, stops the motors, and toggles the soft stop
  * for the elevator motor.
  */
-class Elevator private constructor() : SubsystemBase() {
+object Elevator : SubsystemBase() {
     private val elevatorMotorLeft = TalonFX(ELEVATOR_MOTOR_LEFT_ID)
     private val elevatorMotorRight = TalonFX(ELEVATOR_MOTOR_RIGHT_ID)
 
@@ -406,29 +406,13 @@ class Elevator private constructor() : SubsystemBase() {
             elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
         }
     }
-
-    companion object {
-        /**
-         * Returns the Singleton instance of this ElevatorSubsystem. This static method should be used,
-         * rather than the constructor, to get the single instance of this class. For example: `ElevatorSubsystem.getInstance();`
-         */
-        /**
-         * The Singleton instance of this ElevatorSubsystem. Code should use the [.getInstance]
-         * method to get the single instance (rather than trying to construct an instance of this class.)
-         */
-        val instance: Elevator = Elevator()
-
-        fun setElevatorToBeSetState(state: ElevatorState) {
-            elevatorToBeSetState = state
-        }
-
         @JvmStatic
         fun setAlgaeLevel() {
             if (elevatorToBeSetState == ElevatorState.L2) {
-                instance.state = ElevatorState.ALGAE_LOW
+                Elevator.state = ElevatorState.ALGAE_LOW
             } else if (elevatorToBeSetState == ElevatorState.L3) {
-                instance.state = ElevatorState.ALGAE_HIGH
+                Elevator.state = ElevatorState.ALGAE_HIGH
             }
         }
-    }
 }
+

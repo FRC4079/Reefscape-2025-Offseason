@@ -8,11 +8,6 @@ import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
-    private val swerve = Swerve.getInstance()
-    private val outtake = Outtake.getInstance()
-    private val intake = Intake.getInstance()
-    private val elevator = Elevator.getInstance()
-
     var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
@@ -53,8 +48,9 @@ object SuperStructure : SubsystemBase() {
         if (currentState is State.TeleOpDrive) {
             currentState =
                 when {
-                    Outtake.getInstance().algaeSensor -> State.TeleOpDrive.Algae
-                    Intake.getInstance().coralSensors -> State.TeleOpDrive.Coral
+                    //bad logic change later u suck at coding u idiot
+                    Outtake.getAlgaeSensor() -> State.TeleOpDrive.Algae
+                    Outtake.getCoralSensor() -> State.TeleOpDrive.Coral
                     else -> State.TeleOpDrive.Base
                 }
         }
@@ -70,8 +66,8 @@ object SuperStructure : SubsystemBase() {
                         Swerve.getInstance().stickDrive(aacrn)
                         when (state) {
                             is State.TeleOpDrive.Algae -> {
-                                Outtake.getInstance().stopIntake()
-                            }
+                                Outtake.).stopIntake()
+                            }(
                             is State.TeleOpDrive.Coral -> {
                                 Intake.getInstance().stopMotors()
                             }
