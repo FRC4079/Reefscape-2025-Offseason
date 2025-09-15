@@ -1,27 +1,15 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs
-import com.ctre.phoenix6.configs.MotionMagicConfigs
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs
-import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.controls.DutyCycleOut
-import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionDutyCycle
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.configs.*
+import com.ctre.phoenix6.controls.*
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_PINGU
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_SOFT_LIMIT_DOWN
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_SOFT_LIMIT_UP
-import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_MAGIC_PINGU
-import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_PINGU
-import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
 import frc.robot.utils.setPingu
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.pingu.AlertPingu.add
@@ -48,7 +36,6 @@ object Climber : SubsystemBase() {
     private var acc: LoggedNetworkNumber? = null
     private var jerk: LoggedNetworkNumber? = null
     init {
-        val pivotMotorConfigurator = pivotMotor.configurator
         pivotConfigs = TalonFXConfiguration()
         pivotConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
         pivotConfigs.Slot0.kP = PIVOT_PINGU.p
