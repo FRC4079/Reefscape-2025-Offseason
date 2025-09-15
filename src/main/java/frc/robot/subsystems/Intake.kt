@@ -7,7 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.subsystems.Elevator.Companion.setAlgaeLevel
+import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.CORAL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
@@ -19,10 +19,9 @@ import frc.robot.utils.emu.ElevatorState
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.Pingu
 import xyz.malefic.frc.pingu.VoltagePingu.setOutput
 
-class Intake private constructor() : SubsystemBase() {
+object Intake : SubsystemBase() {
     private val wheelFeederMotor: TalonFX
     private val starFeederMotor: TalonFX
 
@@ -165,17 +164,5 @@ class Intake private constructor() : SubsystemBase() {
         Elevator.setElevatorToBeSetState(ElevatorState.DEFAULT)
         stopMotors()
         algaeIntaking = false
-    }
-
-    companion object {
-        /**
-         * Returns the Singleton instance of this IntakeSubsystem. This static method should be used,
-         * rather than the constructor, to get the single instance of this class. For example: `Intake.getInstance();`
-         */
-        /**
-         * The Singleton instance of this IntakeSubsystem. Code should use the [.getInstance]
-         * method to get the single instance (rather than trying to construct an instance of this class.)
-         */
-        val instance: Intake = Intake()
     }
 }

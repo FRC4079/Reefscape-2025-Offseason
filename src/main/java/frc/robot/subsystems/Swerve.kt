@@ -64,8 +64,12 @@ import frc.robot.utils.updateStdDev
 import frc.robot.utils.updateStdDev3d
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
+import org.opencv.photo.Photo
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.targeting.PhotonPipelineResult
+import xyz.malefic.frc.extension.getEstimatedPose
+import xyz.malefic.frc.extension.updateStdDev
+import xyz.malefic.frc.extension.updateStdDev3d
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.NetworkPingu
@@ -83,7 +87,6 @@ object Swerve : SubsystemBase() {
     private val states = arrayOfNulls<SwerveModuleState>(4)
     private var setStates = arrayOfNulls<SwerveModuleState>(4)
     private val modules: Array<SwerveModule>
-    private val photonVision: PhotonVision
 
     // Auto Align Pingu Values
     private var networkPinguXAutoAlign: NetworkPingu? = null
@@ -132,7 +135,6 @@ object Swerve : SubsystemBase() {
         this.maximumAngularVelocityForDriveToPoint = 0.0
         //    configureAutoBuilder();
         initializePathPlannerLogging()
-        photonVision = PhotonVision.getInstance()
 
         //    swerveLoggingThread.start();
         initializationAlignPing()
@@ -332,31 +334,33 @@ object Swerve : SubsystemBase() {
      * adds the vision measurement to the pose estimator.
      */
     private fun updatePos() {
-        if (!photonVision.resultPairs.isEmpty()) {
-            photonVision
-                .resultPairs
-                .forEach { pair: Pair<PhotonModule, PhotonPipelineResult> ->
-                    val pose =
-                        pair.getEstimatedPose(poseEstimator.estimatedPosition)
-                    pair.updateStdDev(Optional.ofNullable<EstimatedRobotPose>(pose))
-                    pair.updateStdDev3d(Optional.ofNullable<EstimatedRobotPose>(pose))
-                    if (pose != null) {
-                        val timestamp = pose.timestampSeconds
-                        val visionMeasurement2d = pose.estimatedPose.toPose2d()
-                        val visionMeasurement3d = pose.estimatedPose
-                        poseEstimator.addVisionMeasurement(
-                            visionMeasurement2d,
-                            timestamp,
-                            pair.first.currentStdDevs,
-                        )
-                        poseEstimator3d.addVisionMeasurement(
-                            visionMeasurement3d,
-                            timestamp,
-                            pair.first.currentStdDevs3d,
-                        )
-                        robotPos = poseEstimator.estimatedPosition
+        PhotonVision.resultPairs?.isEmpty()?.let {
+            if (!it) {
+                PhotonVision
+                    .resultPairs
+                    ?.forEach { pair ->
+                        val pose =
+                            pair.getEstimatedPose(poseEstimator.estimatedPosition)
+                        pair.updateStdDev(Optional.ofNullable<EstimatedRobotPose>(pose))
+                        pair.updateStdDev3d(Optional.ofNullable<EstimatedRobotPose>(pose))
+                        if (pose != null) {
+                            val timestamp = pose.timestampSeconds
+                            val visionMeasurement2d = pose.estimatedPose.toPose2d()
+                            val visionMeasurement3d = pose.estimatedPose
+                            poseEstimator.addVisionMeasurement(
+                                visionMeasurement2d,
+                                timestamp,
+                                pair.first.currentStdDevs,
+                            )
+                            poseEstimator3d.addVisionMeasurement(
+                                visionMeasurement3d,
+                                timestamp,
+                                pair.first.currentStdDevs3d,
+                            )
+                            robotPos = poseEstimator.estimatedPosition
+                        }
                     }
-                }
+            }
         }
     }
 

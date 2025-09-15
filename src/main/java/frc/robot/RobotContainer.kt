@@ -42,7 +42,7 @@ object RobotContainer {
     val calamityCow: XboxController = XboxController(1)
 
     init {
-        Elevator.getInstance().defaultCommand = padElevator(aacrn, calamityCow)
+        Elevator.defaultCommand = padElevator(aacrn, calamityCow)
 
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
@@ -86,10 +86,10 @@ object RobotContainer {
                 setElevatorToBeSetState(DEFAULT)
             }
             press(LEFT_TRIGGER) {
-                Intake.getInstance().intakeAlgae()
+                Intake.intakeAlgae()
             }
             release(LEFT_TRIGGER) {
-                Intake.getInstance().stopIntake()
+                Intake.stopIntake()
             }
             press(Button.RIGHT_TRIGGER) {
                 when (SuperStructure.currentState) {

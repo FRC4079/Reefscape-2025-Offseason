@@ -250,6 +250,13 @@ object Elevator : SubsystemBase() {
             })
     }
 
+    /**
+     * Set elevator to a specific state
+     */
+    fun setElevatorToBeSetState(default: ElevatorState) {
+        elevatorToBeSetState = default
+    }
+
     /** Stops the elevator motors  */
     fun stopMotors() {
         elevatorMotorLeft.stopMotor()

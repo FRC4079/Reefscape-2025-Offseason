@@ -100,7 +100,7 @@ object SuperStructure : SubsystemBase() {
         } }
 
     fun driveToScoringPose(dir: Direction) {
-        val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
+        val poseToDriveTo = getDesiredScorePose(PhotonVision.bestTargetID, dir)
         Swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
     }
 
