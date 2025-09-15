@@ -101,10 +101,10 @@ object Climber : SubsystemBase() {
         applyPivotPIDValues()
     }
     fun applyPivotPIDValues() {
-        // Set the PID values for the left elevator motor configuration
+        // Set the PID values for the left pivot motor configuration
         pivotConfigs.setPingu(PIVOT_PINGU)
 
-        // Set the PID values for the right elevator motor configuration
+        // Set the PID values for the right pivot motor configuration
         pivotConfigs.setPingu(PIVOT_PINGU)
 
         // Update the Motion Magic configurations with the current PID values
@@ -113,35 +113,35 @@ object Climber : SubsystemBase() {
         motionMagicConfigs.MotionMagicAcceleration = acc!!.get()
         motionMagicConfigs.MotionMagicJerk = jerk!!.get()
 
-        // Apply the updated configurations to the left elevator motor
+        // Apply the updated configurations to the left pivot motor
         pivotMotor.configurator.apply(pivotConfigs)
 
-        // Apply the Motion Magic configurations to the left and right elevator motors
+        // Apply the Motion Magic configurations to the left and right pivot motors
         pivotMotor.configurator.apply(motionMagicConfigs)
         pivotMotor.configurator.apply(motionMagicConfigs)
     }
     fun initializeLoggedNetworkPID() {
         pivotP =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator P", pivotConfigs.Slot0.kP)
+            LoggedNetworkNumber("Tuning/pivot/pivot P", pivotConfigs.Slot0.kP)
         pivotI =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator I", pivotConfigs.Slot0.kI)
+            LoggedNetworkNumber("Tuning/pivot/pivot I", pivotConfigs.Slot0.kI)
         pivotD =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator D", pivotConfigs.Slot0.kD)
+            LoggedNetworkNumber("Tuning/pivot/pivot D", pivotConfigs.Slot0.kD)
         pivotV =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator V", pivotConfigs.Slot0.kV)
+            LoggedNetworkNumber("Tuning/pivot/pivot V", pivotConfigs.Slot0.kV)
         pivotS =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator S", pivotConfigs.Slot0.kS)
+            LoggedNetworkNumber("Tuning/pivot/pivot S", pivotConfigs.Slot0.kS)
         pivotG =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator G", pivotConfigs.Slot0.kG)
+            LoggedNetworkNumber("Tuning/pivot/pivot G", pivotConfigs.Slot0.kG)
 
         cruiseV =
             LoggedNetworkNumber(
-                "Tuning/Elevator/MM Cruise Velocity", motionMagicConfigs.MotionMagicCruiseVelocity
+                "Tuning/pivot/MM Cruise Velocity", motionMagicConfigs.MotionMagicCruiseVelocity
             )
         acc =
             LoggedNetworkNumber(
-                "Tuning/Elevator/MM Acceleration", motionMagicConfigs.MotionMagicAcceleration
+                "Tuning/pivot/MM Acceleration", motionMagicConfigs.MotionMagicAcceleration
             )
-        jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", motionMagicConfigs.MotionMagicJerk)
+        jerk = LoggedNetworkNumber("Tuning/pivot/MM Jerk", motionMagicConfigs.MotionMagicJerk)
     }
 }
