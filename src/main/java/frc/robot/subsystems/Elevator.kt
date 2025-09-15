@@ -72,7 +72,6 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-
         val elevatorLeftConfigurator = elevatorMotorLeft.configurator
         val elevatorRightConfigurator = elevatorMotorRight.configurator
 
@@ -358,6 +357,7 @@ object Elevator : SubsystemBase() {
         jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", motionMagicConfigs.MotionMagicJerk)
     }
 
+
     /**
      * Updates the PID values for the elevator motors. This method sets the PID values for the
      * elevator motors and updates the Motion Magic configurations.
@@ -402,6 +402,7 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.configurator.apply(motionMagicConfigs)
         elevatorMotorRight.configurator.apply(motionMagicConfigs)
     }
+
 
     /**
      * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
