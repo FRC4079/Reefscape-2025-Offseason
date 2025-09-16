@@ -62,11 +62,11 @@ object PathPingu {
      * @return The command to move to the closest scoring position.
      */
     fun findClosestScoringPosition(
-        position: Pose2d?,
+        position: Pose2d,
         direction: Direction,
-    ): Pose2d? {
-        val closest = scoringPositionsL4.minByOrNull { position.translation.getDistance(it.first) }
-        return closest?.let { if (direction == Direction.LEFT) it.second else it.third }
+    ): Pose2d {
+        val closest = scoringPositionsL4.minBy { position.translation.getDistance(it.first) }
+        return closest.let { if (direction == Direction.LEFT) it.second else it.third }
     }
 
     /**
@@ -79,10 +79,10 @@ object PathPingu {
      * @return The command to move to the closest scoring position.
      */
     fun findClosestScoringPositionNotL4(
-        position: Pose2d?,
+        position: Pose2d,
         direction: Direction,
-    ): Pose2d? {
-        val closest = scoringPositionsNotL4.minByOrNull { position.translation.getDistance(it.first) }
-        return closest?.let { if (direction == Direction.LEFT) it.second else it.third }
+    ): Pose2d {
+        val closest = scoringPositionsNotL4.minBy { position.translation.getDistance(it.first) }
+        return closest.let { if (direction == Direction.LEFT) it.second else it.third }
     }
 }

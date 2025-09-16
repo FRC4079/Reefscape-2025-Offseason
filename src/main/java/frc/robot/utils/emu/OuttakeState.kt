@@ -1,6 +1,6 @@
 package frc.robot.utils.emu
 
-import frc.robot.subsystems.Intake.getInstance
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Outtake
 
 /**
@@ -12,19 +12,19 @@ enum class OuttakeState(
     @JvmField val block: () -> Unit,
 ) {
     /** Represents the state when the coral manipulator is intaking a coral piece. */
-    CORAL_INTAKE({ getInstance().startCoralIntake() }),
+    CORAL_INTAKE({ Intake.startCoralIntake() }),
 
     /** Represents the state when the coral manipulator is holding a coral piece. */
-    CORAL_HOLD({ getInstance().stopMotors() }),
+    CORAL_HOLD({ Intake.stopMotors() }),
 
     /** Represents the state when the coral manipulator is releasing a coral piece. */
-    CORAL_REVERSE({ getInstance().reverseMotors() }),
+    CORAL_REVERSE({ Intake.reverseMotors() }),
 
     /** Represents the state when the coral manipulator is intaking algae. */
-    ALGAE_INTAKE({ getInstance().intakeAlgae() }),
+    ALGAE_INTAKE({ Intake.intakeAlgae() }),
 
     /** Represents the state when the coral manipulator is holding algae. */
-    ALGAE_HOLD({ Outtake.getInstance().slowAlgaeScoreMotors() }),
+    ALGAE_HOLD({ Outtake.slowAlgaeScoreMotors() }),
 
-    STOWED({ getInstance().stopMotors() }),
+    STOWED({ Outtake.stow() }),
 }

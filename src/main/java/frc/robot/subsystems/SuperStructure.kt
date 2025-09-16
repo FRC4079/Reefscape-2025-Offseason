@@ -8,8 +8,8 @@ import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
-    private val swerve = Swerve.getInstance()
-    private val outtake = Outtake.getInstance()
+    private val swerve = Swerve
+    private val outtake = Outtake
     private val intake = Intake
     private val elevator = Elevator
 
@@ -53,8 +53,8 @@ object SuperStructure : SubsystemBase() {
         if (currentState is State.TeleOpDrive) {
             currentState =
                 when {
-                    Outtake.getInstance().algaeSensor -> State.TeleOpDrive.Algae
-                    Outtake.getInstance().coralSensor -> State.TeleOpDrive.Coral
+                    Outtake.getAlgaeSensor() -> State.TeleOpDrive.Algae
+                    Outtake.getCoralSensor() -> State.TeleOpDrive.Coral
                     else -> State.TeleOpDrive.Base
                 }
         }
@@ -63,17 +63,17 @@ object SuperStructure : SubsystemBase() {
     fun applyState() {
         when (val state = currentState) {
             is State.TeleOpDrive -> {
-                swerve.stickDrive(aacrn)
+                Swerve.stickDrive(aacrn)
 
                 when (currentState) {
                     is State.TeleOpDrive -> {
-                        Swerve.getInstance().stickDrive(aacrn)
+                        Swerve.stickDrive(aacrn)
                         when (state) {
                             is State.TeleOpDrive.Algae -> {
-                                Outtake.getInstance().stopIntake()
+                                Outtake.stopOuttakeMotor()
                             }
                             is State.TeleOpDrive.Coral -> {
-                                Intake.getInstance().stopMotors()
+                                Intake.stopMotors()
                             }
                             else -> { /* no-op */ }
                         }
@@ -97,7 +97,7 @@ object SuperStructure : SubsystemBase() {
                         // TODO: low algae sequence
                     }
                     is State.Algae.Score -> {
-                        Outtake.getInstance().shootAlgae()
+                        Outtake.shootAlgae()
                         // TODO: algae scoring sequence
                     }
                 }
@@ -110,8 +110,8 @@ object SuperStructure : SubsystemBase() {
     }
 
     fun driveToScoringPose(dir: Direction) {
-        val poseToDriveTo = getDesiredScorePose(PhotonVision.getInstance().bestTargetID, dir)
-        swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
+        val poseToDriveTo = getDesiredScorePose(PhotonVision.bestTargetID, dir)
+        Swerve.setDesiredPoseForDriveToPointWithMaximumAngularVelocity(poseToDriveTo, 3.0, dir)
     }
 
     fun teleopScoringSequence() {
@@ -127,9 +127,9 @@ object SuperStructure : SubsystemBase() {
     fun cancel() {
         wantedState.clear()
         currentState = State.TeleOpDrive.Base
-        swerve.stop()
-        outtake.stopIntake()
-        intake.stopMotors()
+        Swerve.stop()
+        Outtake.stopMotors()
+        Intake.stopMotors()
     }
 
     override fun periodic() {

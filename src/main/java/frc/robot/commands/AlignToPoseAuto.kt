@@ -24,7 +24,9 @@ import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.NetworkPingu
 
-class AlignToPoseAuto(private val offsetSide: Direction) : Command() {
+class AlignToPoseAuto(
+    private val offsetSide: Direction,
+) : Command() {
     private val yaw = 0.0
     private val y = 0.0
     private val dist = 0.0
@@ -97,14 +99,14 @@ class AlignToPoseAuto(private val offsetSide: Direction) : Command() {
                     xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
                     yController!!.calculate(currentPose!!.getY(), targetPose!!.getY()),
                     rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
-                    false
+                    false,
                 )
             } else {
                 Swerve.setDriveSpeeds(
                     -xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
                     -yController!!.calculate(currentPose!!.getY(), targetPose!!.getY()),
                     rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
-                    false
+                    false,
                 )
             }
         } else {
@@ -114,43 +116,42 @@ class AlignToPoseAuto(private val offsetSide: Direction) : Command() {
                     xController!!.calculate(currentPose!!.getX()),
                     yController!!.calculate(currentPose!!.getY()),
                     rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
-                    false
+                    false,
                 )
             } else {
                 Swerve.setDriveSpeeds(
                     -xController!!.calculate(currentPose!!.getX()),
                     -yController!!.calculate(currentPose!!.getY()),
                     rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
-                    false
+                    false,
                 )
             }
         }
-        logs(
-            Runnable {
-                log("AlignToPose/Current Pose", currentPose!!)
-                log("AlignToPose/Target Pose", targetPose!!)
-                log("AlignToPose/Rotational Error", rotationalController!!.getPositionError())
-                log("AlignToPose/Y Error", yController!!.getPositionError())
-                log("AlignToPose/X Error ", xController!!.getPositionError())
-                log("AlignToPose/X Set ", xController!!.getSetpoint().position)
-                log("AlignToPose/X Goal ", xController!!.getGoal().position)
-                log("AlignToPose/Rotational Controller Setpoint", rotationalController!!.atSetpoint())
-                log("AlignToPose/Y Controller Setpoint", yController!!.atSetpoint())
-                log("AlignToPose/X Controller Setpoint ", xController!!.atSetpoint())
-                log(
-                    "AlignToPose/X Set Speed ",
-                    xController!!.calculate(currentPose!!.getX(), targetPose!!.getX())
-                )
-                log("AlignToPose/Y Set Speed ", yController!!.calculate(currentPose!!.getY()))
-                log(
-                    "AlignToPose/Rot Set Speed ",
-                    rotationalController!!.calculate(currentPose!!.getRotation().getDegrees())
-                )
-                log("AlignToPose/ X Set Pos", currentPose!!.getX())
-                log("AlignToPose/ Y Set Pos", currentPose!!.getY())
-                log("AlignToPose/ X Target Pos", targetPose!!.getX())
-                log("AlignToPose/ Y Target Pos", targetPose!!.getY())
-            })
+        logs {
+            log("AlignToPose/Current Pose", currentPose!!)
+            log("AlignToPose/Target Pose", targetPose!!)
+            log("AlignToPose/Rotational Error", rotationalController!!.getPositionError())
+            log("AlignToPose/Y Error", yController!!.getPositionError())
+            log("AlignToPose/X Error ", xController!!.getPositionError())
+            log("AlignToPose/X Set ", xController!!.getSetpoint().position)
+            log("AlignToPose/X Goal ", xController!!.getGoal().position)
+            log("AlignToPose/Rotational Controller Setpoint", rotationalController!!.atSetpoint())
+            log("AlignToPose/Y Controller Setpoint", yController!!.atSetpoint())
+            log("AlignToPose/X Controller Setpoint ", xController!!.atSetpoint())
+            log(
+                "AlignToPose/X Set Speed ",
+                xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
+            )
+            log("AlignToPose/Y Set Speed ", yController!!.calculate(currentPose!!.getY()))
+            log(
+                "AlignToPose/Rot Set Speed ",
+                rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+            )
+            log("AlignToPose/ X Set Pos", currentPose!!.getX())
+            log("AlignToPose/ Y Set Pos", currentPose!!.getY())
+            log("AlignToPose/ X Target Pos", targetPose!!.getX())
+            log("AlignToPose/ Y Target Pos", targetPose!!.getY())
+        }
     }
 
     /**
@@ -166,8 +167,8 @@ class AlignToPoseAuto(private val offsetSide: Direction) : Command() {
      * @return whether this command has finished.
      */
     override fun isFinished(): Boolean {
-        if ((rotationalController!!.atSetpoint() && yController!!.atSetpoint() && xController!!.atSetpoint())
-            || visionDead
+        if ((rotationalController!!.atSetpoint() && yController!!.atSetpoint() && xController!!.atSetpoint()) ||
+            visionDead
         ) {
             timer!!.start()
         } else {

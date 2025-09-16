@@ -239,7 +239,7 @@ object Kommand {
     @JvmStatic
     fun moveToClosestCoralScore(
         direction: Direction,
-        pose: Pose2d?,
+        pose: Pose2d,
     ) = findClosestScoringPosition(pose, direction)
 
     /**
@@ -252,7 +252,7 @@ object Kommand {
     @JvmStatic
     fun moveToClosestCoralScoreNotL4(
         direction: Direction,
-        pose: Pose2d?,
+        pose: Pose2d,
     ) = findClosestScoringPositionNotL4(pose, direction)
 
     /**

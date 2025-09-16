@@ -21,7 +21,6 @@ import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.Pingu.*
 import xyz.malefic.frc.pingu.VoltagePingu.setOutput
 
 object Wrist : SubsystemBase() {
@@ -129,7 +128,7 @@ object Wrist : SubsystemBase() {
             } else if (getCoralSensor() && !hasPiece) {
                 // Stop the motors if the manipulator has a piece, but the sensor no longer
                 // detects it
-                outtakeState = OuttakeState.CORAL_HOLD// CORAL_SLOW
+                outtakeState = OuttakeState.CORAL_HOLD // CORAL_SLOW
                 setHasPiece(true)
             } else if (!getCoralSensor() && hasPiece) {
                 outtakeState = OuttakeState.CORAL_HOLD
@@ -138,14 +137,13 @@ object Wrist : SubsystemBase() {
             }
         }
 
-        logs(
-            Runnable {
-                log("Coral/Coral Sensor", getCoralSensor())
-                log("Coral/Has Piece", hasPiece)
-                log("Coral/Coral Scoring", coralScoring)
-                log("Coral/motorsRunning", this.motorsRunning)
-                log("Coral/Coral State", outtakeState.toString())
-            })
+        logs {
+            log("Coral/Coral Sensor", getCoralSensor())
+            log("Coral/Has Piece", hasPiece)
+            log("Coral/Coral Scoring", coralScoring)
+            log("Coral/motorsRunning", this.motorsRunning)
+            log("Coral/Coral State", outtakeState.toString())
+        }
 
         outtakeState.block.invoke()
     }
@@ -230,7 +228,5 @@ object Wrist : SubsystemBase() {
      *
      * @return The state of the coral manipulator
      */
-    fun getCoralSensor(): Boolean {
-        return !coralSensor.get()
-    }
+    fun getCoralSensor(): Boolean = !coralSensor.get()
 }

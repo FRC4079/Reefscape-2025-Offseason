@@ -9,7 +9,6 @@ import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.PhotonVisionConstants.CAMERA_ONE_HEIGHT_METER
 import frc.robot.utils.getDecentResultPairs
-import frc.robot.utils.hasTargets
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
 import xyz.malefic.frc.extension.hasTargets
@@ -56,7 +55,7 @@ object PhotonVision : SubsystemBase() {
     var bestTargetID: Int = 0
         private set
     private var logCount = 0
-    var resultPairs: MutableList<Pair<PhotonModule?, PhotonPipelineResult?>>?
+    var resultPairs: MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
         private set
 
     /**
@@ -64,18 +63,16 @@ object PhotonVision : SubsystemBase() {
      * class is a Singleton. Code should use the [.getInstance] method to get the singleton
      * instance.
      */
-    // x = 9.5
-    // y = 12
     init {
         cameras.add(
             PhotonModule(
                 "RightCamera",
                 Transform3d(
                     Translation3d(0.27305, -0.2985, CAMERA_ONE_HEIGHT_METER),
-                    Rotation3d(0.0, Math.toRadians(-25.0), Math.toRadians(45.0))
+                    Rotation3d(0.0, Math.toRadians(-25.0), Math.toRadians(45.0)),
                 ),
-                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded)
-            )
+                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
+            ),
         )
         // well calibrated camera is left camera
         cameras.add(
@@ -83,13 +80,13 @@ object PhotonVision : SubsystemBase() {
                 "LeftCamera",
                 Transform3d(
                     Translation3d(0.27305, 0.2985, CAMERA_ONE_HEIGHT_METER),
-                    Rotation3d(0.0, Math.toRadians(-25.0), Math.toRadians(-45.0))
+                    Rotation3d(0.0, Math.toRadians(-25.0), Math.toRadians(-45.0)),
                 ),
-                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded)
-            )
+                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
+            ),
         )
 
-        this.resultPairs = ArrayList<Pair<PhotonModule?, PhotonPipelineResult?>>()
+        this.resultPairs = ArrayList<Pair<PhotonModule, PhotonPipelineResult>>()
 
         PortForwarder.add(5800, "photonvision.local", 5800)
     }
@@ -99,23 +96,20 @@ object PhotonVision : SubsystemBase() {
      * selects the best camera based on pose ambiguity, and updates logged information.
      */
     override fun periodic() {
-        this.resultPairs = cameras.getDecentResultPairs() as MutableList<Pair<PhotonModule?, PhotonPipelineResult?>>?
+        this.resultPairs = cameras.getDecentResultPairs() as MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
 
-        logs(
-            Runnable {
-                log("Photonvision/Does any camera exist", cameras.get(0) != null)
-                log("Photonvision/Does any result pair exist", this.resultPairs != null)
-                log("Photonvision/Has tag", hasTag())
-                log("Photonvision/resultCamera List length", resultPairs!!.size)
-                if (this.resultPairs != null) {
-                    log("Photonvision/Result pairs have targets", resultPairs.hasTargets())
-                }
-            })
+        logs {
+            log("Photonvision/Does any camera exist", cameras.isNotEmpty())
+            log("Photonvision/Does any result pair exist", this.resultPairs != null)
+            log("Photonvision/Has tag", hasTag())
+            log("Photonvision/resultCamera List length", resultPairs!!.size)
+            this.resultPairs?.let { log("Photonvision/Result pairs have targets", resultPairs!!.hasTargets()) }
+        }
 
         if (this.resultPairs != null) {
             logs("Photonvision/Best Target list is empty", resultPairs!!.isEmpty())
 
-            if (!resultPairs!!.isEmpty()) {
+            if (resultPairs!!.isNotEmpty()) {
                 logCount++
                 logs("Photonvision/Best Target updated counter", logCount)
                 val bestTarget = resultPairs!!.get(0).second!!.getBestTarget()
@@ -123,8 +117,8 @@ object PhotonVision : SubsystemBase() {
 
                 if (bestTarget != null) {
                     yaw = bestTarget.getYaw()
-                    y = bestTarget.getBestCameraToTarget().getX()
-                    dist = bestTarget.getBestCameraToTarget().getZ()
+                    y = bestTarget.getBestCameraToTarget().x
+                    dist = bestTarget.getBestCameraToTarget().z
                     this.bestTargetID = bestTarget.getFiducialId()
                 }
 
@@ -146,11 +140,10 @@ object PhotonVision : SubsystemBase() {
     fun hasTag(): Boolean {
         logs("Photonvision/currentResultPair not null", this.resultPairs != null)
 
-        if (this.resultPairs != null) {
-            logs("Photonvision/hasTargets currentResultPair", resultPairs.hasTargets())
-        }
-
-        return this.resultPairs != null && resultPairs.hasTargets()
+        return this.resultPairs?.let {
+            logs("Photonvision/hasTargets currentResultPair", resultPairs!!.hasTargets())
+            return@let this.resultPairs != null && resultPairs!!.hasTargets()
+        } ?: false
     }
 
     fun requestCamera(cameraName: String?): PhotonCamera? {
@@ -173,8 +166,11 @@ object PhotonVision : SubsystemBase() {
 
     fun fetchDist(camera: PhotonCamera?): Double {
         for (pair in this.resultPairs!!) {
-            if (pair.first!!.camera == camera) {
-                return pair.second!!.getBestTarget().getBestCameraToTarget().getX()
+            if (pair.first.camera == camera) {
+                return pair.second
+                    .getBestTarget()
+                    .getBestCameraToTarget()
+                    .x
             }
         }
         return 0.0
@@ -182,8 +178,11 @@ object PhotonVision : SubsystemBase() {
 
     fun fetchY(camera: PhotonCamera?): Double {
         for (pair in this.resultPairs!!) {
-            if (pair.first!!.camera == camera) {
-                return pair.second!!.getBestTarget().getBestCameraToTarget().getY()
+            if (pair.first.camera == camera) {
+                return pair.second
+                    .getBestTarget()
+                    .getBestCameraToTarget()
+                    .y
             }
         }
         return 7157.0
@@ -194,12 +193,13 @@ object PhotonVision : SubsystemBase() {
      * standard deviations and logs the normF value of the standard deviations for each camera.
      */
     fun logStdDev() {
-        cameras.stream()
+        cameras
+            .stream()
             .filter { camera: PhotonModule? -> camera!!.currentStdDevs != null }
             .forEach { camera: PhotonModule? ->
                 logs(
                     "Photonvision/Camera %s Std Dev NormF".toString(),
-                    camera?.currentStdDevs!!.normF()
+                    camera?.currentStdDevs!!.normF(),
                 )
             }
     }

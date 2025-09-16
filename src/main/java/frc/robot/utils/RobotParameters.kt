@@ -23,8 +23,8 @@ import edu.wpi.first.units.measure.Distance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
 import frc.robot.utils.emu.AlgaeCounter
-import frc.robot.utils.emu.AlgaePivotState
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.pingu.LogPingu.metaLogs
 import xyz.malefic.frc.pingu.MagicPingu
@@ -265,14 +265,6 @@ object RobotParameters {
         var isSoftLimitEnabled: Boolean = false
     }
 
-    /** Class containing constants for the PIVOT subsystem.  */
-//    object ClimberParameters {
-//        @JvmField val PIVOT_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
-//
-//        @JvmField
-//        var isSoftLimitEnabled: Boolean = false
-//    }
-
     object AlgaeManipulatorParameters {
         @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
@@ -280,7 +272,7 @@ object RobotParameters {
         var isSoftLimitEnabled: Boolean = false
 
         @JvmField
-        var algaePivotState: AlgaePivotState = AlgaePivotState.UP
+        var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
 
         @JvmField
         var algaeIntaking: Boolean = false

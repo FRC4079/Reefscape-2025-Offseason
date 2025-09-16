@@ -1,7 +1,15 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.*
-import com.ctre.phoenix6.controls.*
+import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs
+import com.ctre.phoenix6.configs.MotionMagicConfigs
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs
+import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.DutyCycleOut
+import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionDutyCycle
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
+import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -55,11 +63,10 @@ object Elevator : SubsystemBase() {
     private var motionMagicConfigs: MotionMagicConfigs
 
     /**
-     * Get the state of the elevator motor
+     * The state of the elevator
      *
-     * @return ElevatorState, the state of the elevator motor
+     * @return [ElevatorState], the state of the elevator
      */
-    /** Sets the elevator state  */
     var state: ElevatorState = ElevatorState.DEFAULT
 
     private val motionMagicVoltage: MotionMagicVoltage
@@ -198,55 +205,54 @@ object Elevator : SubsystemBase() {
         //    elevatorSetState = currentState;
         setElevatorPosition(this.state)
 
-        logs(
-            Runnable {
-                log(
-                    "Elevator/Elevator Left Position",
-                    elevatorMotorLeft.position.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Right Position",
-                    elevatorMotorRight.position.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Left Set Speed",
-                    elevatorMotorLeft.velocity.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Right Set Speed",
-                    elevatorMotorRight.velocity.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Left Acceleration",
-                    elevatorMotorLeft.acceleration.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Right Acceleration",
-                    elevatorMotorRight.acceleration.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Supply Voltage",
-                    elevatorMotorLeft.supplyVoltage.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Motor Voltage",
-                    elevatorMotorLeft.motorVoltage.valueAsDouble
-                )
-                log("Elevator/Elevator State", state.toString())
-                log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
-                log(
-                    "Elevator/Elevator Stator Current",
-                    elevatorMotorLeft.statorCurrent.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Supply Current",
-                    elevatorMotorLeft.supplyCurrent.valueAsDouble
-                )
-                log(
-                    "Elevator/Elevator Stall Current",
-                    elevatorMotorLeft.motorStallCurrent.valueAsDouble
-                )
-            })
+        logs {
+            log(
+                "Elevator/Elevator Left Position",
+                elevatorMotorLeft.position.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Right Position",
+                elevatorMotorRight.position.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Left Set Speed",
+                elevatorMotorLeft.velocity.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Right Set Speed",
+                elevatorMotorRight.velocity.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Left Acceleration",
+                elevatorMotorLeft.acceleration.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Right Acceleration",
+                elevatorMotorRight.acceleration.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Supply Voltage",
+                elevatorMotorLeft.supplyVoltage.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Motor Voltage",
+                elevatorMotorLeft.motorVoltage.valueAsDouble,
+            )
+            log("Elevator/Elevator State", state.toString())
+            log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
+            log(
+                "Elevator/Elevator Stator Current",
+                elevatorMotorLeft.statorCurrent.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Supply Current",
+                elevatorMotorLeft.supplyCurrent.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Stall Current",
+                elevatorMotorLeft.motorStallCurrent.valueAsDouble,
+            )
+        }
     }
 
     /**
@@ -272,12 +278,11 @@ object Elevator : SubsystemBase() {
      * @return double, the position of the elevator motor and -1.0 if the motor is not "left" or
      * "right"
      */
-    fun getElevatorPosValue(motor: ElevatorMotor): Double {
-        return when (motor) {
+    fun getElevatorPosValue(motor: ElevatorMotor): Double =
+        when (motor) {
             ElevatorMotor.LEFT -> elevatorMotorLeft.position.valueAsDouble
             ElevatorMotor.RIGHT -> elevatorMotorRight.position.valueAsDouble
         }
-    }
 
     val elevatorPosAvg: Double
         /**
@@ -348,15 +353,16 @@ object Elevator : SubsystemBase() {
 
         cruiseV =
             LoggedNetworkNumber(
-                "Tuning/Elevator/MM Cruise Velocity", motionMagicConfigs.MotionMagicCruiseVelocity
+                "Tuning/Elevator/MM Cruise Velocity",
+                motionMagicConfigs.MotionMagicCruiseVelocity,
             )
         acc =
             LoggedNetworkNumber(
-                "Tuning/Elevator/MM Acceleration", motionMagicConfigs.MotionMagicAcceleration
+                "Tuning/Elevator/MM Acceleration",
+                motionMagicConfigs.MotionMagicAcceleration,
             )
         jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", motionMagicConfigs.MotionMagicJerk)
     }
-
 
     /**
      * Updates the PID values for the elevator motors. This method sets the PID values for the
@@ -403,7 +409,6 @@ object Elevator : SubsystemBase() {
         elevatorMotorRight.configurator.apply(motionMagicConfigs)
     }
 
-
     /**
      * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
      * until it stalls.
@@ -414,13 +419,13 @@ object Elevator : SubsystemBase() {
             elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
         }
     }
-        @JvmStatic
-        fun setAlgaeLevel() {
-            if (elevatorToBeSetState == ElevatorState.L2) {
-                Elevator.state = ElevatorState.ALGAE_LOW
-            } else if (elevatorToBeSetState == ElevatorState.L3) {
-                Elevator.state = ElevatorState.ALGAE_HIGH
-            }
-        }
-}
 
+    @JvmStatic
+    fun setAlgaeLevel() {
+        if (elevatorToBeSetState == ElevatorState.L2) {
+            Elevator.state = ElevatorState.ALGAE_LOW
+        } else if (elevatorToBeSetState == ElevatorState.L3) {
+            Elevator.state = ElevatorState.ALGAE_HIGH
+        }
+    }
+}

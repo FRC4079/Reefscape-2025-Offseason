@@ -13,21 +13,10 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.LEDState
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
-import kotlin.Double
-import java.util.*
-import kotlin.Int
-import kotlin.IntArray
-import kotlin.collections.ArrayList
-import kotlin.collections.indices
-import kotlin.collections.plus
-import kotlin.collections.plusAssign
-import kotlin.div
+import java.util.Random
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.plus
-import kotlin.sequences.plus
-import kotlin.times
 
 class LED private constructor() : SubsystemBase() {
     // LED Hardware Components
@@ -59,8 +48,8 @@ class LED private constructor() : SubsystemBase() {
 
         robonautLEDTimer.start()
 
-        for (i in 0..<laser_count) {
-            laserPositions.add(-i * spacing)
+        for (i in 0..<LASER_COUNT) {
+            laserPositions.add(-i * SPACING)
         }
     }
 
@@ -115,17 +104,20 @@ class LED private constructor() : SubsystemBase() {
      * @param g (Green) Integer values between 0 - 255
      * @param b (Blue) Integer values between 0 - 255
      */
-    fun setRGB(r: Int, g: Int, b: Int) {
+    fun setRGB(
+        r: Int,
+        g: Int,
+        b: Int,
+    ) {
         for (i in 0..<ledBuffer.length) {
             ledBuffer.setRGB(i, r, g, b)
         }
-        logs(
-            Runnable {
-                log("LED Length", ledBuffer.length)
-                log("LED Color Blue", ledBuffer.getLED(0).blue)
-                log("LED Color Red", ledBuffer.getLED(0).red)
-                log("LED Color Green", ledBuffer.getLED(0).green)
-            })
+        logs {
+            log("LED Length", ledBuffer.length)
+            log("LED Color Blue", ledBuffer.getLED(0).blue)
+            log("LED Color Red", ledBuffer.getLED(0).red)
+            log("LED Color Green", ledBuffer.getLED(0).green)
+        }
         leds.setData(ledBuffer)
     }
 
@@ -136,7 +128,11 @@ class LED private constructor() : SubsystemBase() {
      * @param s (Saturation) Integer values between 0 - 255
      * @param v (Value) Integer values between 0 - 255
      */
-    fun rainbowHSV(h: Int, s: Int, v: Int) {
+    fun rainbowHSV(
+        h: Int,
+        s: Int,
+        v: Int,
+    ) {
         for (i in 0..<ledBuffer.length) {
             ledBuffer.setHSV(i, h, s, v)
         }
@@ -281,7 +277,7 @@ class LED private constructor() : SubsystemBase() {
             laserPositions[i] = pos + 2
 
             if (laserPositions[i]!! >= ledBuffer.length) {
-                laserPositions[i] = -rand.nextInt(spacing)
+                laserPositions[i] = -rand.nextInt(SPACING)
             }
         }
         leds.setData(ledBuffer)
@@ -297,7 +293,10 @@ class LED private constructor() : SubsystemBase() {
      * @param cycleDuration The duration of the wave cycle
      */
     fun createWave(
-        startColor: Color, endColor: Color, wavelength: Double, cycleDuration: Double
+        startColor: Color,
+        endColor: Color,
+        wavelength: Double,
+        cycleDuration: Double,
     ) {
         var phase =
             (1 - ((Timer.getFPGATimestamp() % cycleDuration) / cycleDuration)) * 2.0 * Math.PI
@@ -380,16 +379,11 @@ class LED private constructor() : SubsystemBase() {
 
     companion object {
         // Laser Effect Properties
-        private const val laser_count = 10
-        private const val spacing = 5
+        private const val LASER_COUNT = 10
+        private const val SPACING = 5
         /**
          * Returns the Singleton instance of this LEDSubsystem. This static method should be used, rather
          * than the constructor, to get the single instance of this class. For example: `LEDSubsystem.getInstance();`
          */
-        /**
-         * The Singleton instance of this LEDSubsystem. Code should use the [.getInstance] method
-         * to get the single instance (rather than trying to construct an instance of this class.)
-         */
-        val instance: LED = LED()
     }
 }

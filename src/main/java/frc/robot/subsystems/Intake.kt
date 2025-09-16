@@ -95,13 +95,12 @@ object Intake : SubsystemBase() {
         wheelFeederMotor.setControl(voltageOutFeeder)
         starFeederMotor.setControl(voltageOutFeeder)
 
-        logs(
-            Runnable {
-                log("Coral/Has Piece", hasPiece)
-                log("Coral/Coral Scoring", coralScoring)
-                log("Coral/motorsRunning", motorsRunning)
-                log("Coral/Coral State", outtakeState.toString())
-            })
+        logs {
+            log("Coral/Has Piece", hasPiece)
+            log("Coral/Coral Scoring", coralScoring)
+            log("Coral/motorsRunning", motorsRunning)
+            log("Coral/Coral State", outtakeState.toString())
+        }
 
         outtakeState.block.invoke()
     }

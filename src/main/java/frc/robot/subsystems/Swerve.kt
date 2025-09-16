@@ -58,22 +58,16 @@ import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.IS_FIELD_ORIE
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State.ScoreAlign
 import frc.robot.utils.emu.State.TeleOpDrive
-import frc.robot.utils.getEstimatedPose
 import frc.robot.utils.leftStickPosition
-import frc.robot.utils.updateStdDev
-import frc.robot.utils.updateStdDev3d
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
-import org.opencv.photo.Photo
 import org.photonvision.EstimatedRobotPose
-import org.photonvision.targeting.PhotonPipelineResult
 import xyz.malefic.frc.extension.getEstimatedPose
 import xyz.malefic.frc.extension.updateStdDev
 import xyz.malefic.frc.extension.updateStdDev3d
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.NetworkPingu
-import xyz.malefic.frc.sub.PhotonModule
 import java.util.Optional
 import java.util.function.Predicate
 import kotlin.math.abs
@@ -530,6 +524,7 @@ object Swerve : SubsystemBase() {
             }
             return moduleStates
         }
+
         /**
          * Sets the states of the swerve modules.
          *
@@ -603,7 +598,7 @@ object Swerve : SubsystemBase() {
         }
     }
 
-    val pose2Dfrom3D: Pose2d?
+    val pose2Dfrom3D: Pose2d
         get() = poseEstimator3d.estimatedPosition.toPose2d()
 
     /**
@@ -612,11 +607,6 @@ object Swerve : SubsystemBase() {
      * @return Command, The command to path find to the goal.
      */
     fun pathFindToGoal(targetPose: Pose2d?): Command? = AutoBuilder.pathfindToPose(targetPose, constraints)
-
-    private class RobotConfigException(
-        message: String?,
-        cause: Throwable?,
-    ) : RuntimeException(message, cause)
 
     private fun initializationAlignPing() {
         networkPinguXAutoAlign =
