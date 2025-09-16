@@ -15,18 +15,10 @@ import frc.robot.utils.RobotParameters.OuttakeParameters
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
-import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
-import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
-import frc.robot.utils.emu.OuttakeState.ALGAE_HOLD
-import frc.robot.utils.emu.OuttakeState.ALGAE_SHOOT
-import frc.robot.utils.emu.OuttakeState.CORAL_HOLD
-import frc.robot.utils.emu.OuttakeState.CORAL_REVERSE
-import frc.robot.utils.emu.OuttakeState.CORAL_SHOOT
-import frc.robot.utils.emu.OuttakeState.STOWED
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -103,7 +95,7 @@ object Outtake : SubsystemBase() {
 
     // This method will be called once per scheduler run
     override fun periodic() {
-        outtakeState.block()
+        outtakeState.block(this)
 
         setPivotPos(outtakePivotState)
 

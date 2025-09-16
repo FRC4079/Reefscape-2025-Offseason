@@ -8,23 +8,25 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionDutyCycle
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
+import edu.wpi.first.wpilibj.motorcontrol.PWMTalonSRX
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_PINGU
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_SOFT_LIMIT_DOWN
 import frc.robot.utils.RobotParameters.ClimberParameters.PIVOT_SOFT_LIMIT_UP
-import frc.robot.utils.setPingu
+import frc.robot.utils.emu.ClimberPivotState
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.pingu.AlertPingu.add
 
 object Climber : SubsystemBase() {
     private val pivotMotor = TalonFX(0)
-    private val pivotConfigs: TalonFXConfiguration
+    private val pivotConfigs: TalonFXConfiguration = TalonFXConfiguration()
     private val pivotSoftLimitConfig: SoftwareLimitSwitchConfigs
     private val posRequest: PositionDutyCycle
     private val velocityRequest: VelocityTorqueCurrentFOC
@@ -32,7 +34,7 @@ object Climber : SubsystemBase() {
     private val motionMagicVoltage: MotionMagicVoltage
     private val cycleOut: DutyCycleOut
     private var motionMagicConfigs: MotionMagicConfigs
-
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
     private var pivotP: LoggedNetworkNumber? = null
     private var pivotI: LoggedNetworkNumber? = null
     private var pivotD: LoggedNetworkNumber? = null
@@ -43,8 +45,9 @@ object Climber : SubsystemBase() {
     private var acc: LoggedNetworkNumber? = null
     private var jerk: LoggedNetworkNumber? = null
 
+    private var clampMotor: PWMTalonSRX = PWMTalonSRX(0)
+
     init {
-        pivotConfigs = TalonFXConfiguration()
         pivotConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
         pivotConfigs.Slot0.kP = PIVOT_PINGU.p
         pivotConfigs.Slot0.kI = PIVOT_PINGU.i
@@ -93,43 +96,6 @@ object Climber : SubsystemBase() {
         add(pivotMotor, "ClimberPivot")
         initializeLoggedNetworkPID()
     }
-
-    fun updatePivotPID() {
-        PIVOT_PINGU.setP(pivotP!!)
-        PIVOT_PINGU.setI(pivotI!!)
-        PIVOT_PINGU.setD(pivotD!!)
-        PIVOT_PINGU.setV(pivotV!!)
-        PIVOT_PINGU.setS(pivotS!!)
-        PIVOT_PINGU.setG(pivotG!!)
-
-        PIVOT_MAGIC_PINGU.setVelocity(cruiseV!!)
-        PIVOT_MAGIC_PINGU.setAcceleration(acc!!)
-        PIVOT_MAGIC_PINGU.setJerk(jerk!!)
-
-        applyPivotPIDValues()
-    }
-
-    fun applyPivotPIDValues() {
-        // Set the PID values for the left pivot motor configuration
-        pivotConfigs.setPingu(PIVOT_PINGU)
-
-        // Set the PID values for the right pivot motor configuration
-        pivotConfigs.setPingu(PIVOT_PINGU)
-
-        // Update the Motion Magic configurations with the current PID values
-        motionMagicConfigs = pivotConfigs.MotionMagic
-        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV!!.get()
-        motionMagicConfigs.MotionMagicAcceleration = acc!!.get()
-        motionMagicConfigs.MotionMagicJerk = jerk!!.get()
-
-        // Apply the updated configurations to the left pivot motor
-        pivotMotor.configurator.apply(pivotConfigs)
-
-        // Apply the Motion Magic configurations to the left and right pivot motors
-        pivotMotor.configurator.apply(motionMagicConfigs)
-        pivotMotor.configurator.apply(motionMagicConfigs)
-    }
-
     fun initializeLoggedNetworkPID() {
         pivotP =
             LoggedNetworkNumber("Tuning/pivot/pivot P", pivotConfigs.Slot0.kP)
@@ -155,5 +121,18 @@ object Climber : SubsystemBase() {
                 motionMagicConfigs.MotionMagicAcceleration,
             )
         jerk = LoggedNetworkNumber("Tuning/pivot/MM Jerk", motionMagicConfigs.MotionMagicJerk)
+
+    }
+    fun setPivotPos(state: ClimberPivotState) {
+        pivotMotor.setControl(voltagePos.withPosition(state.pos))
+    }
+    fun closeClampMotor() {
+        clampMotor.set(-1.0);
+    }
+    fun openClampMotor() {
+        clampMotor.set(1.0);
+    }
+    fun speedClamp(speed: Double) {
+        clampMotor.set(speed)
     }
 }
