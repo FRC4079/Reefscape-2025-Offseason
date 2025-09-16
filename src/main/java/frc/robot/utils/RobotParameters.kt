@@ -22,7 +22,6 @@ import edu.wpi.first.units.Units.Inches
 import edu.wpi.first.units.measure.Distance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.XboxController
-import frc.robot.utils.emu.AlgaeCounter
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
@@ -265,37 +264,24 @@ object RobotParameters {
         var isSoftLimitEnabled: Boolean = false
     }
 
-    object AlgaeManipulatorParameters {
-        @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
-
-        @JvmField
-        var isSoftLimitEnabled: Boolean = false
-
-        @JvmField
-        var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
-
-        @JvmField
-        var algaeIntaking: Boolean = false
-
-        @JvmField
-        var algaeCounter: AlgaeCounter = AlgaeCounter.INTAKE
-    }
-
-    object CoralManipulatorParameters {
+    object OuttakeParameters {
         const val CORAL_SENSOR_ID: Int = 0
         const val ALGAE_SENSOR_ID: Int = 0
 
-        @JvmField
-        val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+        @JvmField val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
 
-        @JvmField
-        var outtakeState: OuttakeState = OuttakeState.CORAL_INTAKE
+        @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
-        @JvmField
-        var hasPiece: Boolean = false
+        @JvmField var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
 
-        @JvmField
-        var coralScoring: Boolean = false
+        @JvmField var outtakeState: OuttakeState = OuttakeState.CORAL_HOLD
+
+        @JvmField var hasPiece: Boolean = false
+
+        @JvmField var coralScoring: Boolean = false
+
+        @JvmField var algaeIntaking: Boolean = false
+
         // coral should be intaking and coral state should be intaking
 
 //        @JvmField

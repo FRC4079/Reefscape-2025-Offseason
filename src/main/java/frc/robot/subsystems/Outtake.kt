@@ -8,21 +8,25 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters
-import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeCounter
-import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking
-import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.outtakePivotState
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.ALGAE_SENSOR_ID
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.CORAL_SENSOR_ID
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.hasPiece
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState
+import frc.robot.subsystems.Outtake.setOuttakeSpeed
 import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_INTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_PIVOT_MOTOR_ID
-import frc.robot.utils.emu.AlgaeCounter
+import frc.robot.utils.RobotParameters.OuttakeParameters
+import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
+import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
+import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
+import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
+import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
+import frc.robot.utils.emu.OuttakeState.ALGAE_HOLD
+import frc.robot.utils.emu.OuttakeState.ALGAE_SHOOT
+import frc.robot.utils.emu.OuttakeState.CORAL_HOLD
+import frc.robot.utils.emu.OuttakeState.CORAL_REVERSE
+import frc.robot.utils.emu.OuttakeState.CORAL_SHOOT
+import frc.robot.utils.emu.OuttakeState.STOWED
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -55,9 +59,9 @@ object Outtake : SubsystemBase() {
         algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
         algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
 
-        algaePivotConfiguration.Slot0.kP = AlgaeManipulatorParameters.ALGAE_PINGU.p
-        algaePivotConfiguration.Slot0.kI = AlgaeManipulatorParameters.ALGAE_PINGU.i
-        algaePivotConfiguration.Slot0.kD = AlgaeManipulatorParameters.ALGAE_PINGU.d
+        algaePivotConfiguration.Slot0.kP = OuttakeParameters.ALGAE_PINGU.p
+        algaePivotConfiguration.Slot0.kI = OuttakeParameters.ALGAE_PINGU.i
+        algaePivotConfiguration.Slot0.kD = OuttakeParameters.ALGAE_PINGU.d
 
         algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
         algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
@@ -99,39 +103,21 @@ object Outtake : SubsystemBase() {
 
     // This method will be called once per scheduler run
     override fun periodic() {
+        outtakeState.block()
+
         setPivotPos(outtakePivotState)
-        checkAlgaeSensor()
 
-        if (!algaeIntaking && !coralScoring) {
-            when {
-                !getCoralSensor() && !hasPiece -> {
-                    outtakeState = OuttakeState.CORAL_INTAKE
-                }
-                getCoralSensor() && !hasPiece -> {
-                    // Stop the motors if the manipulator has a piece, but the sensor no longer detects it
-                    outtakeState = OuttakeState.CORAL_HOLD
-                    setHasPiece(true)
-                }
-                !getAlgaeSensor() && hasPiece -> {
-                    outtakeState = OuttakeState.CORAL_HOLD
-                }
-                else -> {
-                    outtakeState = OuttakeState.STOWED
-                }
+        outtakeState =
+            if (getCoralSensor()) {
+                OuttakeState.STOWED
+            } else {
+                OuttakeState.CORAL_HOLD
             }
-        }
-
-        if (getCoralSensor()) {
-            outtakeState = OuttakeState.STOWED
-        } else {
-            outtakeState = OuttakeState.CORAL_HOLD
-        }
 
         logs {
             log("Algae/Algae Pivot Motor Position", this.pivotPosValue)
             log("Algae/Algae State", outtakePivotState.toString())
             log("Algae/IsAlgaeIntaking", algaeIntaking)
-            log("Algae/Algae counter", algaeCounter.toString())
             log(
                 "Algae/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
                 pivotMotor.isConnected,
@@ -184,29 +170,49 @@ object Outtake : SubsystemBase() {
         pivotMotor.stopMotor()
     }
 
+    /**
+     * Stows the outtake by stopping the outtake motor and moving the pivot to the UP position.
+     */
     fun stow() {
         stopOuttakeMotor()
         setPivotPos(OuttakePivotState.UP)
     }
 
+    /**
+     * Stops the outtake motor.
+     */
     fun stopOuttakeMotor() {
         outtakeMotor.stopMotor()
     }
 
     /**
-     * Checks the state of the algae sensor. Sets the algaeCounter to HOLDING if the sensor is
-     * triggered, otherwise sets it to DEFAULT.
+     * Shoots algae by running the outtake at a fixed negative command.
+     *
+     * Uses `setOuttakeSpeed(-30.0)` to eject algae.
+     * @see setOuttakeSpeed
      */
-    fun checkAlgaeSensor() {
-        algaeCounter =
-            if (algaeSensor.get()) {
-                AlgaeCounter.HOLDING
-            } else {
-                AlgaeCounter.DEFAULT
-            }
+    fun shootAlgae() {
+        // TODO: Weird elevator timing (in this file or somewhere else?)
+        setOuttakeSpeed(-30.0)
     }
 
-    fun shootAlgae() {
+    /**
+     * Shoots coral by running the outtake at a fixed positive command.
+     *
+     * Uses `setOuttakeSpeed(30.0)` to eject coral for scoring.
+     * @see setOuttakeSpeed
+     */
+    fun shootCoral() {
+        setOuttakeSpeed(30.0)
+    }
+
+    /**
+     * Reverses coral by running the outtake at a fixed negative command.
+     *
+     * Uses `setOuttakeSpeed(-30.0)` to shoot the coral into the intake.
+     * @see setOuttakeSpeed
+     */
+    fun reverseCoral() {
         setOuttakeSpeed(-30.0)
     }
 
@@ -216,17 +222,14 @@ object Outtake : SubsystemBase() {
      * @param hasPiece true if the manipulator has a piece, false otherwise
      */
     fun setHasPiece(hasPiece: Boolean) {
-        CoralManipulatorParameters.hasPiece = hasPiece
+        OuttakeParameters.hasPiece = hasPiece
     }
 
     /**
      * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
      * scoring process.
      */
-    fun slowAlgaeScoreMotors() {
-        voltageOut.Output = -3.0
-        outtakeMotor.setControl(voltageOut)
-    }
+    fun slowAlgaeScoreMotors() = setOuttakeSpeed(-3.0)
 
     /**
      * Gets the state of the coral sensor
@@ -241,4 +244,6 @@ object Outtake : SubsystemBase() {
      * @return The state of the algae sensor
      */
     fun getAlgaeSensor(): Boolean = !algaeSensor.get()
+
+    fun hasAlgae(): Boolean = !algaeSensor.get() && outtakeState == OuttakeState.STOWED
 }

@@ -15,9 +15,9 @@ import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.PathPingu.findClosestScoringPosition
 import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.hasPiece
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState
+import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
+import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CONSTRAINTS
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
@@ -217,14 +217,6 @@ object Kommand {
         controller: XboxController,
         controller2: XboxController,
     ) = PadElevator(controller, controller2)
-
-    /**
-     * Creates an [InstantCommand] to set the coral manipulator intaking state to true.
-     *
-     * @return An [InstantCommand] that sets the coral intaking state to true.
-     */
-    @JvmStatic
-    fun hasPieceFalse() = cmd { hasPiece = false }
 
     @JvmStatic
     fun coralScoreFalse() = cmd { coralScoring = false }

@@ -131,7 +131,7 @@ open class AlignToPose(
      * @return True if the command is finished, false otherwise.
      */
     override fun isFinished(): Boolean {
-        if ((rotationalController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint()) || visionDead) {
+        if (controllersAtSetpoint || visionDead) {
             timer.start()
         } else {
             timer.reset()
@@ -159,7 +159,7 @@ open class AlignToPose(
             log("AlignToPose/X Set ", xController.setpoint.position)
             log("AlignToPose/X Goal ", xController.goal.position)
             log("AlignToPose/Rotational Controller Setpoint", rotationalController.atSetpoint())
-            log("AligntoPOse/Heading got from odometry", currentPose.rotation.degrees)
+            log("AlignToPose/Heading got from odometry", currentPose.rotation.degrees)
             log("AlignToPose/Y Controller Setpoint", yController.atSetpoint())
             log("AlignToPose/X Controller Setpoint ", xController.atSetpoint())
             log(

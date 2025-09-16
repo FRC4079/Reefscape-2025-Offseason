@@ -8,13 +8,13 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Elevator.setAlgaeLevel
-import frc.robot.utils.RobotParameters.AlgaeManipulatorParameters.algaeIntaking
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.CORAL_FEEDER_PINGU
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.coralScoring
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.hasPiece
-import frc.robot.utils.RobotParameters.CoralManipulatorParameters.outtakeState
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
+import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_FEEDER_PINGU
+import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
+import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
+import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.ElevatorState
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
@@ -96,7 +96,6 @@ object Intake : SubsystemBase() {
         starFeederMotor.setControl(voltageOutFeeder)
 
         logs {
-            log("Coral/Has Piece", hasPiece)
             log("Coral/Coral Scoring", coralScoring)
             log("Coral/motorsRunning", motorsRunning)
             log("Coral/Coral State", outtakeState.toString())

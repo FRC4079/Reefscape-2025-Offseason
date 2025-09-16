@@ -1,18 +1,13 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.commands.sequencing.Sequences
+import frc.robot.commands.Sequences
 import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
-    private val swerve = Swerve
-    private val outtake = Outtake
-    private val intake = Intake
-    private val elevator = Elevator
-
     var currentState: State = State.TeleOpDrive.Base
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 

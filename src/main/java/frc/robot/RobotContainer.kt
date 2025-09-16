@@ -8,7 +8,7 @@ import frc.robot.commands.Kommand.hasPieceFalse
 import frc.robot.commands.Kommand.moveElevatorState
 import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
-import frc.robot.commands.sequencing.Sequences.fullScoreAuto
+import frc.robot.commands.Sequences.fullScoreAuto
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Intake
@@ -47,7 +47,7 @@ object RobotContainer {
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
-            bind("HasPieceFalse", hasPieceFalse())
+//            bind("HasPieceFalse", hasPieceFalse())
             bind("MoveElevatorL4Auto", moveElevatorState(L4))
             bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
             bind("SetL1", setElevatorState(L1))
