@@ -99,12 +99,22 @@ object Outtake : SubsystemBase() {
 
         setPivotPos(outtakePivotState)
 
-        outtakeState =
-            if (getCoralSensor()) {
-                OuttakeState.STOWED
-            } else {
-                OuttakeState.CORAL_HOLD
+        when {
+            outtakeState != OuttakeState.CORAL_SHOOT && outtakeState != OuttakeState.ALGAE_SHOOT -> {
+                outtakeState =
+                    if (getCoralSensor()) {
+                        OuttakeState.CORAL_HOLD
+                    } else if (getAlgaeSensor()) {
+                        OuttakeState.ALGAE_HOLD
+                    } else {
+                        OuttakeState.STOWED
+                    }
             }
+            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) || (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
+                outtakeState = OuttakeState.STOWED
+            }
+        }
+
 
         logs {
             log("Algae/Algae Pivot Motor Position", this.pivotPosValue)
