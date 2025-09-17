@@ -135,4 +135,9 @@ object Climber : SubsystemBase() {
     fun speedClamp(speed: Double) {
         clampMotor.set(speed)
     }
+    fun climb() {
+        setPivotPos(ClimberPivotState.UP)
+        closeClampMotor()
+        setPivotPos(ClimberPivotState.DOWN)
+    }
 }
