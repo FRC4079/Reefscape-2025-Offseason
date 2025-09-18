@@ -1,9 +1,6 @@
 package frc.robot.commands
 
-import frc.robot.utils.RobotParameters
 import frc.robot.utils.emu.Direction
-import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.emu.OuttakeState
 
 object Sequences {
     /**

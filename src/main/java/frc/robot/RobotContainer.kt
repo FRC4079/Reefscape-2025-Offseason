@@ -4,7 +4,6 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.commands.Kommand.hasPieceFalse
 import frc.robot.commands.Kommand.moveElevatorState
 import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState

@@ -96,6 +96,7 @@ object Climber : SubsystemBase() {
         add(pivotMotor, "ClimberPivot")
         initializeLoggedNetworkPID()
     }
+
     fun initializeLoggedNetworkPID() {
         pivotP =
             LoggedNetworkNumber("Tuning/pivot/pivot P", pivotConfigs.Slot0.kP)
@@ -121,17 +122,20 @@ object Climber : SubsystemBase() {
                 motionMagicConfigs.MotionMagicAcceleration,
             )
         jerk = LoggedNetworkNumber("Tuning/pivot/MM Jerk", motionMagicConfigs.MotionMagicJerk)
-
     }
+
     fun setPivotPos(state: ClimberPivotState) {
         pivotMotor.setControl(voltagePos.withPosition(state.pos))
     }
+
     fun closeClampMotor() {
-        clampMotor.set(-1.0);
+        clampMotor.set(-1.0)
     }
+
     fun openClampMotor() {
-        clampMotor.set(1.0);
+        clampMotor.set(1.0)
     }
+
     fun speedClamp(speed: Double) {
         clampMotor.set(speed)
     }

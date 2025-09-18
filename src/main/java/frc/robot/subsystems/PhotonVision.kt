@@ -27,7 +27,7 @@ import xyz.malefic.frc.sub.PhotonModule
  * and get the pivot position based on distance calculations.
  */
 object PhotonVision : SubsystemBase() {
-    private val cameras: MutableList<PhotonModule> = ArrayList<PhotonModule>()
+    private val cameras: MutableList<PhotonModule> = ArrayList()
 
     /**
      * Gets the current yaw angle to the target.
@@ -99,21 +99,21 @@ object PhotonVision : SubsystemBase() {
         this.resultPairs = cameras.getDecentResultPairs() as MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
 
         logs {
-            log("Photonvision/Does any camera exist", cameras.isNotEmpty())
-            log("Photonvision/Does any result pair exist", this.resultPairs != null)
-            log("Photonvision/Has tag", hasTag())
-            log("Photonvision/resultCamera List length", resultPairs!!.size)
-            this.resultPairs?.let { log("Photonvision/Result pairs have targets", resultPairs!!.hasTargets()) }
+            log("PhotonVision/Does any camera exist", cameras.isNotEmpty())
+            log("PhotonVision/Does any result pair exist", this.resultPairs != null)
+            log("PhotonVision/Has tag", hasTag())
+            log("PhotonVision/resultCamera List length", resultPairs!!.size)
+            this.resultPairs?.let { log("PhotonVision/Result pairs have targets", resultPairs!!.hasTargets()) }
         }
 
         if (this.resultPairs != null) {
-            logs("Photonvision/Best Target list is empty", resultPairs!!.isEmpty())
+            logs("PhotonVision/Best Target list is empty", resultPairs!!.isEmpty())
 
             if (resultPairs!!.isNotEmpty()) {
                 logCount++
-                logs("Photonvision/Best Target updated counter", logCount)
-                val bestTarget = resultPairs!!.get(0).second!!.getBestTarget()
-                logs("Photonvision/Best Target is not null", bestTarget != null)
+                logs("PhotonVision/Best Target updated counter", logCount)
+                val bestTarget = resultPairs!![0].second.bestTarget
+                logs("PhotonVision/Best Target is not null", bestTarget != null)
 
                 if (bestTarget != null) {
                     yaw = bestTarget.getYaw()
@@ -122,10 +122,10 @@ object PhotonVision : SubsystemBase() {
                     this.bestTargetID = bestTarget.getFiducialId()
                 }
 
-                logs("Photonvision/Best Target Yaw", yaw)
-                logs("Photonvision/Best Target Y", y)
-                logs("Photonvision/Best Target Dist", dist)
-                logs("Photonvision/Best Target ID", this.bestTargetID)
+                logs("PhotonVision/Best Target Yaw", yaw)
+                logs("PhotonVision/Best Target Y", y)
+                logs("PhotonVision/Best Target Dist", dist)
+                logs("PhotonVision/Best Target ID", this.bestTargetID)
             }
 
             logStdDev()
@@ -138,10 +138,10 @@ object PhotonVision : SubsystemBase() {
      * @return true if there is a visible tag and the current result pair is not null
      */
     fun hasTag(): Boolean {
-        logs("Photonvision/currentResultPair not null", this.resultPairs != null)
+        logs("PhotonVision/currentResultPair not null", this.resultPairs != null)
 
         return this.resultPairs?.let {
-            logs("Photonvision/hasTargets currentResultPair", resultPairs!!.hasTargets())
+            logs("PhotonVision/hasTargets currentResultPair", resultPairs!!.hasTargets())
             return@let this.resultPairs != null && resultPairs!!.hasTargets()
         } ?: false
     }
@@ -157,8 +157,8 @@ object PhotonVision : SubsystemBase() {
 
     fun fetchYaw(camera: PhotonCamera?): Double {
         for (pair in this.resultPairs!!) {
-            if (pair.first!!.camera == camera) {
-                return pair.second!!.getBestTarget().getYaw()
+            if (pair.first.camera == camera) {
+                return pair.second.bestTarget.getYaw()
             }
         }
         return 0.0
@@ -168,7 +168,7 @@ object PhotonVision : SubsystemBase() {
         for (pair in this.resultPairs!!) {
             if (pair.first.camera == camera) {
                 return pair.second
-                    .getBestTarget()
+                    .bestTarget
                     .getBestCameraToTarget()
                     .x
             }
@@ -180,7 +180,7 @@ object PhotonVision : SubsystemBase() {
         for (pair in this.resultPairs!!) {
             if (pair.first.camera == camera) {
                 return pair.second
-                    .getBestTarget()
+                    .bestTarget
                     .getBestCameraToTarget()
                     .y
             }
@@ -198,7 +198,7 @@ object PhotonVision : SubsystemBase() {
             .filter { camera: PhotonModule? -> camera!!.currentStdDevs != null }
             .forEach { camera: PhotonModule? ->
                 logs(
-                    "Photonvision/Camera %s Std Dev NormF".toString(),
+                    "PhotonVision/Camera %s Std Dev NormF",
                     camera?.currentStdDevs!!.normF(),
                 )
             }

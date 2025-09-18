@@ -16,7 +16,6 @@ import frc.robot.subsystems.Swerve
 import frc.robot.utils.PathPingu.findClosestScoringPosition
 import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
 import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
-import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CONSTRAINTS
 import frc.robot.utils.emu.Direction

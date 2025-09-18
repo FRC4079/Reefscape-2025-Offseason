@@ -13,7 +13,6 @@ import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
-import frc.robot.utils.RobotParameters.OuttakeParameters.hasPiece
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.ElevatorState
 import xyz.malefic.frc.pingu.AlertPingu.add
@@ -62,15 +61,15 @@ object Intake : SubsystemBase() {
         starFeederCurrentConfig.StatorCurrentLimit = 40.0
         starFeederCurrentConfig.StatorCurrentLimitEnable = true
 
-        wheelFeederMotor.getConfigurator().apply(coralFeederCurrentConfig)
-        starFeederMotor.getConfigurator().apply(starFeederCurrentConfig)
+        wheelFeederMotor.configurator.apply(coralFeederCurrentConfig)
+        starFeederMotor.configurator.apply(starFeederCurrentConfig)
 
         // on
         coralFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive
         starFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive
 
-        wheelFeederMotor.getConfigurator().apply(coralFeederConfiguration)
-        starFeederMotor.getConfigurator().apply(starFeederConfiguration)
+        wheelFeederMotor.configurator.apply(coralFeederConfiguration)
+        starFeederMotor.configurator.apply(starFeederConfiguration)
 
         voltageOut = VoltageOut(0.0)
         voltageOutFeeder = VoltageOut(0.0)
@@ -100,8 +99,6 @@ object Intake : SubsystemBase() {
             log("Coral/motorsRunning", motorsRunning)
             log("Coral/Coral State", outtakeState.toString())
         }
-
-        outtakeState.block.invoke()
     }
 
     /**
