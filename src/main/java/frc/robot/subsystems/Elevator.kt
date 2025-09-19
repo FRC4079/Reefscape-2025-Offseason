@@ -420,12 +420,21 @@ object Elevator : SubsystemBase() {
         }
     }
 
-    @JvmStatic
-    fun setAlgaeLevel() {
-        if (elevatorToBeSetState == ElevatorState.L2) {
-            state = ElevatorState.ALGAE_LOW
-        } else if (elevatorToBeSetState == ElevatorState.L3) {
-            state = ElevatorState.ALGAE_HIGH
+    /**
+     * Sets the elevator state to the appropriate algae level based on the value of elevatorToBeSetState.
+     *
+     * @return true if the state was set to ALGAE_LOW or ALGAE_HIGH, false otherwise.
+     */
+    fun setAlgaeLevel(): Boolean =
+        when (elevatorToBeSetState) {
+            ElevatorState.L2 -> {
+                state = ElevatorState.ALGAE_LOW
+                true
+            }
+            ElevatorState.L3 -> {
+                state = ElevatorState.ALGAE_HIGH
+                true
+            }
+            else -> false
         }
-    }
 }

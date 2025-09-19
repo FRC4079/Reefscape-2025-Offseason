@@ -5,13 +5,7 @@ sealed class State {
     object Auto : State()
 
     // Tele-op drive with subcategories
-    sealed class TeleOpDrive : State() {
-        object Coral : TeleOpDrive()
-
-        object Algae : TeleOpDrive()
-
-        object Base : TeleOpDrive()
-    }
+    object TeleOpDrive : State()
 
     // Score with multiple levels and alignment options
     data class ScoreAlign(
@@ -25,9 +19,5 @@ sealed class State {
         object High : Algae()
 
         object Low : Algae()
-
-        object Score : Algae()
     }
-
-    object Climb : State()
 }

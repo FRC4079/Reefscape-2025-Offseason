@@ -46,19 +46,19 @@ class AlignToPoseAuto(
     /** The initial subroutine of a command. Called once when the command is initially scheduled.  */
     override fun initialize() {
         // Update the list of coral scoring positions to the correct side (hopefully)
-        currentPose = Swerve.pose2Dfrom3D
+        currentPose = Swerve.estimatedPose2D
 
         timer = Timer()
         addRequirements(Swerve)
 
         clearCoralScoringPositions()
         addCoralPosList()
-        currentPose = Swerve.pose2Dfrom3D
+        currentPose = Swerve.estimatedPose2D
 
         if (elevatorToBeSetState == ElevatorState.L4) {
-            targetPose = moveToClosestCoralScore(offsetSide, Swerve.pose2Dfrom3D)
+            targetPose = moveToClosestCoralScore(offsetSide, Swerve.estimatedPose2D)
         } else {
-            targetPose = moveToClosestCoralScoreNotL4(offsetSide, Swerve.pose2Dfrom3D)
+            targetPose = moveToClosestCoralScoreNotL4(offsetSide, Swerve.estimatedPose2D)
         }
 
         xController = X_PINGU.profiledPIDController
@@ -86,7 +86,7 @@ class AlignToPoseAuto(
      * called repeatedly until [.isFinished]) returns true.
      */
     override fun execute() {
-        currentPose = Swerve.pose2Dfrom3D
+        currentPose = Swerve.estimatedPose2D
 
         // TODO PLS CHECK BOTH SIDES AND BOTH APRIL TAG SIDES AND MAKE SURE IT ACTUALLY ALIGNS -SHAWN
         // TODO when aligning the x and y axes, you need to add sin/cos of the other axes angles and

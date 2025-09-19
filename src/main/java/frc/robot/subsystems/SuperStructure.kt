@@ -8,7 +8,7 @@ import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 
 object SuperStructure : SubsystemBase() {
-    var currentState: State = State.TeleOpDrive.Base
+    var currentState: State = State.TeleOpDrive
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
     /**
@@ -20,15 +20,6 @@ object SuperStructure : SubsystemBase() {
         wantedState.add(state)
     }
 
-    /**
-     * Adds a state to the wantedState queue.
-     *
-     * @param state The state to add.
-     */
-    fun addWantedState(state: State) {
-        wantedState.add(state)
-    }
-
     fun handleStateTransition() {
         when (wantedState.removeFirst()) {
             // TODO: add state transition handling
@@ -36,51 +27,13 @@ object SuperStructure : SubsystemBase() {
         }
     }
 
-    /**
-     * Updates the `currentState` to the appropriate `TeleOpDrive` state based on sensor input.
-     *
-     * If the current state is a `TeleOpDrive` state, checks the status of the algae and coral sensors:
-     * - If the algae sensor is active, sets the state to `TeleOpDrive.Algae`.
-     * - If the coral sensors are active, sets the state to `TeleOpDrive.Coral`.
-     * - Otherwise, sets the state to `TeleOpDrive.Base`.
-     */
-    fun handleDriveState() {
-        if (currentState is State.TeleOpDrive) {
-            currentState =
-                when {
-                    Outtake.getAlgaeSensor() -> State.TeleOpDrive.Algae
-                    Outtake.getCoralSensor() -> State.TeleOpDrive.Coral
-                    else -> State.TeleOpDrive.Base
-                }
-        }
-    }
-
     fun applyState() {
         when (val state = currentState) {
-            is State.TeleOpDrive -> {
-                Swerve.stickDrive(aacrn)
-
-                when (currentState) {
-                    is State.TeleOpDrive -> {
-                        Swerve.stickDrive(aacrn)
-                        when (state) {
-                            is State.TeleOpDrive.Algae -> {
-                                Outtake.stopOuttakeMotor()
-                            }
-                            is State.TeleOpDrive.Coral -> {
-                                Intake.stopMotors()
-                            }
-                            else -> { /* no-op */ }
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
+            is State.TeleOpDrive -> Swerve.stickDrive(aacrn)
 
             is State.ScoreAlign -> {
-                val dir = state.dir // Ensure `dir` exists in `ScoreAlign`
-                Sequences.fullScore(dir)
+                val dir = state.dir
+                Sequences.fullScore(dir) // TODO: actually implement a full score sequence
             }
 
             is State.Algae -> {
@@ -91,14 +44,9 @@ object SuperStructure : SubsystemBase() {
                     is State.Algae.Low -> {
                         // TODO: low algae sequence
                     }
-                    is State.Algae.Score -> {
-                        Outtake.shootAlgae()
-                        // TODO: algae scoring sequence
-                    }
                 }
             }
 
-            State.Climb -> TODO()
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
         }
@@ -117,14 +65,13 @@ object SuperStructure : SubsystemBase() {
      */
     fun cancel() {
         wantedState.clear()
-        currentState = State.TeleOpDrive.Base
+        currentState = State.TeleOpDrive
         Swerve.stop()
         Outtake.stopMotors()
         Intake.stopMotors()
     }
 
     override fun periodic() {
-        handleDriveState()
         if (wantedState.isNotEmpty()) {
             handleStateTransition()
         }

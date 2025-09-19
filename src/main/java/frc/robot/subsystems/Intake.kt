@@ -128,17 +128,6 @@ object Intake : SubsystemBase() {
     }
 
     /**
-     * Initiates the algae intake process. Sets the elevator to the algae level, starts the intake
-     * motor, and marks the algaeIntaking flag as true.
-     */
-    fun intakeAlgae() {
-        stopMotors()
-        setAlgaeLevel()
-        setIntakeSpeed(4.5)
-        algaeIntaking = true
-    }
-
-    /**
      * Sets the speed of the algae intake motor.
      *
      * @param speed the desired speed to set for the intake motor
@@ -147,15 +136,5 @@ object Intake : SubsystemBase() {
         voltageOut.Output = speed
         wheelFeederMotor.setControl(voltageOut)
         starFeederMotor.setControl(voltageOut)
-    }
-
-    /**
-     * Stops the algae intake process. Resets the elevator position to default, stops the algae intake
-     * motor, and sets the algaeIntaking flag to false.
-     */
-    fun stopIntake() {
-        Elevator.setElevatorToBeSetState(ElevatorState.DEFAULT)
-        stopMotors()
-        algaeIntaking = false
     }
 }

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.subsystems.Outtake.setOuttakeSpeed
 import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_INTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_PIVOT_MOTOR_ID
@@ -17,8 +18,10 @@ import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
+import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
+import frc.robot.utils.emu.State
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -44,7 +47,6 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-
         val algaePivotConfiguration = TalonFXConfiguration()
         val algaeIntakeConfiguration = TalonFXConfiguration()
 
@@ -97,23 +99,22 @@ object Outtake : SubsystemBase() {
     override fun periodic() {
         outtakeState.block(this)
 
-        setPivotPos(outtakePivotState)
+        setPivotState(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.UP else OuttakePivotState.DOWN)
 
         when {
-            outtakeState != OuttakeState.CORAL_SHOOT && outtakeState != OuttakeState.ALGAE_SHOOT -> {
+            outtakeState !in listOf(OuttakeState.CORAL_SHOOT, OuttakeState.ALGAE_SHOOT) -> {
                 outtakeState =
-                    if (getCoralSensor()) {
-                        OuttakeState.CORAL_HOLD
-                    } else if (getAlgaeSensor()) {
-                        OuttakeState.ALGAE_HOLD
-                    } else {
-                        OuttakeState.STOWED
+                    when {
+                        getCoralSensor() -> OuttakeState.CORAL_HOLD
+                        getAlgaeSensor() -> OuttakeState.ALGAE_HOLD
+                        else -> OuttakeState.STOWED
                     }
             }
             (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) ||
                 (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
                 outtakeState = OuttakeState.STOWED
             }
+            // otherwise, keep the current state (i.e., continue shooting)
         }
 
         logs {
@@ -144,7 +145,7 @@ object Outtake : SubsystemBase() {
      *
      * @param state the state to set the algae pivot
      */
-    fun setPivotPos(state: OuttakePivotState) {
+    fun setPivotState(state: OuttakePivotState) {
         pivotMotor.setControl(voltagePos.withPosition(state.pos))
     }
 
@@ -176,8 +177,7 @@ object Outtake : SubsystemBase() {
      * Stows the outtake by stopping the outtake motor and moving the pivot to the UP position.
      */
     fun stow() {
-        stopOuttakeMotor()
-        setPivotPos(OuttakePivotState.UP)
+        stopMotors() // TODO: is there anything else to do here?
     }
 
     /**
@@ -185,17 +185,6 @@ object Outtake : SubsystemBase() {
      */
     fun stopOuttakeMotor() {
         outtakeMotor.stopMotor()
-    }
-
-    /**
-     * Shoots algae by running the outtake at a fixed negative command.
-     *
-     * Uses `setOuttakeSpeed(-30.0)` to eject algae.
-     * @see setOuttakeSpeed
-     */
-    fun shootAlgae() {
-        // TODO: Weird elevator timing (in this file or somewhere else?)
-        setOuttakeSpeed(-30.0)
     }
 
     /**
@@ -223,6 +212,38 @@ object Outtake : SubsystemBase() {
      * scoring process.
      */
     fun slowAlgaeScoreMotors() = setOuttakeSpeed(-3.0)
+
+    /**
+     * Initiates the algae intake process. Sets the elevator to the algae level, starts the intake
+     * motor, and marks the algaeIntaking flag as true.
+     */
+    fun intakeAlgae() {
+        stopMotors()
+        if (!setAlgaeLevel()) return
+        setOuttakeSpeed(-30.0)
+    }
+
+    /**
+     * Shoots algae by running the outtake at a fixed negative command.
+     *
+     * Uses `setOuttakeSpeed(-30.0)` to eject algae.
+     * @see setOuttakeSpeed
+     */
+    fun shootAlgae() {
+        // TODO: Weird elevator timing (in this file or somewhere else?)
+        setOuttakeSpeed(-30.0)
+        stopAlgaeIntake()
+    }
+
+    /**
+     * Stops the algae intake process. Resets the elevator position to default, stops the algae intake
+     * motor, and sets the algaeIntaking flag to false.
+     */
+    fun stopAlgaeIntake() {
+        Elevator.setElevatorToBeSetState(ElevatorState.DEFAULT)
+        stopMotors()
+        SuperStructure + State.TeleOpDrive
+    }
 
     /**
      * Gets the state of the coral sensor

@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.subsystems.SuperStructure.addWantedState
 import frc.robot.subsystems.SuperStructure.currentState
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
@@ -63,6 +62,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.photonvision.EstimatedRobotPose
 import xyz.malefic.frc.extension.getEstimatedPose
+import xyz.malefic.frc.extension.to3d
 import xyz.malefic.frc.extension.updateStdDev
 import xyz.malefic.frc.extension.updateStdDev3d
 import xyz.malefic.frc.pingu.LogPingu.log
@@ -83,9 +83,9 @@ object Swerve : SubsystemBase() {
     private val modules: Array<SwerveModule>
 
     // Auto Align Pingu Values
-    private var networkPinguXAutoAlign: NetworkPingu? = null
-    private var networkPinguYAutoAlign: NetworkPingu? = null
-    private var networkPinguRotAutoAlign: NetworkPingu? = null
+    private lateinit var networkPinguXAutoAlign: NetworkPingu
+    private lateinit var networkPinguYAutoAlign: NetworkPingu
+    private lateinit var networkPinguRotAutoAlign: NetworkPingu
 
     private val reefChooser: LoggedDashboardChooser<*>? = null
     private var desiredPoseForDriveToPoint: Pose2d
@@ -131,7 +131,7 @@ object Swerve : SubsystemBase() {
         initializePathPlannerLogging()
 
         //    swerveLoggingThread.start();
-        initializationAlignPing()
+        initializationAlignPingu()
     }
 
     /**
@@ -467,11 +467,10 @@ object Swerve : SubsystemBase() {
 
     /** Resets the pose of the robot to zero.  */
     fun zeroPose() {
-        poseEstimator.resetPosition(
-            Rotation2d.fromDegrees(this.heading),
-            this.modulePositions,
-            Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
-        )
+        val heading = Rotation2d.fromDegrees(this.heading)
+        val positions = this.modulePositions
+        poseEstimator.resetPosition(heading, positions, Pose2d())
+        poseEstimator3d.resetPosition(heading.to3d(this.pidgeyYaw), positions, Pose3d())
     }
 
     /**
@@ -491,14 +490,6 @@ object Swerve : SubsystemBase() {
          * @return ChassisSpeeds, The chassis speeds for autonomous driving.
          */
         get() = kinematics.toChassisSpeeds(*this.moduleStates)
-
-    val rotationPidgey: Rotation2d
-        /**
-         * Gets the rotation of the Pigeon2 IMU for PID control.
-         *
-         * @return [Rotation2d], The rotation of the Pigeon2 IMU for PID control.
-         */
-        get() = Rotation2d.fromDegrees(-pidgey.rotation2d.degrees)
 
     /**
      * Drives the robot using chassis speeds.
@@ -598,7 +589,7 @@ object Swerve : SubsystemBase() {
         }
     }
 
-    val pose2Dfrom3D: Pose2d
+    val estimatedPose2D: Pose2d
         get() = poseEstimator3d.estimatedPosition.toPose2d()
 
     /**
@@ -608,7 +599,7 @@ object Swerve : SubsystemBase() {
      */
     fun pathFindToGoal(targetPose: Pose2d?): Command? = AutoBuilder.pathfindToPose(targetPose, constraints)
 
-    private fun initializationAlignPing() {
+    private fun initializationAlignPingu() {
         networkPinguXAutoAlign =
             NetworkPingu(
                 LoggedNetworkNumber("Tuning/Swerve/Align X P", X_PINGU.p),
@@ -647,7 +638,7 @@ object Swerve : SubsystemBase() {
     ) {
         log("Swerve/Driving to scoring pose", pose)
         this.desiredPoseForDriveToPoint = pose
-        addWantedState(ScoreAlign(direction))
+        SuperStructure + ScoreAlign(direction)
         this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint
     }

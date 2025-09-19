@@ -11,10 +11,12 @@ import frc.robot.commands.Sequences.fullScoreAuto
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Intake
+import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.Direction.LEFT
 import frc.robot.utils.emu.Direction.RIGHT
 import frc.robot.utils.emu.ElevatorState.DEFAULT
@@ -22,7 +24,12 @@ import frc.robot.utils.emu.ElevatorState.L1
 import frc.robot.utils.emu.ElevatorState.L2
 import frc.robot.utils.emu.ElevatorState.L3
 import frc.robot.utils.emu.ElevatorState.L4
+import frc.robot.utils.emu.OuttakeState
+import frc.robot.utils.emu.OuttakeState.ALGAE_HOLD
+import frc.robot.utils.emu.OuttakeState.ALGAE_SHOOT
+import frc.robot.utils.emu.OuttakeState.CORAL_HOLD
 import frc.robot.utils.emu.State
+import frc.robot.utils.emu.State.ScoreManual
 import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.A
 import xyz.malefic.frc.emu.Button.B
@@ -38,10 +45,9 @@ import xyz.malefic.frc.pingu.CommandPingu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
-    val calamityCow: XboxController = XboxController(1)
 
     init {
-        Elevator.defaultCommand = padElevator(aacrn, calamityCow)
+        Elevator.defaultCommand = padElevator(testPad)
 
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
@@ -85,15 +91,15 @@ object RobotContainer {
                 setElevatorToBeSetState(DEFAULT)
             }
             press(LEFT_TRIGGER) {
-                Intake.intakeAlgae()
+                Outtake.intakeAlgae()
             }
             release(LEFT_TRIGGER) {
-                Intake.stopIntake()
+                Outtake.stopAlgaeIntake()
             }
             press(Button.RIGHT_TRIGGER) {
-                when (SuperStructure.currentState) {
-                    State.TeleOpDrive.Algae -> SuperStructure + State.Algae.Score
-                    State.TeleOpDrive.Coral -> SuperStructure + State.ScoreManual
+                when (outtakeState) {
+                    ALGAE_HOLD -> outtakeState = ALGAE_SHOOT
+                    CORAL_HOLD -> SuperStructure + ScoreManual
                     else -> { /* no-op */ }
                 }
             }

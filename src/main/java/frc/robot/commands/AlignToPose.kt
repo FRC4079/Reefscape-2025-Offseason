@@ -53,7 +53,7 @@ open class AlignToPose(
         addRequirements(Swerve)
 
         // Update the list of coral scoring positions to the correct side (hopefully)
-        currentPose = Swerve.pose2Dfrom3D
+        currentPose = Swerve.estimatedPose2D
 
         timer = Timer()
 
@@ -62,9 +62,9 @@ open class AlignToPose(
 
         targetPose =
             if (elevatorToBeSetState == ElevatorState.L4) {
-                moveToClosestCoralScore(offsetSide, Swerve.pose2Dfrom3D)
+                moveToClosestCoralScore(offsetSide, Swerve.estimatedPose2D)
             } else {
-                moveToClosestCoralScoreNotL4(offsetSide, Swerve.pose2Dfrom3D)
+                moveToClosestCoralScoreNotL4(offsetSide, Swerve.estimatedPose2D)
             }
 
         xController =
@@ -101,7 +101,7 @@ open class AlignToPose(
      * Refer to commit 9c00e5 for the old method of aligning the robot.
      */
     override fun execute() {
-        currentPose = Swerve.pose2Dfrom3D
+        currentPose = Swerve.estimatedPose2D
         if (
             ((DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) && DriverStation.isTeleop()) ||
             ((DriverStation.getAlliance().get() == DriverStation.Alliance.Red) && DriverStation.isAutonomous())
