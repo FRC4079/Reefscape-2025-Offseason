@@ -7,14 +7,11 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_FEEDER_PINGU
-import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
-import frc.robot.utils.emu.ElevatorState
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
