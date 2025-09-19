@@ -8,7 +8,6 @@ import frc.robot.utils.emu.ElevatorState
 
 /** Command to control the robot's swerve drive using a Logitech gaming pad.  */
 class PadElevator(
-    private val aacrn: XboxController?,
     private val calamityCow: XboxController,
 ) : Command() {
     /** Constructs a new PadDrive command.  */
@@ -67,13 +66,12 @@ class PadElevator(
      * @param index The value to correspond to a D-pad combination.
      * @return If the specified combination is pressed.
      */
-    fun checkDPad(index: Int): Boolean {
-        if (0 <= index && index <= 7) {
-            return (index * 45) == calamityCow.getPOV(0)
+    fun checkDPad(index: Int): Boolean =
+        if (index in 0..7) {
+            (index * 45) == calamityCow.getPOV(0)
         } else {
-            return false
+            false
         }
-    }
 
     /**
      * Returns true when the command should end.

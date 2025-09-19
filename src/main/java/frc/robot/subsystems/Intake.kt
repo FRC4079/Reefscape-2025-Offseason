@@ -21,8 +21,8 @@ import xyz.malefic.frc.pingu.LogPingu.logs
 import xyz.malefic.frc.pingu.VoltagePingu.setOutput
 
 object Intake : SubsystemBase() {
-    private val wheelFeederMotor: TalonFX
-    private val starFeederMotor: TalonFX
+    private val wheelFeederMotor: TalonFX = TalonFX(CORAL_FEEDER_ID)
+    private val starFeederMotor: TalonFX = TalonFX(STAR_FEEDER_ID)
 
     private val voltageOut: VoltageOut
     private val voltageOutFeeder: VoltageOut
@@ -34,8 +34,6 @@ object Intake : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        wheelFeederMotor = TalonFX(CORAL_FEEDER_ID)
-        starFeederMotor = TalonFX(STAR_FEEDER_ID)
 
         val coralFeederConfiguration = TalonFXConfiguration()
         val starFeederConfiguration = TalonFXConfiguration()

@@ -141,7 +141,7 @@ object Swerve : SubsystemBase() {
      * @return SwerveModule[], An array of initialized SwerveModule objects.
      */
     private fun initializeModules(): Array<SwerveModule> =
-        arrayOf<SwerveModule>(
+        arrayOf(
             SwerveModule(
                 FRONT_LEFT_DRIVE_ID,
                 FRONT_LEFT_STEER_ID,
@@ -640,7 +640,7 @@ object Swerve : SubsystemBase() {
      * to the point.
      * @param direction The direction for score alignment.
      */
-    fun setDesiredPoseForDriveToPointWithMaximumAngularVelocity(
+    fun setWantedDrivePose(
         pose: Pose2d,
         maximumAngularVelocityForDriveToPoint: Double,
         direction: Direction,

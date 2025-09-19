@@ -162,7 +162,7 @@ class AlignToPoseAuto(
      * Returning false will result in the command never ending automatically. It may still be
      * cancelled manually or interrupted by another command. Hard coding this command to always return
      * true will result in the command executing once and finishing immediately. It is recommended to
-     * use * [InstantCommand] for such an operation.
+     * use [edu.wpi.first.wpilibj2.command.InstantCommand] for such an operation.
      *
      * @return whether this command has finished.
      */

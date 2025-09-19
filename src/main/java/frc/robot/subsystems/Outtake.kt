@@ -110,11 +110,11 @@ object Outtake : SubsystemBase() {
                         OuttakeState.STOWED
                     }
             }
-            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) || (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
+            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) ||
+                (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
                 outtakeState = OuttakeState.STOWED
             }
         }
-
 
         logs {
             log("Algae/Algae Pivot Motor Position", this.pivotPosValue)
@@ -219,15 +219,6 @@ object Outtake : SubsystemBase() {
     }
 
     /**
-     * Sets the state of whether the manipulator has a piece.
-     *
-     * @param hasPiece true if the manipulator has a piece, false otherwise
-     */
-    fun setHasPiece(hasPiece: Boolean) {
-        OuttakeParameters.hasPiece = hasPiece
-    }
-
-    /**
      * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
      * scoring process.
      */
@@ -246,6 +237,4 @@ object Outtake : SubsystemBase() {
      * @return The state of the algae sensor
      */
     fun getAlgaeSensor(): Boolean = !algaeSensor.get()
-
-    fun hasAlgae(): Boolean = !algaeSensor.get() && outtakeState == OuttakeState.STOWED
 }

@@ -206,16 +206,13 @@ object Kommand {
         )
 
     /**
-     * Creates a [PadDrive] command to control the elevator.
+     * Creates a [PadElevator] command to control the elevator.
      *
      * @param controller The gaming controller used to move the elevator.
-     * @return A [PadDrive] command to control the robot's elevator.
+     * @return A [PadElevator] command to control the robot's elevator.
      */
     @JvmStatic
-    fun padElevator(
-        controller: XboxController,
-        controller2: XboxController,
-    ) = PadElevator(controller, controller2)
+    fun padElevator(controller: XboxController) = PadElevator(controller)
 
     @JvmStatic
     fun coralScoreFalse() = cmd { coralScoring = false }

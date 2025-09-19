@@ -46,15 +46,15 @@ object Elevator : SubsystemBase() {
     private val leftSoftLimitConfig: SoftwareLimitSwitchConfigs
     private val rightSoftLimitConfig: SoftwareLimitSwitchConfigs
 
-    private var elevatorP: LoggedNetworkNumber? = null
-    private var elevatorI: LoggedNetworkNumber? = null
-    private var elevatorD: LoggedNetworkNumber? = null
-    private var elevatorV: LoggedNetworkNumber? = null
-    private var elevatorS: LoggedNetworkNumber? = null
-    private var elevatorG: LoggedNetworkNumber? = null
-    private var cruiseV: LoggedNetworkNumber? = null
-    private var acc: LoggedNetworkNumber? = null
-    private var jerk: LoggedNetworkNumber? = null
+    private lateinit var elevatorP: LoggedNetworkNumber
+    private lateinit var elevatorI: LoggedNetworkNumber
+    private lateinit var elevatorD: LoggedNetworkNumber
+    private lateinit var elevatorV: LoggedNetworkNumber
+    private lateinit var elevatorS: LoggedNetworkNumber
+    private lateinit var elevatorG: LoggedNetworkNumber
+    private lateinit var cruiseV: LoggedNetworkNumber
+    private lateinit var acc: LoggedNetworkNumber
+    private lateinit var jerk: LoggedNetworkNumber
 
     private val voltageOut: VoltageOut
     private val elevatorLeftConfigs: TalonFXConfiguration
@@ -171,7 +171,7 @@ object Elevator : SubsystemBase() {
         //    motionMagicVoltage.EnableFOC = true;
         //    motionMagicVoltage.FeedForward = 0;
 
-        // TODO test elevator with FOC, increase accleration, cruise velocity, and graph it all to see
+        // TODO test elevator with FOC, increase acceleration, cruise velocity, and graph it all to see
         // how to speed it up
         // reduce timeouts for automatic scoring, autoalign speed it up even more, test in autonomous
         // with 180 command
@@ -369,16 +369,16 @@ object Elevator : SubsystemBase() {
      * elevator motors and updates the Motion Magic configurations.
      */
     fun updateElevatorPID() {
-        ELEVATOR_PINGU.setP(elevatorP!!)
-        ELEVATOR_PINGU.setI(elevatorI!!)
-        ELEVATOR_PINGU.setD(elevatorD!!)
-        ELEVATOR_PINGU.setV(elevatorV!!)
-        ELEVATOR_PINGU.setS(elevatorS!!)
-        ELEVATOR_PINGU.setG(elevatorG!!)
+        ELEVATOR_PINGU.setP(elevatorP)
+        ELEVATOR_PINGU.setI(elevatorI)
+        ELEVATOR_PINGU.setD(elevatorD)
+        ELEVATOR_PINGU.setV(elevatorV)
+        ELEVATOR_PINGU.setS(elevatorS)
+        ELEVATOR_PINGU.setG(elevatorG)
 
-        ELEVATOR_MAGIC_PINGU.setVelocity(cruiseV!!)
-        ELEVATOR_MAGIC_PINGU.setAcceleration(acc!!)
-        ELEVATOR_MAGIC_PINGU.setJerk(jerk!!)
+        ELEVATOR_MAGIC_PINGU.setVelocity(cruiseV)
+        ELEVATOR_MAGIC_PINGU.setAcceleration(acc)
+        ELEVATOR_MAGIC_PINGU.setJerk(jerk)
 
         applyElevatorPIDValues()
     }
@@ -396,9 +396,9 @@ object Elevator : SubsystemBase() {
 
         // Update the Motion Magic configurations with the current PID values
         motionMagicConfigs = elevatorLeftConfigs.MotionMagic
-        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV!!.get()
-        motionMagicConfigs.MotionMagicAcceleration = acc!!.get()
-        motionMagicConfigs.MotionMagicJerk = jerk!!.get()
+        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV.get()
+        motionMagicConfigs.MotionMagicAcceleration = acc.get()
+        motionMagicConfigs.MotionMagicJerk = jerk.get()
 
         // Apply the updated configurations to the left elevator motor
         elevatorMotorLeft.configurator.apply(elevatorLeftConfigs)
@@ -423,9 +423,9 @@ object Elevator : SubsystemBase() {
     @JvmStatic
     fun setAlgaeLevel() {
         if (elevatorToBeSetState == ElevatorState.L2) {
-            Elevator.state = ElevatorState.ALGAE_LOW
+            state = ElevatorState.ALGAE_LOW
         } else if (elevatorToBeSetState == ElevatorState.L3) {
-            Elevator.state = ElevatorState.ALGAE_HIGH
+            state = ElevatorState.ALGAE_HIGH
         }
     }
 }

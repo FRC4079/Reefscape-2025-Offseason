@@ -10,7 +10,4 @@ enum class Direction {
 
     /** Represents the right direction.  */
     RIGHT,
-
-    /** Represents the center direction.  */
-    CENTER,
 }

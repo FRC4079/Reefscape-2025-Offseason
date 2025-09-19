@@ -36,10 +36,7 @@ import kotlin.math.sin
 /** Class containing global values for the robot.  */
 object RobotParameters {
     object ControllerConstants {
-        @JvmField
         val aacrn = XboxController(0)
-
-        @JvmField
         val testPad = XboxController(1)
     }
 
@@ -77,7 +74,6 @@ object RobotParameters {
         const val STEER_MOTOR_GEAR_RATIO: Double = 150.0 / 7
         const val DRIVE_MOTOR_GEAR_RATIO: Double = 6.750000000000000
         private const val WHEEL_DIAMETER: Double = 0.106
-        // new treads so i increased
 
         // TODO CALIBRATE WHEELS
         const val METERS_PER_REV: Double = WHEEL_DIAMETER * PI * 0.99
@@ -92,35 +88,26 @@ object RobotParameters {
     object SwerveParameters {
         /** Class containing PID constants for the swerve drive system.  */
         object PinguParameters {
-            @JvmField
             val PROFILE_CONSTRAINTS = Constraints(0.4, 0.4)
 
-            @JvmField
             val STEER_PINGU_TELE = Pingu(750.0, 5.000, 15.0, 0.0)
 
-            @JvmField
             val STEER_PINGU_AUTO = Pingu(750.0, 5.000, 15.0, 0.0)
 
-            @JvmField
             val DRIVE_PINGU_AUTO = Pingu(5.0, 0.0, 0.0, 0.7)
 
-            @JvmField
             val DRIVE_PINGU_TELE = Pingu(5.0, 0.0, 0.0, 0.7)
 
-            @JvmField
             val ROTATIONAL_PINGU = ProfiledPingu(0.15, 0.0, 0.01, profile = PROFILE_CONSTRAINTS)
 
-            @JvmField
             val Y_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
-            @JvmField
             val X_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
-            @JvmField
             val DIST_PINGU = Pingu(0.2910, 0.0, 0.0)
 
             // TODO remember to update path planner config values and measure everything (cameras etc)
-            @JvmField
+
             val PATH_CONSTRAINTS: PathConstraints =
                 PathConstraints(
                     5.0,
@@ -129,7 +116,6 @@ object RobotParameters {
                     degreesToRadians(720.0),
                 )
 
-            @JvmField
             var config: RobotConfig? = null
 
             init {
@@ -151,7 +137,6 @@ object RobotParameters {
             private val BACK_LEFT: Translation2d = Translation2d(-SWERVE_MODULE_OFFSET, SWERVE_MODULE_OFFSET)
             private val BACK_RIGHT: Translation2d = Translation2d(-SWERVE_MODULE_OFFSET, -SWERVE_MODULE_OFFSET)
 
-            @JvmField
             val kinematics: SwerveDriveKinematics =
                 SwerveDriveKinematics(FRONT_LEFT, FRONT_RIGHT, BACK_LEFT, BACK_RIGHT)
         }
@@ -163,10 +148,8 @@ object RobotParameters {
             const val CANCODER_VAL11: Double = -0.475098
             const val CANCODER_VAL12: Double = -0.032959 + 0.5
 
-            @JvmField
             val DRIVE_MOTOR_INVERTED: InvertedValue = InvertedValue.CounterClockwise_Positive
 
-            @JvmField
             val STEER_MOTOR_INVERTED: InvertedValue = InvertedValue.Clockwise_Positive
             const val JOYSTICK_DEADBAND: Double = 0.05
             const val IS_FIELD_ORIENTED: Boolean = true
@@ -177,7 +160,7 @@ object RobotParameters {
 
             // Testing boolean for logging (to not slow down the robot)
 //            val TEST_MODE: Boolean = !DriverStation.isFMSAttached()
-            val TEST_MODE: Boolean = true
+            const val TEST_MODE: Boolean = true
         }
     }
 
@@ -186,17 +169,15 @@ object RobotParameters {
         const val LOW_BATTERY_VOLTAGE: Double = 11.8
 
         // make this a supplier
-        @JvmField
+
         var robotPos: Pose2d = Pose2d(0.0, 0.0, Rotation2d(0.0, 0.0))
 
-        @JvmField
         var lowBattery: Boolean = false
 
-        @JvmField
         var visionDead: Boolean = false
     }
 
-    /** Class containing constants for the Photonvision subsystem.  */
+    /** Class containing constants for the PhotonVision subsystem.  */
     object PhotonVisionConstants {
         const val CAMERA_ONE_HEIGHT_METER: Double = 0.195
         const val CAMERA_ONE_ANGLE_DEG: Double = 33.0
@@ -209,58 +190,47 @@ object RobotParameters {
         const val RIGHT_OFFSET: Double = -0.163
 
         // THESE NEED TO BE REPLACED WITH TESTED VALUES PLS (BUT I KNOW WE WON'T HAVE TIME FOR THIS)
-        @JvmField
+
         val SINGLE_TARGET_STD_DEV: Matrix<N3, N1> = VecBuilder.fill(0.08, 0.08, 0.05)
 
-        @JvmField
         val MULTI_TARGET_STD_DEV: Matrix<N3, N1> = VecBuilder.fill(0.05, 0.05, 0.03)
 
-        @JvmField
         val SINGLE_TARGET_STD_DEV_3D: Matrix<N4, N1> = VecBuilder.fill(0.08, 0.08, 0.08, 0.05)
 
-        @JvmField
         val MULTI_TARGET_STD_DEV_3D: Matrix<N4, N1> = VecBuilder.fill(0.05, 0.05, 0.05, 0.03)
     }
 
     /** Class containing constants for the elevator subsystem.  */
     object ElevatorParameters {
-        @JvmField
         val ELEVATOR_PINGU: Pingu = Pingu(5.0, 0.0, 0.0, 0.35, 0.5199, 0.42) // g could be 0.42
 
         // MM ↓
 
-        @JvmField
         val ELEVATOR_MAGIC_PINGU = MagicPingu(90.0, 180.0, 0.0)
 
         const val ELEVATOR_SOFT_LIMIT_DOWN: Double = 0.0
 
         const val ELEVATOR_SOFT_LIMIT_UP: Double = 65.0
 
-        @JvmField
         var elevatorToBeSetState: ElevatorState = ElevatorState.L4
 
-        @JvmField
         var isSoftLimitEnabled: Boolean = false
     }
 
     /** Class containing constants for the elevator subsystem.  */
     object ClimberParameters {
-        @JvmField
         val PIVOT_PINGU: Pingu = Pingu(5.0, 0.0, 0.0, 0.35, 0.5199, 0.42) // g could be 0.42
 
         // MM ↓
 
-        @JvmField
         val PIVOT_MAGIC_PINGU = MagicPingu(90.0, 180.0, 0.0)
 
         const val PIVOT_SOFT_LIMIT_DOWN: Double = 0.0
 
         const val PIVOT_SOFT_LIMIT_UP: Double = 65.0
 
-        @JvmField
         var pivotUp: Boolean = true
 
-        @JvmField
         var isSoftLimitEnabled: Boolean = false
     }
 
@@ -268,24 +238,19 @@ object RobotParameters {
         const val CORAL_SENSOR_ID: Int = 0
         const val ALGAE_SENSOR_ID: Int = 0
 
-        @JvmField val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+        val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
 
-        @JvmField val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
+        val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
-        @JvmField var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
+        var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
 
-        @JvmField var outtakeState: OuttakeState = OuttakeState.CORAL_HOLD
+        var outtakeState: OuttakeState = OuttakeState.CORAL_HOLD
 
-        @JvmField var hasPiece: Boolean = false
+        var coralScoring: Boolean = false
 
-        @JvmField var coralScoring: Boolean = false
+        var algaeIntaking: Boolean = false
 
-        @JvmField var algaeIntaking: Boolean = false
-
-        // coral should be intaking and coral state should be intaking
-
-//        @JvmField
-//        var isCoralIntaking: Boolean = false
+        // var isCoralIntaking: Boolean = false
     }
 
     object FieldParameters {
@@ -373,7 +338,7 @@ object RobotParameters {
                 Pose2d(REEF_L.x, REEF_L.y, REEF_L.rotation)
 
             // Tag order is 18, 19, 20, 21, 22, 17
-            @JvmField
+
             val coralScoreBlueList: List<CoralScore> =
                 listOf(
                     Triple(Translation2d(3.6576, 4.0259), SCORING_A_BLUE, SCORING_B_BLUE),
@@ -384,7 +349,6 @@ object RobotParameters {
                     Triple(Translation2d(4.0739, 4.7455), SCORING_K_BLUE, SCORING_L_BLUE),
                 )
 
-            @JvmField
             val coralScoreBlueListNotL4: List<CoralScore> =
                 listOf(
                     Triple(Translation2d(3.6576, 4.0259), SCORING_A_BLUE_NOT_L4, SCORING_B_BLUE_NOT_L4),
@@ -400,7 +364,7 @@ object RobotParameters {
                 Pose2d(
                     FIELD_LENGTH_METERS - bluePose.x,
                     FIELD_WIDTH_METERS - bluePose.y,
-                    bluePose.rotation.plus(Rotation2d.fromDegrees(180.0)),
+                    bluePose.rotation.plus(fromDegrees(180.0)),
                 )
 
             @JvmStatic
@@ -434,19 +398,16 @@ object RobotParameters {
             }
 
             // TODO convert to red, now we need to implement it so that we do not have to swap sides every deploy
-            // REMEMBER EVERY DEPLOY CHANGE THE DRIVERSATION TO THE CORRECT COLOR
+            // REMEMBER EVERY DEPLOY CHANGE THE DRIVERSTATION TO THE CORRECT COLOR
 
             // List of Source positions
-            @JvmField
+
             val LEFT_CORAL_STATION_FAR: Pose2d = Pose2d(1.64, 7.33, fromDegrees(-54.5))
 
-            @JvmField
             val LEFT_CORAL_STATION_NEAR: Pose2d = Pose2d(0.71, 6.68, fromDegrees(-54.5))
 
-            @JvmField
             val RIGHT_CORAL_STATION_FAR: Pose2d = Pose2d(1.61, 0.70, fromDegrees(55.0))
 
-            @JvmField
             val RIGHT_CORAL_STATION_NEAR: Pose2d = Pose2d(0.64, 1.37, fromDegrees(55.0))
         }
     }

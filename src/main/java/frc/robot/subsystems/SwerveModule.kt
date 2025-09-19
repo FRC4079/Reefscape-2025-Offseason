@@ -275,7 +275,6 @@ class SwerveModule(
      *
      * @param driveId The ID of the drive motor.
      * @param steerId The ID of the steer motor.
-     * @param canCoderId The ID of the CANcoder.
      */
     fun initializeAlarms(
         driveId: Int,
