@@ -1,10 +1,9 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.commands.Sequences
-import frc.robot.subsystems.Swerve.swerveState
 import frc.robot.utils.Pose.getDesiredScorePose
-import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.RobotParameters
+import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.SwerveDriveState
@@ -22,24 +21,10 @@ object SuperStructure : SubsystemBase() {
         wantedState.add(state)
     }
 
-    fun handleStateTransition() {
-        when (wantedState.removeFirst()) {
-            // TODO: add state transition handling
-            else -> {}
-        }
-    }
-
     fun applyState() {
         when (val state = currentState) {
-            is State.TeleOpDrive -> {
-                swerveState = SwerveDriveState.ManualDrive
-            }
-
-            is State.ScoreAlign -> {
-                val dir = state.dir
-                driveToScoringPose(dir)
-            }
-
+            is State.TeleOpDrive -> swerveState = SwerveDriveState.ManualDrive
+            is State.ScoreAlign -> driveToScoringPose(state.dir)
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
         }
@@ -66,7 +51,7 @@ object SuperStructure : SubsystemBase() {
 
     override fun periodic() {
         if (wantedState.isNotEmpty()) {
-            handleStateTransition()
+            wantedState.removeFirst()
         }
         applyState()
     }

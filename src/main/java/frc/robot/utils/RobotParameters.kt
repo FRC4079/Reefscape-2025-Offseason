@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.XboxController
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
+import frc.robot.utils.emu.SwerveDriveState
 import xyz.malefic.frc.pingu.LogPingu.metaLogs
 import xyz.malefic.frc.pingu.MagicPingu
 import xyz.malefic.frc.pingu.Pingu
@@ -86,6 +87,8 @@ object RobotParameters {
 
     /** Class containing global values related to the swerve drive system.  */
     object SwerveParameters {
+        var swerveState: SwerveDriveState = SwerveDriveState.ManualDrive
+
         /** Class containing PID constants for the swerve drive system.  */
         object PinguParameters {
             val PROFILE_CONSTRAINTS = Constraints(0.4, 0.4)
