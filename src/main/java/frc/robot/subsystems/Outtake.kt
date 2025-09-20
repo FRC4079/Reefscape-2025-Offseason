@@ -19,6 +19,8 @@ import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
+import frc.robot.utils.RobotParameters.OuttakeParameters.OUTTAKE_PINGU
+import frc.robot.utils.RobotParameters.OuttakeParameters.PIVOT_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
@@ -27,6 +29,7 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.State
+import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -53,39 +56,8 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        val pivotMotorConfiguration = TalonFXConfiguration()
-        val outtakeMotorConfiguration = TalonFXConfiguration()
-
-        pivotMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        outtakeMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
-
-        pivotMotorConfiguration.Slot0.kP = OuttakeParameters.ALGAE_PINGU.p
-        pivotMotorConfiguration.Slot0.kI = OuttakeParameters.ALGAE_PINGU.i
-        pivotMotorConfiguration.Slot0.kD = OuttakeParameters.ALGAE_PINGU.d
-
-        pivotMotorConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
-        outtakeMotorConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
-
-        pivotMotor.configurator.apply(pivotMotorConfiguration)
-        outtakeMotor.configurator.apply(outtakeMotorConfiguration)
-
-        pivotMotorConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
-        pivotMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
-        pivotMotorConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
-        pivotMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
-
-        outtakeMotorConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
-        outtakeMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
-        outtakeMotorConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
-        outtakeMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
-
-        pivotMotorConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0
-        pivotMotorConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false
-        pivotMotorConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0
-        pivotMotorConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false
-
-        pivotMotor.configurator.apply(pivotMotorConfiguration)
-        outtakeMotor.configurator.apply(outtakeMotorConfiguration)
+        pivotMotor.configureWithDefaults(PIVOT_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
+        outtakeMotor.configureWithDefaults(OUTTAKE_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
 
         val canCoderConfiguration = CANcoderConfiguration()
 

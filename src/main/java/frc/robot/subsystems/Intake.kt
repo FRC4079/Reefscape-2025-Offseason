@@ -1,17 +1,16 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs
-import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
+import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
-import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
+import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -24,52 +23,19 @@ object Intake : SubsystemBase() {
     private val voltageOut: VoltageOut
     private val voltageOutFeeder: VoltageOut
 
-    private var motorsRunning = false
-
     /**
      * Creates a new instance of this IntakeSubsystem. This constructor is private since this class is
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        val coralFeederConfiguration = TalonFXConfiguration()
-        val starFeederConfiguration = TalonFXConfiguration()
+        wheelFeederMotor.configureWithDefaults(WHEEL_FEEDER_PINGU)
+        add(wheelFeederMotor, "Coral Feeder")
 
-        coralFeederConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        starFeederConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast
-
-        coralFeederConfiguration.Slot0.kP = CORAL_FEEDER_PINGU.p
-        coralFeederConfiguration.Slot0.kI = CORAL_FEEDER_PINGU.i
-        coralFeederConfiguration.Slot0.kD = CORAL_FEEDER_PINGU.d
-        coralFeederConfiguration.Slot0.kV = CORAL_FEEDER_PINGU.v!!
-
-        val coralFeederCurrentConfig = CurrentLimitsConfigs()
-        val starFeederCurrentConfig = CurrentLimitsConfigs()
-
-        coralFeederCurrentConfig.SupplyCurrentLimit = 40.0
-        coralFeederCurrentConfig.SupplyCurrentLimitEnable = true
-        coralFeederCurrentConfig.StatorCurrentLimit = 40.0
-        coralFeederCurrentConfig.StatorCurrentLimitEnable = true
-
-        starFeederCurrentConfig.SupplyCurrentLimit = 40.0
-        starFeederCurrentConfig.SupplyCurrentLimitEnable = true
-        starFeederCurrentConfig.StatorCurrentLimit = 40.0
-        starFeederCurrentConfig.StatorCurrentLimitEnable = true
-
-        wheelFeederMotor.configurator.apply(coralFeederCurrentConfig)
-        starFeederMotor.configurator.apply(starFeederCurrentConfig)
-
-        // on
-        coralFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive
-        starFeederConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive
-
-        wheelFeederMotor.configurator.apply(coralFeederConfiguration)
-        starFeederMotor.configurator.apply(starFeederConfiguration)
+        starFeederMotor.configureWithDefaults(STAR_FEEDER_PINGU, neutralMode = NeutralModeValue.Coast)
+        add(starFeederMotor, "Star Feeder Motor")
 
         voltageOut = VoltageOut(0.0)
         voltageOutFeeder = VoltageOut(0.0)
-
-        add(wheelFeederMotor, "Coral Feeder")
-        add(starFeederMotor, "Star Feeder Motor")
     }
 
     /**
@@ -90,7 +56,6 @@ object Intake : SubsystemBase() {
 
         logs {
             log("Coral/Coral Scoring", coralScoring)
-            log("Coral/motorsRunning", motorsRunning)
             log("Coral/Coral State", outtakeState.toString())
         }
     }
@@ -101,7 +66,6 @@ object Intake : SubsystemBase() {
     fun stopMotors() {
         wheelFeederMotor.stopMotor()
         starFeederMotor.stopMotor()
-        motorsRunning = false
     }
 
     /**
@@ -120,7 +84,6 @@ object Intake : SubsystemBase() {
     fun reverseMotors() {
         wheelFeederMotor.setControl(setOutput(-4.5))
         starFeederMotor.setControl(setOutput(-4.5))
-        motorsRunning = true
     }
 
     /**

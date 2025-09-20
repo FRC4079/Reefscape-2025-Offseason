@@ -237,13 +237,17 @@ object RobotParameters {
         var isSoftLimitEnabled: Boolean = false
     }
 
+    object IntakeParameters {
+        val STAR_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+        val WHEEL_FEEDER_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
+    }
+
     object OuttakeParameters {
-        const val CORAL_SENSOR_ID: Int = 0
-        const val ALGAE_SENSOR_ID: Int = 0
+        const val CORAL_SENSOR_ID: Int = 1
+        const val ALGAE_SENSOR_ID: Int = 2
 
-        val CORAL_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
-
-        val ALGAE_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
+        val OUTTAKE_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
+        val PIVOT_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
         var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
 
@@ -252,8 +256,6 @@ object RobotParameters {
         var coralScoring: Boolean = false
 
         var algaeIntaking: Boolean = false
-
-        // var isCoralIntaking: Boolean = false
     }
 
     object FieldParameters {

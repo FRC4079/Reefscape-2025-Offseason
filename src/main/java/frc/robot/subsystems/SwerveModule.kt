@@ -74,7 +74,7 @@ class SwerveModule(
         // Set the Pingu values for the drive motor
         driveConfigs.setPingu(DRIVE_PINGU_AUTO)
 
-        // Sets the brake mode, invered, and current limits for the drive motor
+        // Sets the brake mode, inverted, and current limits for the drive motor
         driveConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
         driveConfigs.MotorOutput.Inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED
         driveConfigs.CurrentLimits.SupplyCurrentLimit = DRIVE_SUPPLY_LIMIT
