@@ -2,12 +2,10 @@ package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.commands.Sequences
-import frc.robot.subsystems.Swerve.swerveState
 import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
-import frc.robot.utils.emu.SwerveDriveState
 
 object SuperStructure : SubsystemBase() {
     var currentState: State = State.TeleOpDrive
@@ -31,13 +29,22 @@ object SuperStructure : SubsystemBase() {
 
     fun applyState() {
         when (val state = currentState) {
-            is State.TeleOpDrive -> {
-                swerveState = SwerveDriveState.ManualDrive
-            }
+            is State.TeleOpDrive -> Swerve.stickDrive(aacrn)
 
             is State.ScoreAlign -> {
                 val dir = state.dir
-                driveToScoringPose(dir)
+                Sequences.fullScore(dir) // TODO: actually implement a full score sequence
+            }
+
+            is State.Algae -> {
+                when (state) {
+                    is State.Algae.High -> {
+                        // TODO: high algae sequence
+                    }
+                    is State.Algae.Low -> {
+                        // TODO: low algae sequence
+                    }
+                }
             }
 
             State.ScoreManual -> TODO()

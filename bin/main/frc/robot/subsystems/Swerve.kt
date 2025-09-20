@@ -57,7 +57,6 @@ import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.IS_FIELD_ORIE
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State.ScoreAlign
 import frc.robot.utils.emu.State.TeleOpDrive
-import frc.robot.utils.emu.SwerveDriveState
 import frc.robot.utils.leftStickPosition
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
@@ -76,8 +75,6 @@ import kotlin.math.min
 
 object Swerve : SubsystemBase() {
     private val poseEstimator: SwerveDrivePoseEstimator
-
-    var swerveState: SwerveDriveState = SwerveDriveState.ManualDrive
     private val poseEstimator3d: SwerveDrivePoseEstimator3d
     private val field = Field2d()
     private val pidgey = Pigeon2(PIDGEY_ID)
@@ -241,9 +238,9 @@ object Swerve : SubsystemBase() {
     private fun applySwerveState() {
         // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
-        if (swerveState is SwerveDriveState.ManualDrive) {
+        if (currentState is TeleOpDrive) {
             stickDrive(aacrn)
-        } else if (swerveState is SwerveDriveState.SwerveAlignment) {
+        } else if (currentState is ScoreAlign) {
             // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
             val translationToDesiredPoint =
                 desiredPoseForDriveToPoint.translation.minus(this.pose!!.translation)
@@ -641,8 +638,7 @@ object Swerve : SubsystemBase() {
     ) {
         log("Swerve/Driving to scoring pose", pose)
         this.desiredPoseForDriveToPoint = pose
-//        SuperStructure + ScoreAlign(direction)
-        swerveState = SwerveDriveState.SwerveAlignment(direction)
+        SuperStructure + ScoreAlign(direction)
         this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint
     }
