@@ -37,7 +37,7 @@ object RobotContainer {
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
-//            bind("HasPieceFalse", hasPieceFalse())
+            // bind("HasPieceFalse", hasPieceFalse())
             bind("MoveElevatorL4Auto", moveElevatorState(L4))
             bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
             bind("SetL1", setElevatorState(L1))

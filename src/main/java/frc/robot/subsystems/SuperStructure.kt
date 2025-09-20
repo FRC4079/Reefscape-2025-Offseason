@@ -36,17 +36,6 @@ object SuperStructure : SubsystemBase() {
                 Sequences.fullScore(dir) // TODO: actually implement a full score sequence
             }
 
-            is State.Algae -> {
-                when (state) {
-                    is State.Algae.High -> {
-                        // TODO: high algae sequence
-                    }
-                    is State.Algae.Low -> {
-                        // TODO: low algae sequence
-                    }
-                }
-            }
-
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
         }
