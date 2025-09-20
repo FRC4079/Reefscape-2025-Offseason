@@ -34,7 +34,7 @@ fun List<PhotonModule>.getDecentResultPairs(): List<Pair<PhotonModule, PhotonPip
         .mapNotNull { module ->
             module.allUnreadResults
                 .getOrNull(0)
-                // TODO make sure this isnt rejecting too much maybe lower it idk
+                // TODO make sure this isn't rejecting too much maybe lower it idk
                 ?.takeIf {
                     it.hasTargets() // && module.currentStdDevs.normF() < 0.9
                 }?.let { module to it }
@@ -44,7 +44,7 @@ fun List<PhotonModule>.getDecentResultPairs(): List<Pair<PhotonModule, PhotonPip
  * Extension function to set the Pingu values of a TalonFXConfiguration using a Pingu object.
  *
  * @receiver TalonFXConfiguration The TalonFX configuration to set the values for.
- * @param pingu Pingu The Pingu object containing the PIDF values.
+ * @param pingu Pingu The Pingu object containing the PID values.
  */
 fun TalonFXConfiguration.setPingu(pingu: Pingu) =
     pingu.apply {
@@ -71,19 +71,6 @@ fun TalonFXConfiguration.setPingu(pingu: NetworkPingu) =
         s ?. run { Slot0.kS = s!!.get() }
         g ?. run { Slot0.kG = g!!.get() }
     }
-
-/**
- * Extension property to create a ProfiledPIDController using the Pingu object's PID values.
- *
- * This property initializes a ProfiledPIDController with the proportional (p), integral (i),
- * and derivative (d) gains from the Pingu object, as well as the profile constraints defined
- * in PROFILE_CONSTRAINTS.
- *
- * @receiver Pingu The Pingu object containing the PID values.
- * @return ProfiledPIDController The initialized ProfiledPIDController.
- */
-val Pingu.profiledPIDController
-    get() = ProfiledPIDController(p, i, d, PROFILE_CONSTRAINTS)
 
 /**
  * Extension property to get a new Pose2d rotated by 180 degrees from the current pose.

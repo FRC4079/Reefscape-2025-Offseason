@@ -37,7 +37,7 @@ object RobotContainer {
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
-//            bind("HasPieceFalse", hasPieceFalse())
+            // bind("HasPieceFalse", hasPieceFalse())
             bind("MoveElevatorL4Auto", moveElevatorState(L4))
             bind("MoveElevatorDefaultAuto", moveElevatorState(DEFAULT))
             bind("SetL1", setElevatorState(L1))
@@ -75,13 +75,17 @@ object RobotContainer {
             press(A) {
                 setElevatorToBeSetState(DEFAULT)
             }
-            press(LEFT_TRIGGER) {
+            hold(LEFT_TRIGGER) {
                 Outtake.intakeAlgae()
             }
             release(LEFT_TRIGGER) {
                 Outtake.stopAlgaeIntake()
+                if (Outtake.getAlgaeSensor()) {
+                    outtakeState = ALGAE_HOLD
+                    setElevatorToBeSetState(L2)
+                }
             }
-            press(Button.RIGHT_TRIGGER) {
+            press(RIGHT_TRIGGER) {
                 when (outtakeState) {
                     ALGAE_HOLD -> outtakeState = ALGAE_SHOOT
                     CORAL_HOLD -> SuperStructure + ScoreManual
