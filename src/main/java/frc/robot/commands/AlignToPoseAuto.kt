@@ -188,16 +188,5 @@ class AlignToPoseAuto(
      */
     override fun end(interrupted: Boolean) {
         Swerve.stop()
-    } //  public void initializeLoggedNetworkPingu() {
-    //    networkPinguRotation = new NetworkPingu(new
-    // LoggedNetworkNumber("Tuning/AlignToPose/Rotational P", rotationalController.getP()), new
-    // LoggedNetworkNumber("Tuning/AlignToPose/Rotational I", rotationalController.getI()), new
-    // LoggedNetworkNumber("Tuning/AlignToPose/Rotational D", rotationalController.getD()));
-    //    networkPinguY = new NetworkPingu(new LoggedNetworkNumber("Tuning/AlignToPose/Y P",
-    // yController.getP()), new LoggedNetworkNumber("Tuning/AlignToPose/Y I", yController.getI()), new
-    // LoggedNetworkNumber("Tuning/AlignToPose/Y D", yController.getD()));
-    //    networkPinguX = new NetworkPingu(new LoggedNetworkNumber("Tuning/AlignToPose/X P",
-    // xController.getP()), new LoggedNetworkNumber("Tuning/AlignToPose/X I", xController.getI()), new
-    // LoggedNetworkNumber("Tuning/AlignToPose/X D", xController.getD()));
-    //  }
+    }
 }

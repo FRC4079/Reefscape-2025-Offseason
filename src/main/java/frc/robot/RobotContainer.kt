@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package frc.robot
 
 import com.pathplanner.lib.auto.AutoBuilder
