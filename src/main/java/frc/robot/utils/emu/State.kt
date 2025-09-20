@@ -13,11 +13,4 @@ sealed class State {
     ) : State()
 
     object ScoreManual : State()
-
-    // Algae with different options
-    sealed class Algae : State() {
-        object High : Algae()
-
-        object Low : Algae()
-    }
 }
