@@ -31,7 +31,6 @@ object Intake : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-
         val coralFeederConfiguration = TalonFXConfiguration()
         val starFeederConfiguration = TalonFXConfiguration()
 

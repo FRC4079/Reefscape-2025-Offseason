@@ -1,23 +1,28 @@
 package frc.robot.subsystems
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
+import com.ctre.phoenix6.signals.SensorDirectionValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.subsystems.Outtake.setOuttakeSpeed
-import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_INTAKE_MOTOR_ID
-import frc.robot.utils.RobotParameters.MotorParameters.ALGAE_PIVOT_MOTOR_ID
+import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
+import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_CANBORE_ID
+import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
@@ -33,8 +38,9 @@ import xyz.malefic.frc.pingu.LogPingu.logs
  */
 object Outtake : SubsystemBase() {
     /** Creates a new end effector.  */
-    private val pivotMotor: TalonFX = TalonFX(ALGAE_PIVOT_MOTOR_ID)
-    private val outtakeMotor: TalonFX = TalonFX(ALGAE_INTAKE_MOTOR_ID)
+    private val pivotMotor: TalonFX = TalonFX(OUTTAKE_PIVOT_MOTOR_ID)
+    private val outtakeMotor: TalonFX = TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)
+    private val canbore = CANcoder(OUTTAKE_PIVOT_CANBORE_ID)
 
     private val voltageOut: VoltageOut
     private val voltagePos: PositionVoltage
@@ -47,39 +53,45 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        val algaePivotConfiguration = TalonFXConfiguration()
-        val algaeIntakeConfiguration = TalonFXConfiguration()
+        val pivotMotorConfiguration = TalonFXConfiguration()
+        val outtakeMotorConfiguration = TalonFXConfiguration()
 
-        algaePivotConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        algaeIntakeConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
+        pivotMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
+        outtakeMotorConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake
 
-        algaePivotConfiguration.Slot0.kP = OuttakeParameters.ALGAE_PINGU.p
-        algaePivotConfiguration.Slot0.kI = OuttakeParameters.ALGAE_PINGU.i
-        algaePivotConfiguration.Slot0.kD = OuttakeParameters.ALGAE_PINGU.d
+        pivotMotorConfiguration.Slot0.kP = OuttakeParameters.ALGAE_PINGU.p
+        pivotMotorConfiguration.Slot0.kI = OuttakeParameters.ALGAE_PINGU.i
+        pivotMotorConfiguration.Slot0.kD = OuttakeParameters.ALGAE_PINGU.d
 
-        algaePivotConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
-        algaeIntakeConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+        pivotMotorConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+        outtakeMotorConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
 
-        pivotMotor.configurator.apply(algaePivotConfiguration)
-        outtakeMotor.configurator.apply(algaeIntakeConfiguration)
+        pivotMotor.configurator.apply(pivotMotorConfiguration)
+        outtakeMotor.configurator.apply(outtakeMotorConfiguration)
 
-        algaePivotConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
-        algaePivotConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
-        algaePivotConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
-        algaePivotConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
+        pivotMotorConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
+        pivotMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
+        pivotMotorConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
+        pivotMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
 
-        algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
-        algaeIntakeConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
-        algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
-        algaeIntakeConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
+        outtakeMotorConfiguration.CurrentLimits.SupplyCurrentLimit = 30.0
+        outtakeMotorConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true
+        outtakeMotorConfiguration.CurrentLimits.StatorCurrentLimit = 30.0
+        outtakeMotorConfiguration.CurrentLimits.StatorCurrentLimitEnable = true
 
-        algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0
-        algaePivotConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false
-        algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0
-        algaePivotConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false
+        pivotMotorConfiguration.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.0
+        pivotMotorConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = false
+        pivotMotorConfiguration.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0
+        pivotMotorConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = false
 
-        pivotMotor.configurator.apply(algaePivotConfiguration)
-        outtakeMotor.configurator.apply(algaeIntakeConfiguration)
+        pivotMotor.configurator.apply(pivotMotorConfiguration)
+        outtakeMotor.configurator.apply(outtakeMotorConfiguration)
+
+        val canCoderConfiguration = CANcoderConfiguration()
+
+        canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive
+        canCoderConfiguration.MagnetSensor.MagnetOffset = ENCODER_OFFSET
+        canCoderConfiguration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0
 
         //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
         // InvertedValue.Clockwise_Positive;
