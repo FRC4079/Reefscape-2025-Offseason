@@ -13,7 +13,6 @@ import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
-import frc.robot.subsystems.SuperStructure.driveToScoringPose
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
@@ -24,7 +23,6 @@ import frc.robot.utils.emu.ElevatorState.*
 import frc.robot.utils.emu.OuttakeState.*
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.State.ScoreManual
-import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.*
 import xyz.malefic.frc.pingu.Bingu.bindings
 import xyz.malefic.frc.pingu.CommandPingu

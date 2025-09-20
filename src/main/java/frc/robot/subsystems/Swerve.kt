@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.RobotParameters
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID

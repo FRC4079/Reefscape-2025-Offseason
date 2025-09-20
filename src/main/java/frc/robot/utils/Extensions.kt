@@ -3,13 +3,11 @@ package frc.robot.utils
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.apriltag.AprilTagFields
-import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units.inchesToMeters
 import edu.wpi.first.math.util.Units.metersToInches
 import edu.wpi.first.wpilibj.XboxController
-import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PROFILE_CONSTRAINTS
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import org.photonvision.targeting.PhotonPipelineResult
