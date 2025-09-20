@@ -44,9 +44,6 @@ object Elevator : SubsystemBase() {
     private val posRequest: PositionDutyCycle
     private val velocityRequest: VelocityTorqueCurrentFOC
 
-    private val leftSoftLimitConfig: SoftwareLimitSwitchConfigs
-    private val rightSoftLimitConfig: SoftwareLimitSwitchConfigs
-
     private lateinit var elevatorP: LoggedNetworkNumber
     private lateinit var elevatorI: LoggedNetworkNumber
     private lateinit var elevatorD: LoggedNetworkNumber
@@ -60,8 +57,6 @@ object Elevator : SubsystemBase() {
     private val voltageOut: VoltageOut
     private val elevatorLeftConfigs: TalonFXConfiguration
     private val elevatorRightConfigs: TalonFXConfiguration
-
-    private var motionMagicConfigs: MotionMagicConfigs
 
     /**
      * The state of the elevator
@@ -80,82 +75,28 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-        val elevatorLeftConfigurator = elevatorMotorLeft.configurator
-        val elevatorRightConfigurator = elevatorMotorRight.configurator
-
-        // Configure motors with defaults using Malefix extension
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
-            neutralMode = NeutralModeValue.Brake,
             inverted = InvertedValue.CounterClockwise_Positive,
+            currentLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            dutyCycleNeutralDeadband = 0.1,
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
         )
         elevatorMotorRight.configureWithDefaults(
             ELEVATOR_PINGU,
-            neutralMode = NeutralModeValue.Brake,
-            inverted = InvertedValue.Clockwise_Positive,
+            currentLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            dutyCycleNeutralDeadband = 0.1,
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
         )
 
         elevatorLeftConfigs = TalonFXConfiguration()
         elevatorRightConfigs = TalonFXConfiguration()
-
-        val leftMotorCurrentConfig = CurrentLimitsConfigs()
-        val rightMotorCurrentConfig = CurrentLimitsConfigs()
-
-        val leftMotorRampConfig = ClosedLoopRampsConfigs()
-        val rightMotorRampConfig = ClosedLoopRampsConfigs()
-
-        leftSoftLimitConfig = SoftwareLimitSwitchConfigs()
-        rightSoftLimitConfig = SoftwareLimitSwitchConfigs()
-
-        leftMotorCurrentConfig.SupplyCurrentLimit = 40.79
-        leftMotorCurrentConfig.SupplyCurrentLimitEnable = true
-        leftMotorCurrentConfig.StatorCurrentLimit = 40.79
-        leftMotorCurrentConfig.StatorCurrentLimitEnable = true
-
-        rightMotorCurrentConfig.SupplyCurrentLimit = 40.79
-        rightMotorCurrentConfig.SupplyCurrentLimitEnable = true
-        rightMotorCurrentConfig.StatorCurrentLimit = 40.79
-        rightMotorCurrentConfig.StatorCurrentLimitEnable = true
-
-        elevatorMotorLeft.configurator.apply(leftMotorCurrentConfig)
-        elevatorMotorRight.configurator.apply(rightMotorCurrentConfig)
-
-        leftMotorRampConfig.DutyCycleClosedLoopRampPeriod = 0.0
-        rightMotorRampConfig.DutyCycleClosedLoopRampPeriod = 0.0
-
-        elevatorMotorLeft.configurator.apply(leftMotorRampConfig)
-        elevatorMotorRight.configurator.apply(rightMotorRampConfig)
-
-        // on
-        leftSoftLimitConfig.ForwardSoftLimitEnable = true
-        leftSoftLimitConfig.ReverseSoftLimitEnable = true
-        leftSoftLimitConfig.ForwardSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_UP
-        leftSoftLimitConfig.ReverseSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_DOWN
-
-        rightSoftLimitConfig.ForwardSoftLimitEnable = true
-        rightSoftLimitConfig.ReverseSoftLimitEnable = true
-        rightSoftLimitConfig.ReverseSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_DOWN
-        rightSoftLimitConfig.ForwardSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_UP
-
-        elevatorLeftConfigs.SoftwareLimitSwitch = leftSoftLimitConfig
-        elevatorRightConfigs.SoftwareLimitSwitch = rightSoftLimitConfig
-
-        elevatorLeftConfigs.MotorOutput.DutyCycleNeutralDeadband = 0.1
-        elevatorRightConfigs.MotorOutput.DutyCycleNeutralDeadband = 0.1
-
-        elevatorMotorLeft.configurator.apply(leftSoftLimitConfig)
-        elevatorMotorRight.configurator.apply(rightSoftLimitConfig)
 
         velocityRequest = VelocityTorqueCurrentFOC(0.0)
         posRequest = PositionDutyCycle(0.0)
         voltageOut = VoltageOut(0.0)
         motionMagicVoltage = MotionMagicVoltage(0.0)
         cycleOut = DutyCycleOut(0.0)
-
-        motionMagicConfigs = elevatorLeftConfigs.MotionMagic
-        motionMagicConfigs.MotionMagicCruiseVelocity = ELEVATOR_MAGIC_PINGU.velocity
-        motionMagicConfigs.MotionMagicAcceleration = ELEVATOR_MAGIC_PINGU.acceleration
-        motionMagicConfigs.MotionMagicJerk = ELEVATOR_MAGIC_PINGU.jerk
 
         motionMagicVoltage.Slot = 0
 
@@ -176,12 +117,6 @@ object Elevator : SubsystemBase() {
 
         elevatorMotorLeft.setPosition(0.0)
         elevatorMotorRight.setPosition(0.0)
-
-        elevatorLeftConfigurator.apply(elevatorLeftConfigs)
-        elevatorRightConfigurator.apply(elevatorRightConfigs)
-
-        elevatorLeftConfigurator.apply(motionMagicConfigs)
-        elevatorRightConfigurator.apply(motionMagicConfigs)
 
         add(elevatorMotorLeft, "left elevator")
         add(elevatorMotorRight, "right elevator")
@@ -289,18 +224,18 @@ object Elevator : SubsystemBase() {
         elevatorMotorRight.setPosition(0.0)
     }
 
-    /** Toggles the soft stop for the elevator motor  */
-    fun toggleSoftStop() {
-        ElevatorParameters.isSoftLimitEnabled = !ElevatorParameters.isSoftLimitEnabled
-        leftSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-        leftSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-
-        rightSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-        rightSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-
-        elevatorMotorLeft.configurator.apply(leftSoftLimitConfig)
-        elevatorMotorRight.configurator.apply(rightSoftLimitConfig)
-    }
+//    /** Toggles the soft stop for the elevator motor  */
+//    fun toggleSoftStop() {
+//        ElevatorParameters.isSoftLimitEnabled = !ElevatorParameters.isSoftLimitEnabled
+//        leftSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
+//        leftSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
+//
+//        rightSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
+//        rightSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
+//
+//        elevatorMotorLeft.configurator.apply(leftSoftLimitConfig)
+//        elevatorMotorRight.configurator.apply(rightSoftLimitConfig)
+//    }
 
     /**
      * Move the elevator motor at a specific velocity
@@ -345,14 +280,14 @@ object Elevator : SubsystemBase() {
         cruiseV =
             LoggedNetworkNumber(
                 "Tuning/Elevator/MM Cruise Velocity",
-                motionMagicConfigs.MotionMagicCruiseVelocity,
+                ELEVATOR_MAGIC_PINGU.velocity,
             )
         acc =
             LoggedNetworkNumber(
                 "Tuning/Elevator/MM Acceleration",
-                motionMagicConfigs.MotionMagicAcceleration,
+                ELEVATOR_MAGIC_PINGU.acceleration,
             )
-        jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", motionMagicConfigs.MotionMagicJerk)
+        jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", ELEVATOR_MAGIC_PINGU.jerk)
     }
 
     /**
@@ -386,18 +321,18 @@ object Elevator : SubsystemBase() {
         elevatorRightConfigs.setPingu(ELEVATOR_PINGU)
 
         // Update the Motion Magic configurations with the current PID values
-        motionMagicConfigs = elevatorLeftConfigs.MotionMagic
-        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV.get()
-        motionMagicConfigs.MotionMagicAcceleration = acc.get()
-        motionMagicConfigs.MotionMagicJerk = jerk.get()
+//        motionMagicConfigs = elevatorLeftConfigs.MotionMagic
+//        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV.get()
+//        motionMagicConfigs.MotionMagicAcceleration = acc.get()
+//        motionMagicConfigs.MotionMagicJerk = jerk.get()
 
         // Apply the updated configurations to the left elevator motor
         elevatorMotorLeft.configurator.apply(elevatorLeftConfigs)
         elevatorMotorRight.configurator.apply(elevatorRightConfigs)
 
         // Apply the Motion Magic configurations to the left and right elevator motors
-        elevatorMotorLeft.configurator.apply(motionMagicConfigs)
-        elevatorMotorRight.configurator.apply(motionMagicConfigs)
+//        elevatorMotorLeft.configurator.apply(motionMagicConfigs)
+//        elevatorMotorRight.configurator.apply(motionMagicConfigs)
     }
 
     /**
