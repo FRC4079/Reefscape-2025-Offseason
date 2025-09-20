@@ -50,7 +50,7 @@ object SuperStructure : SubsystemBase() {
 
     override fun periodic() {
         if (wantedState.isNotEmpty()) {
-            wantedState.removeFirst()
+            currentState = wantedState.removeFirst()
         }
         applyState()
     }
