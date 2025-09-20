@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.subsystems.SuperStructure.currentState
+import frc.robot.utils.RobotParameters
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
@@ -54,9 +54,8 @@ import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL1
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL12
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.CANCODER_VAL9
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.IS_FIELD_ORIENTED
+import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
-import frc.robot.utils.emu.State.ScoreAlign
-import frc.robot.utils.emu.State.TeleOpDrive
 import frc.robot.utils.emu.SwerveDriveState
 import frc.robot.utils.leftStickPosition
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -76,8 +75,6 @@ import kotlin.math.min
 
 object Swerve : SubsystemBase() {
     private val poseEstimator: SwerveDrivePoseEstimator
-
-    var swerveState: SwerveDriveState = SwerveDriveState.ManualDrive
     private val poseEstimator3d: SwerveDrivePoseEstimator3d
     private val field = Field2d()
     private val pidgey = Pigeon2(PIDGEY_ID)
@@ -372,9 +369,7 @@ object Swerve : SubsystemBase() {
         forwardSpeed: Double,
         leftSpeed: Double,
         turnSpeed: Double,
-    ) {
-        setDriveSpeeds(forwardSpeed, leftSpeed, turnSpeed, IS_FIELD_ORIENTED)
-    }
+    ) = setDriveSpeeds(forwardSpeed, leftSpeed, turnSpeed, IS_FIELD_ORIENTED)
 
     /**
      * Sets the drive speeds for the swerve modules.
