@@ -26,6 +26,7 @@ import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.setPingu
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
+import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -82,28 +83,20 @@ object Elevator : SubsystemBase() {
         val elevatorLeftConfigurator = elevatorMotorLeft.configurator
         val elevatorRightConfigurator = elevatorMotorRight.configurator
 
+        // Configure motors with defaults using Malefix extension
+        elevatorMotorLeft.configureWithDefaults(
+            ELEVATOR_PINGU,
+            neutralMode = NeutralModeValue.Brake,
+            inverted = InvertedValue.CounterClockwise_Positive,
+        )
+        elevatorMotorRight.configureWithDefaults(
+            ELEVATOR_PINGU,
+            neutralMode = NeutralModeValue.Brake,
+            inverted = InvertedValue.Clockwise_Positive,
+        )
+
         elevatorLeftConfigs = TalonFXConfiguration()
         elevatorRightConfigs = TalonFXConfiguration()
-
-        elevatorLeftConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        elevatorRightConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
-
-        elevatorLeftConfigs.Slot0.kP = ELEVATOR_PINGU.p
-        elevatorLeftConfigs.Slot0.kI = ELEVATOR_PINGU.i
-        elevatorLeftConfigs.Slot0.kD = ELEVATOR_PINGU.d
-        elevatorLeftConfigs.Slot0.kV = ELEVATOR_PINGU.v!!
-        elevatorLeftConfigs.Slot0.kS = ELEVATOR_PINGU.s!!
-        elevatorLeftConfigs.Slot0.kG = ELEVATOR_PINGU.g!!
-
-        elevatorRightConfigs.Slot0.kP = ELEVATOR_PINGU.p
-        elevatorRightConfigs.Slot0.kI = ELEVATOR_PINGU.i
-        elevatorRightConfigs.Slot0.kD = ELEVATOR_PINGU.d
-        elevatorRightConfigs.Slot0.kV = ELEVATOR_PINGU.v!!
-        elevatorRightConfigs.Slot0.kS = ELEVATOR_PINGU.s!!
-        elevatorRightConfigs.Slot0.kG = ELEVATOR_PINGU.g!!
-
-        elevatorMotorLeft.configurator.apply(elevatorLeftConfigs)
-        elevatorMotorRight.configurator.apply(elevatorRightConfigs)
 
         val leftMotorCurrentConfig = CurrentLimitsConfigs()
         val rightMotorCurrentConfig = CurrentLimitsConfigs()
@@ -144,8 +137,6 @@ object Elevator : SubsystemBase() {
         rightSoftLimitConfig.ReverseSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_DOWN
         rightSoftLimitConfig.ForwardSoftLimitThreshold = ELEVATOR_SOFT_LIMIT_UP
 
-        elevatorLeftConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
-        elevatorRightConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive
         elevatorLeftConfigs.SoftwareLimitSwitch = leftSoftLimitConfig
         elevatorRightConfigs.SoftwareLimitSwitch = rightSoftLimitConfig
 

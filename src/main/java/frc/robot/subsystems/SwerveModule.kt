@@ -27,6 +27,7 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PI
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
 import frc.robot.utils.setPingu
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
+import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -71,32 +72,32 @@ class SwerveModule(
 
         driveConfigs = TalonFXConfiguration()
 
-        // Set the Pingu values for the drive motor
-        driveConfigs.setPingu(DRIVE_PINGU_AUTO)
+        // Configure drive motor with defaults using Malefix extension
+        driveMotor.configureWithDefaults(
+            DRIVE_PINGU_AUTO,
+            neutralMode = NeutralModeValue.Brake,
+            inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED,
+            currentLimits = DRIVE_SUPPLY_LIMIT to DRIVE_STATOR_LIMIT,
+        )
 
-        // Sets the brake mode, inverted, and current limits for the drive motor
-        driveConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        driveConfigs.MotorOutput.Inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED
-        driveConfigs.CurrentLimits.SupplyCurrentLimit = DRIVE_SUPPLY_LIMIT
-        driveConfigs.CurrentLimits.SupplyCurrentLimitEnable = true
-        driveConfigs.CurrentLimits.StatorCurrentLimit = DRIVE_STATOR_LIMIT
-        driveConfigs.CurrentLimits.StatorCurrentLimitEnable = true
+        // Additional drive motor configuration
         driveConfigs.Feedback.RotorToSensorRatio = DRIVE_MOTOR_GEAR_RATIO
 
         steerConfigs = TalonFXConfiguration()
 
-        // Set the PID values for the steer motor
-        steerConfigs.setPingu(STEER_PINGU_AUTO)
-        steerConfigs.ClosedLoopGeneral.ContinuousWrap = true
+        // Configure steer motor with defaults using Malefix extension
+        steerMotor.configureWithDefaults(
+            STEER_PINGU_AUTO,
+            neutralMode = NeutralModeValue.Brake,
+            inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED,
+            currentLimits = STEER_SUPPLY_LIMIT to 0.0,
+        )
 
-        // Sets the brake mode, inverted, and current limits for the steer motor
-        steerConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake
-        steerConfigs.MotorOutput.Inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED
+        // Additional steer motor configuration
+        steerConfigs.ClosedLoopGeneral.ContinuousWrap = true
         steerConfigs.Feedback.FeedbackRemoteSensorID = canCoderID
         steerConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
         steerConfigs.Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
-        steerConfigs.CurrentLimits.SupplyCurrentLimit = STEER_SUPPLY_LIMIT
-        steerConfigs.CurrentLimits.SupplyCurrentLimitEnable = true
 
         driveTorqueConfigs = TorqueCurrentConfigs()
 
