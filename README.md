@@ -4,7 +4,7 @@
 [![WPILib](https://img.shields.io/badge/WPILib-2025-blue)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-purple)]()
 
-FRC Team 4079's repository for the 2025 REEFSCAPE robot code. "Nautilus" is designed for competitive play in the 2025 FRC season, featuring advanced swerve drive, multi-level scoring capabilities, and comprehensive autonomous routines.
+FRC Team 4079's repository for the 2025 REEFSCAPE robot code. Our robot is designed for competitive play in the 2025 FRC season, featuring advanced swerve drive, multi-level scoring capabilities, and comprehensive autonomous routines.
 
 <img src="https://github.com/user-attachments/assets/5d3b9c7d-d495-4d81-bdd9-e715a5b2b35b" width="400" height="400">
 
