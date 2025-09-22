@@ -10,7 +10,12 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Kommand.flipPidgey
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.LED
+import frc.robot.subsystems.Outtake
+import frc.robot.subsystems.PhotonVision
+import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList
 import frc.robot.utils.RobotParameters.Info.logInfo
@@ -23,6 +28,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import xyz.malefic.frc.path.LocalADStarAK
+import xyz.malefic.frc.pingu.AlertPingu
+import xyz.malefic.frc.pingu.Bingu
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -41,11 +48,20 @@ class Robot : LoggedRobot() {
      * initialization code.
      */
     override fun robotInit() {
+        CommandScheduler.getInstance().registerSubsystem(
+            LED,
+            Elevator,
+            Intake,
+            Outtake,
+            PhotonVision,
+            SuperStructure,
+            Swerve,
+            Bingu,
+            AlertPingu,
+        )
+
         // Set a metadata value
         logInfo()
-
-        // Calls LEDs to activate
-        LED
 
         // Records useful but random info
         Logger.recordMetadata("Reefscape", "Logging")

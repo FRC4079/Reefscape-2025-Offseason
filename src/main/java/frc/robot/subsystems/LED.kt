@@ -18,11 +18,15 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
 
-class LED private constructor() : SubsystemBase() {
+object LED : SubsystemBase() {
+    // Laser Effect Properties
+    private const val LASER_COUNT = 10
+    private const val SPACING = 5
+
     // LED Hardware Components
-    private val leds: AddressableLED
-    private val ledBuffer: AddressableLEDBuffer
-    private val brightnessLevels: IntArray
+    private val leds: AddressableLED = AddressableLED(9)
+    private val ledBuffer: AddressableLEDBuffer = AddressableLEDBuffer(LEDValues.LED_COUNT)
+    private val brightnessLevels: IntArray = IntArray(LEDValues.LED_COUNT)
 
     // Animation Controls
     var ledState: LEDState = LEDState.RAINBOW_FLOW
@@ -39,9 +43,6 @@ class LED private constructor() : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        leds = AddressableLED(9)
-        ledBuffer = AddressableLEDBuffer(LEDValues.LED_COUNT)
-        brightnessLevels = IntArray(LEDValues.LED_COUNT)
         leds.setLength(ledBuffer.length)
         leds.setData(ledBuffer)
         leds.start()
@@ -84,7 +85,7 @@ class LED private constructor() : SubsystemBase() {
             LEDState.TWINKLE -> twinkle()
             LEDState.ROBONAUT -> robonautsLED()
             LEDState.FUNNY_ROBONAUT -> funnyRobonaunts()
-            LEDState.LASER -> laserbeam()
+            LEDState.LASER -> laserBeam()
             LEDState.ORANGE_WAVE -> setRGB(255, 255, 0)
             LEDState.RED_WAVE -> setRGB(255, 0, 0)
             LEDState.GREEN_WAVE -> greenWave()
@@ -264,7 +265,7 @@ class LED private constructor() : SubsystemBase() {
     }
 
     /** Laser effect for LED lights  */
-    fun laserbeam() {
+    fun laserBeam() {
         for (i in 0..<ledBuffer.length) {
             ledBuffer.setHSV(i, 0, 255, 20)
         }
@@ -375,15 +376,5 @@ class LED private constructor() : SubsystemBase() {
 
     fun setLightGreen() {
         solidColor(Color.kLimeGreen)
-    }
-
-    companion object {
-        // Laser Effect Properties
-        private const val LASER_COUNT = 10
-        private const val SPACING = 5
-        /**
-         * Returns the Singleton instance of this LEDSubsystem. This static method should be used, rather
-         * than the constructor, to get the single instance of this class. For example: `LEDSubsystem.getInstance();`
-         */
     }
 }
