@@ -5,18 +5,11 @@ import com.pathplanner.lib.commands.PathfindingCommand
 import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotController
-import edu.wpi.first.wpilibj.Threads
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.commands.Kommand.flipPidgey
-import frc.robot.subsystems.Elevator
-import frc.robot.subsystems.Intake
-import frc.robot.subsystems.LED
-import frc.robot.subsystems.Outtake
-import frc.robot.subsystems.PhotonVision
-import frc.robot.subsystems.SuperStructure
-import frc.robot.subsystems.Swerve
+import frc.robot.subsystems.*
 import frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList
 import frc.robot.utils.RobotParameters.Info.logInfo
 import frc.robot.utils.RobotParameters.LiveRobotValues.LOW_BATTERY_VOLTAGE
@@ -40,6 +33,8 @@ import xyz.malefic.frc.pingu.Bingu
 class Robot : LoggedRobot() {
     private var autonomousCommand: Command? = null
 
+    private val robotContainer: RobotContainer
+
     private var garbageTimer: Timer? = null
     private var batteryTimer: Timer? = null
 
@@ -47,18 +42,16 @@ class Robot : LoggedRobot() {
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
      */
-    override fun robotInit() {
-        CommandScheduler.getInstance().registerSubsystem(
-            Swerve,
-            SuperStructure,
-            PhotonVision,
-            Outtake,
-            Intake,
-            Elevator,
-            LED,
-            Bingu,
-            AlertPingu,
-        )
+    init {
+        Swerve
+        SuperStructure
+        PhotonVision
+        Outtake
+        Intake
+        Elevator
+        LED
+        Bingu
+        AlertPingu
 
         // Set a metadata value
         logInfo()
@@ -105,12 +98,10 @@ class Robot : LoggedRobot() {
         Swerve.configureAutoBuilder()
 
         // Initialize the robot container
-        val unused: Any = RobotContainer
+        robotContainer = RobotContainer
 
         // Schedule the warmup command
         PathfindingCommand.warmupCommand().schedule()
-
-        CommandScheduler.getInstance().enable()
     }
 
     /**
@@ -122,10 +113,7 @@ class Robot : LoggedRobot() {
      * SmartDashboard integrated updating.
      */
     override fun robotPeriodic() {
-        Threads.setCurrentThreadPriority(true, 99)
-
         CommandScheduler.getInstance().run()
-        if (garbageTimer!!.advanceIfElapsed(5.0)) System.gc()
 
         // Checks for low battery
         if (RobotController.getBatteryVoltage() < LOW_BATTERY_VOLTAGE) {
@@ -137,8 +125,6 @@ class Robot : LoggedRobot() {
             batteryTimer!!.stop()
             lowBattery = false
         }
-
-        Threads.setCurrentThreadPriority(false, 99)
     }
 
     /**
