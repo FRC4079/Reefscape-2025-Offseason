@@ -113,8 +113,8 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.setPosition(0.0)
         elevatorMotorRight.setPosition(0.0)
 
-        add(elevatorMotorLeft, "left elevator")
-        add(elevatorMotorRight, "right elevator")
+//        add(elevatorMotorLeft, "left elevator")
+//        add(elevatorMotorRight, "right elevator")
 
         initializeLoggedNetworkPID()
     }

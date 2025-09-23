@@ -73,13 +73,13 @@ object Outtake : SubsystemBase() {
 
         pivotMotor.setPosition(0.0)
 
-        add(pivotMotor, "algae pivot")
-        add(outtakeMotor, "algae intake")
+//        add(pivotMotor, "algae pivot")
+//        add(outtakeMotor, "algae intake")
     }
 
     // This method will be called once per scheduler run
     override fun periodic() {
-        System.out.println("periodic outtake")
+        println("periodic outtake")
         outtakeState.block(this)
 
         setPivotState(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.UP else OuttakePivotState.DOWN)

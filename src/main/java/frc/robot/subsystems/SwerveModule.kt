@@ -122,8 +122,6 @@ class SwerveModule(
         steerVelocity = steerMotor.velocity.valueAsDouble
         steerPosition = steerMotor.position.valueAsDouble
 
-        initializeAlarms(driveId, steerId)
-
         networkPinguDrive =
             NetworkPingu(
                 LoggedNetworkNumber("Tuning/Swerve/Drive P", driveConfigs.Slot0.kP),

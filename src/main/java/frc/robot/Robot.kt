@@ -51,17 +51,17 @@ class Robot : LoggedRobot() {
         System.out.println("pre register###################################")
         System.out.println("pre register###################################")
 
-        CommandScheduler.getInstance().registerSubsystem(
-            Bingu,
-            AlertPingu,
-            PhotonVision,
-            Swerve,
-            LED,
-            Elevator,
-            Outtake,
-            Intake,
-            SuperStructure,
-        )
+//        CommandScheduler.getInstance().registerSubsystem(
+//            Bingu,
+//            AlertPingu,
+//            PhotonVision,
+//            Swerve,
+//            LED,
+//            Elevator,
+//            Outtake,
+//            Intake,
+//            SuperStructure,
+//        )
 
         System.out.println("registered subsystems******************************")
         System.out.println("registered subsystems******************************")

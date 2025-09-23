@@ -55,8 +55,7 @@ object PhotonVision : SubsystemBase() {
     var bestTargetID: Int = 0
         private set
     private var logCount = 0
-    var resultPairs: MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
-        private set
+    val resultPairs: MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
 
     /**
      * Creates a new instance of this PhotonVision subsystem. This constructor is private since this
@@ -98,7 +97,7 @@ object PhotonVision : SubsystemBase() {
      */
     override fun periodic() {
         println("periodic photonvision")
-        this.resultPairs = cameras.getDecentResultPairs() as MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
+        this.resultPairs?.addAll(cameras.getDecentResultPairs())
 
         logs {
             log("PhotonVision/Does any camera exist", cameras.isNotEmpty())
