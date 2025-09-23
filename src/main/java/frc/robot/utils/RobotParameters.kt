@@ -8,7 +8,6 @@ import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Rotation2d.fromDegrees
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
@@ -169,13 +168,10 @@ object RobotParameters {
 
     /** CLass for robot values that change and affect the robot. */
     object LiveRobotValues {
-        const val LOW_BATTERY_VOLTAGE: Double = 11.8
-
-        // make this a supplier
-
-        var robotPos: Pose2d = Pose2d(0.0, 0.0, Rotation2d(0.0, 0.0))
-
+        const val LOW_BATTERY_VOLTAGE = 11.8
         var lowBattery: Boolean = false
+
+        var robotPos = Pose2d()
 
         var visionDead: Boolean = false
     }
@@ -245,7 +241,6 @@ object RobotParameters {
     object OuttakeParameters {
         const val CORAL_SENSOR_ID: Int = 1
         const val ALGAE_SENSOR_ID: Int = 5
-
 
         val OUTTAKE_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
         val PIVOT_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)

@@ -44,6 +44,8 @@ class Robot : LoggedRobot() {
     private val batteryTimer: Timer
 
     init {
+        Bingu
+        AlertPingu
         PhotonVision
         Swerve
         LED
@@ -51,8 +53,6 @@ class Robot : LoggedRobot() {
         Outtake
         Intake
         SuperStructure
-        Bingu
-        AlertPingu
 
         // Set a metadata value
         logInfo()
