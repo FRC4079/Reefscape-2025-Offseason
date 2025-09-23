@@ -49,13 +49,13 @@ class Robot : LoggedRobot() {
      */
     override fun robotInit() {
         CommandScheduler.getInstance().registerSubsystem(
-            LED,
-            Elevator,
-            Intake,
-            Outtake,
-            PhotonVision,
-            SuperStructure,
             Swerve,
+            SuperStructure,
+            PhotonVision,
+            Outtake,
+            Intake,
+            Elevator,
+            LED,
             Bingu,
             AlertPingu,
         )

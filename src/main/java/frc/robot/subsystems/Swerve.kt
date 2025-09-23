@@ -91,6 +91,9 @@ object Swerve : SubsystemBase() {
     private var maxVelocityOutputForDriveToPoint: Double
     private var maximumAngularVelocityForDriveToPoint: Double
 
+    // Subsystem instances
+    private val photonVision: PhotonVision = PhotonVision
+
     //
     //  Thread swerveLoggingThread =
     //      new Thread(
@@ -327,9 +330,9 @@ object Swerve : SubsystemBase() {
      * adds the vision measurement to the pose estimator.
      */
     private fun updatePos() {
-        PhotonVision.resultPairs?.isEmpty()?.let {
+        photonVision.resultPairs?.isEmpty()?.let {
             if (!it) {
-                PhotonVision
+                photonVision
                     .resultPairs
                     ?.forEach { pair ->
                         val pose =
