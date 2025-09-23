@@ -37,11 +37,11 @@ import xyz.malefic.frc.pingu.Bingu
  * project.
  */
 class Robot : LoggedRobot() {
-    private var autonomousCommand: Command? = null
+    private lateinit var autonomousCommand: Command
 
-    private lateinit var robotContainer: RobotContainer
+    private val robotContainer: RobotContainer
 
-    private lateinit var batteryTimer: Timer
+    private val batteryTimer: Timer
 
     init {
         PhotonVision
@@ -53,13 +53,7 @@ class Robot : LoggedRobot() {
         SuperStructure
         Bingu
         AlertPingu
-    }
 
-    /**
-     * This function is run when the robot is first started up and should be used for any
-     * initialization code.
-     */
-    override fun robotInit() {
         // Set a metadata value
         logInfo()
 
@@ -139,12 +133,12 @@ class Robot : LoggedRobot() {
         //    autonomousCommand = robotContainer.networkChooser.getSelected();
         flipPidgey()
         autonomousCommand = PathPlannerAuto("4l4autoA")
-        autonomousCommand!!.schedule()
+        autonomousCommand.schedule()
     }
 
     /** This function is called once when teleop mode is initialized.  */
     override fun teleopInit() {
-        if (autonomousCommand != null) autonomousCommand!!.cancel()
+        if (::autonomousCommand.isInitialized) autonomousCommand.cancel()
         //    flipPidgey();
     }
 
