@@ -91,9 +91,6 @@ object Swerve : SubsystemBase() {
     private var maxVelocityOutputForDriveToPoint: Double
     private var maximumAngularVelocityForDriveToPoint: Double
 
-    // Subsystem instances
-    private val photonVision: PhotonVision = PhotonVision
-
     //
     //  Thread swerveLoggingThread =
     //      new Thread(
@@ -180,7 +177,7 @@ object Swerve : SubsystemBase() {
         SwerveDrivePoseEstimator(
             kinematics,
             Rotation2d.fromDegrees(this.heading),
-            this.modulePositions,
+            this.modulePositions.toTypedArray(),
             Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
             VecBuilder.fill(0.02, 0.02, Units.degreesToRadians(5.0)),
             VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10.0)),
@@ -196,7 +193,7 @@ object Swerve : SubsystemBase() {
         SwerveDrivePoseEstimator3d(
             kinematics,
             pidgey.getRotation3d(),
-            this.modulePositions,
+            this.modulePositions.toTypedArray(),
             Pose3d(0.0, 0.0, 0.0, Rotation3d(0.0, 0.0, 0.0)),
         )
 
@@ -245,7 +242,7 @@ object Swerve : SubsystemBase() {
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
             // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
             val translationToDesiredPoint =
-                desiredPoseForDriveToPoint.translation.minus(this.pose!!.translation)
+                desiredPoseForDriveToPoint.translation.minus(this.pose.translation)
             val linearDistance = translationToDesiredPoint.norm
             var frictionCoefficient = 0.1 // this is a guess
             if (linearDistance >= Units.inchesToMeters(0.5)) {
@@ -269,7 +266,7 @@ object Swerve : SubsystemBase() {
             val xComponent = velocityOutput * directionOfTravel.cos
             val yComponent = velocityOutput * directionOfTravel.sin
 
-            val currentAngle = this.pose!!.rotation.degrees
+            val currentAngle = this.pose.rotation.degrees
 
             this.setDriveSpeeds(
                 yComponent,
@@ -305,8 +302,8 @@ object Swerve : SubsystemBase() {
          * Updates the robot position based on movement and rotation from the pidgey and
          * encoders.
          */
-        poseEstimator.update(this.pidgeyRotation, this.modulePositions)
-        poseEstimator3d.update(pidgey.getRotation3d(), this.modulePositions)
+        poseEstimator.update(this.pidgeyRotation, this.modulePositions.toTypedArray())
+        poseEstimator3d.update(pidgey.getRotation3d(), this.modulePositions.toTypedArray())
 
         field.robotPose = poseEstimator.estimatedPosition
         robotPos = poseEstimator.estimatedPosition
@@ -330,32 +327,30 @@ object Swerve : SubsystemBase() {
      * adds the vision measurement to the pose estimator.
      */
     private fun updatePos() {
-        photonVision.resultPairs?.isEmpty()?.let {
-            if (!it) {
-                photonVision
-                    .resultPairs
-                    ?.forEach { pair ->
-                        val pose =
-                            pair.getEstimatedPose(poseEstimator.estimatedPosition)
-                        pair.updateStdDev(Optional.ofNullable<EstimatedRobotPose>(pose))
-                        pair.updateStdDev3d(Optional.ofNullable<EstimatedRobotPose>(pose))
-                        if (pose != null) {
-                            val timestamp = pose.timestampSeconds
-                            val visionMeasurement2d = pose.estimatedPose.toPose2d()
-                            val visionMeasurement3d = pose.estimatedPose
-                            poseEstimator.addVisionMeasurement(
-                                visionMeasurement2d,
-                                timestamp,
-                                pair.first.currentStdDevs,
-                            )
-                            poseEstimator3d.addVisionMeasurement(
-                                visionMeasurement3d,
-                                timestamp,
-                                pair.first.currentStdDevs3d,
-                            )
-                            robotPos = poseEstimator.estimatedPosition
-                        }
+        PhotonVision.resultPairs?.let {
+            if (!it.isEmpty()) {
+                it.forEach { pair ->
+                    val pose =
+                        pair.getEstimatedPose(poseEstimator.estimatedPosition)
+                    pair.updateStdDev(Optional.ofNullable<EstimatedRobotPose>(pose))
+                    pair.updateStdDev3d(Optional.ofNullable<EstimatedRobotPose>(pose))
+                    if (pose != null) {
+                        val timestamp = pose.timestampSeconds
+                        val visionMeasurement2d = pose.estimatedPose.toPose2d()
+                        val visionMeasurement3d = pose.estimatedPose
+                        poseEstimator.addVisionMeasurement(
+                            visionMeasurement2d,
+                            timestamp,
+                            pair.first.currentStdDevs,
+                        )
+                        poseEstimator3d.addVisionMeasurement(
+                            visionMeasurement3d,
+                            timestamp,
+                            pair.first.currentStdDevs3d,
+                        )
+                        robotPos = poseEstimator.estimatedPosition
                     }
+                }
             }
         }
     }
@@ -447,17 +442,23 @@ object Swerve : SubsystemBase() {
         // Check to make sure 180 words or otherwise I can just flip everything
         // and ignore the flipping of the rotation cause it should be
         // just a note to future ppl: you should revert x maybe y controls for red side
-        // odometry is seprate from pidgey so path planner should be fine? (it reverts paths
+        // odometry is separate from pidgey so path planner should be fine? (it reverts paths
         // interestingly)
         pidgey.reset()
     }
 
-    // om add docs pls
+    /**
+     * Flips the yaw of the Pigeon2 IMU to 180 degrees.
+     *
+     * This method sets the yaw of the Pigeon2 IMU to 180 degrees, which can be used
+     * to adjust the robot's orientation. This is typically useful when the robot's
+     * starting orientation needs to be flipped or aligned to a specific direction.
+     */
     fun flipPidgey() {
         pidgey.setYaw(180.0)
     }
 
-    val pose: Pose2d?
+    val pose: Pose2d
         /**
          * Gets the current pose of the robot from the pose estimator.
          *
@@ -469,8 +470,8 @@ object Swerve : SubsystemBase() {
     fun zeroPose() {
         val heading = Rotation2d.fromDegrees(this.heading)
         val positions = this.modulePositions
-        poseEstimator.resetPosition(heading, positions, Pose2d())
-        poseEstimator3d.resetPosition(heading.to3d(this.pidgeyYaw), positions, Pose3d())
+        poseEstimator.resetPosition(heading, positions.toTypedArray(), Pose2d())
+        poseEstimator3d.resetPosition(heading.to3d(this.pidgeyYaw), positions.toTypedArray(), Pose3d())
     }
 
     /**
@@ -479,8 +480,8 @@ object Swerve : SubsystemBase() {
      * @param pose The new pose.
      */
     fun newPose(pose: Pose2d) {
-        poseEstimator.resetPosition(this.pidgeyRotation, this.modulePositions, pose)
-        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.modulePositions, Pose3d(pose))
+        poseEstimator.resetPosition(this.pidgeyRotation, this.modulePositions.toTypedArray(), pose)
+        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.modulePositions.toTypedArray(), Pose3d(pose))
     }
 
     val autoSpeeds: ChassisSpeeds?
@@ -508,7 +509,7 @@ object Swerve : SubsystemBase() {
          * @return SwerveModuleState[], The states of the swerve modules.
          */
         get() {
-            // TODO try returning new states maybe it is calling it too much why is why pp doesnt update
+            // TODO try returning new states maybe it is calling it too much why is why pp doesn't update
             val moduleStates = arrayOfNulls<SwerveModuleState>(4)
             for (i in modules.indices) {
                 moduleStates[i] = modules[i].getState()
@@ -528,26 +529,14 @@ object Swerve : SubsystemBase() {
             }
         }
 
-    val setModuleStates: Array<SwerveModuleState?>
-        /**
-         * Gets the states of the swerve modules.
-         *
-         * @return SwerveModuleState[], The states of the swerve modules.
-         */
-        get() {
-            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
-            System.arraycopy(setStates, 0, moduleStates, 0, setStates.size)
-            return moduleStates
-        }
-
-    val modulePositions: Array<SwerveModulePosition?>
+    val modulePositions: ArrayList<SwerveModulePosition>
         /**
          * Gets the positions of the swerve modules.
          *
          * @return SwerveModulePosition[], The positions of the swerve modules.
          */
         get() {
-            val positions = arrayOfNulls<SwerveModulePosition>(states.size)
+            val positions = ArrayList<SwerveModulePosition>(states.size)
             for (i in positions.indices) {
                 positions[i] = modules[i].position
             }
@@ -638,7 +627,7 @@ object Swerve : SubsystemBase() {
     ) {
         log("Swerve/Driving to scoring pose", pose)
         this.desiredPoseForDriveToPoint = pose
-//        SuperStructure + ScoreAlign(direction)
+        // SuperStructure + ScoreAlign(direction)
         swerveState = SwerveDriveState.SwerveAlignment(direction)
         this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint
