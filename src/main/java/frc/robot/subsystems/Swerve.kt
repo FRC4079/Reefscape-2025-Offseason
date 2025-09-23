@@ -119,6 +119,7 @@ object Swerve : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
+        println("init swerve")
         this.modules = initializeModules()
         this.pidgey.reset()
         this.poseEstimator = initializePoseEstimator()
@@ -296,6 +297,7 @@ object Swerve : SubsystemBase() {
      * dashboard values.
      */
     override fun periodic() {
+        println("periodic swerve")
         updatePos()
 
         /*

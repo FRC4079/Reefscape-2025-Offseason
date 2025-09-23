@@ -66,7 +66,7 @@ object RobotParameters {
         const val CLIMB_PIVOT_MOTOR_ID: Int = 21
         const val CAGE_LOCK_MOTOR_ID: Int = 22
 
-        const val OUTTAKE_PIVOT_CANBORE_ID: Int = 5
+        const val OUTTAKE_PIVOT_CANBORE_ID: Int = 23
 
         // Motor Property Values
         const val MAX_SPEED: Double = 5.76

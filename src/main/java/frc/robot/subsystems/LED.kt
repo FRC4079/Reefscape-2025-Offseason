@@ -47,6 +47,8 @@ object LED : SubsystemBase() {
         leds.setData(ledBuffer)
         leds.start()
 
+        println("LED init")
+
         robonautLEDTimer.start()
 
         for (i in 0..<LASER_COUNT) {
@@ -59,6 +61,7 @@ object LED : SubsystemBase() {
      * state.
      */
     override fun periodic() {
+        println("periodic LED")
         // Enabled Robot
 
         if (DriverStation.isEnabled()) {

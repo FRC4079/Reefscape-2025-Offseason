@@ -1,9 +1,5 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs
-import com.ctre.phoenix6.configs.MotionMagicConfigs
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
@@ -12,9 +8,7 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
-import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.RobotParameters.ElevatorParameters
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
@@ -75,6 +69,7 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
+        System.out.println("init Elevator")
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
             inverted = InvertedValue.CounterClockwise_Positive,
@@ -126,6 +121,7 @@ object Elevator : SubsystemBase() {
 
     // This method will be called once per scheduler run
     override fun periodic() {
+        System.out.println("periodic Elevator")
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
         // what Jayden clicks which will be displayed on leds but not necessarily = currenState
         //    elevatorSetState = currentState;

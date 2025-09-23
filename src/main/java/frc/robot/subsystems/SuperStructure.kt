@@ -11,6 +11,10 @@ object SuperStructure : SubsystemBase() {
     var currentState: State = State.TeleOpDrive
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
+    init {
+        println("init superstructure")
+    }
+
     /**
      * Adds a state to the wantedState queue using the plus operator.
      *
@@ -49,6 +53,7 @@ object SuperStructure : SubsystemBase() {
     }
 
     override fun periodic() {
+        println("periodic superstructure")
         if (wantedState.isNotEmpty()) {
             currentState = wantedState.removeFirst()
         }
