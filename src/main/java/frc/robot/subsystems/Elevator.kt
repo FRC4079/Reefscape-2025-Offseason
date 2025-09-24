@@ -69,7 +69,7 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-        System.out.println("init Elevator")
+//        System.out.println("init Elevator")
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
             inverted = InvertedValue.CounterClockwise_Positive,
@@ -121,7 +121,7 @@ object Elevator : SubsystemBase() {
 
     // This method will be called once per scheduler run
     override fun periodic() {
-        System.out.println("periodic Elevator")
+//        System.out.println("periodic Elevator")
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
         // what Jayden clicks which will be displayed on leds but not necessarily = currenState
         //    elevatorSetState = currentState;

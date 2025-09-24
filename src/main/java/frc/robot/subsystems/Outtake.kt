@@ -53,7 +53,7 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        println("init outtake")
+//        println("init outtake")
         pivotMotor.configureWithDefaults(PIVOT_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
         outtakeMotor.configureWithDefaults(OUTTAKE_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
 
@@ -79,7 +79,7 @@ object Outtake : SubsystemBase() {
 
     // This method will be called once per scheduler run
     override fun periodic() {
-        println("periodic outtake")
+//        println("periodic outtake")
         outtakeState.block(this)
 
         setPivotState(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.UP else OuttakePivotState.DOWN)

@@ -79,6 +79,8 @@ object Swerve : SubsystemBase() {
     private val pidgey = Pigeon2(PIDGEY_ID)
     private val states = arrayOfNulls<SwerveModuleState>(4)
     private var setStates = arrayOfNulls<SwerveModuleState>(4)
+//    val modulePositions: ArrayList<SwerveModulePosition>
+
     private val modules: Array<SwerveModule>
 
     // Auto Align Pingu Values
@@ -124,6 +126,7 @@ object Swerve : SubsystemBase() {
         this.pidgey.reset()
         this.poseEstimator = initializePoseEstimator()
         this.poseEstimator3d = initializePoseEstimator3d()
+//        this.modulePositions = getModulePositions()
         this.desiredPoseForDriveToPoint = Pose2d()
         this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = 0.0
@@ -132,6 +135,8 @@ object Swerve : SubsystemBase() {
 
         //    swerveLoggingThread.start();
         initializationAlignPingu()
+
+
     }
 
     /**
@@ -168,7 +173,8 @@ object Swerve : SubsystemBase() {
             ),
         )
 
-    /**
+
+       /**
      * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEsimator estimates the robot's
      * position. This is based on a combination of the robot's movement and vision.
      *
@@ -178,11 +184,21 @@ object Swerve : SubsystemBase() {
         SwerveDrivePoseEstimator(
             kinematics,
             Rotation2d.fromDegrees(this.heading),
-            this.modulePositions.toTypedArray(),
+            this.getModulePositions().toTypedArray(),
             Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0.0)),
             VecBuilder.fill(0.02, 0.02, Units.degreesToRadians(5.0)),
             VecBuilder.fill(0.3, 0.3, Units.degreesToRadians(10.0)),
         )
+
+    fun getModulePositions(): ArrayList<SwerveModulePosition> {
+        val positions = ArrayList<SwerveModulePosition>(4)
+        for (module in modules) {
+            positions.add(module.position)
+        }
+        return positions
+    }
+
+
 
     /**
      * Initializes the SwerveDrivePoseEstimator3d. The SwerveDrivePoseEsimator3d estimates the robot's
@@ -194,7 +210,7 @@ object Swerve : SubsystemBase() {
         SwerveDrivePoseEstimator3d(
             kinematics,
             pidgey.getRotation3d(),
-            this.modulePositions.toTypedArray(),
+            this.getModulePositions().toTypedArray(),
             Pose3d(0.0, 0.0, 0.0, Rotation3d(0.0, 0.0, 0.0)),
         )
 
@@ -288,6 +304,7 @@ object Swerve : SubsystemBase() {
         }
     }
 
+
     //    public void setSwerveState(SwerveRequest request) {
     //        this.setControl(request);
     //    }
@@ -297,15 +314,17 @@ object Swerve : SubsystemBase() {
      * dashboard values.
      */
     override fun periodic() {
-        println("periodic swerve")
+//        println("periodic swerve")
         updatePos()
 
         /*
          * Updates the robot position based on movement and rotation from the pidgey and
          * encoders.
          */
-        poseEstimator.update(this.pidgeyRotation, this.modulePositions.toTypedArray())
-        poseEstimator3d.update(pidgey.getRotation3d(), this.modulePositions.toTypedArray())
+//        println("module positions size: " + this.modulePositions.size)
+//        println("number of modules: " + this.modules.size)
+        poseEstimator.update(this.pidgeyRotation, this.getModulePositions().toTypedArray())
+        poseEstimator3d.update(pidgey.getRotation3d(), this.getModulePositions().toTypedArray())
 
         field.robotPose = poseEstimator.estimatedPosition
         robotPos = poseEstimator.estimatedPosition
@@ -471,7 +490,7 @@ object Swerve : SubsystemBase() {
     /** Resets the pose of the robot to zero.  */
     fun zeroPose() {
         val heading = Rotation2d.fromDegrees(this.heading)
-        val positions = this.modulePositions
+        val positions = this.getModulePositions()
         poseEstimator.resetPosition(heading, positions.toTypedArray(), Pose2d())
         poseEstimator3d.resetPosition(heading.to3d(this.pidgeyYaw), positions.toTypedArray(), Pose3d())
     }
@@ -482,8 +501,8 @@ object Swerve : SubsystemBase() {
      * @param pose The new pose.
      */
     fun newPose(pose: Pose2d) {
-        poseEstimator.resetPosition(this.pidgeyRotation, this.modulePositions.toTypedArray(), pose)
-        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.modulePositions.toTypedArray(), Pose3d(pose))
+        poseEstimator.resetPosition(this.pidgeyRotation, this.getModulePositions().toTypedArray(), pose)
+        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.getModulePositions().toTypedArray(), Pose3d(pose))
     }
 
     val autoSpeeds: ChassisSpeeds?
@@ -531,19 +550,7 @@ object Swerve : SubsystemBase() {
             }
         }
 
-    val modulePositions: ArrayList<SwerveModulePosition>
-        /**
-         * Gets the positions of the swerve modules.
-         *
-         * @return SwerveModulePosition[], The positions of the swerve modules.
-         */
-        get() {
-            val positions = ArrayList<SwerveModulePosition>(states.size)
-            for (i in positions.indices) {
-                positions[i] = modules[i].position
-            }
-            return positions
-        }
+
 
     /** Stops all swerve modules.  */
     fun stop() {

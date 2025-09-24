@@ -12,7 +12,7 @@ object SuperStructure : SubsystemBase() {
     private var wantedState: ArrayDeque<State> = ArrayDeque()
 
     init {
-        println("init superstructure")
+//        println("init superstructure")
     }
 
     /**
@@ -53,7 +53,7 @@ object SuperStructure : SubsystemBase() {
     }
 
     override fun periodic() {
-        println("periodic superstructure")
+//        println("periodic superstructure")
         if (wantedState.isNotEmpty()) {
             currentState = wantedState.removeFirst()
         }

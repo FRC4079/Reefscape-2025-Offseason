@@ -28,7 +28,7 @@ object Intake : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        System.out.println("init intake")
+//        System.out.println("init intake")
         wheelFeederMotor.configureWithDefaults(WHEEL_FEEDER_PINGU)
 //        add(wheelFeederMotor, "Coral Feeder")
 
@@ -51,7 +51,7 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-        println("periodic intake")
+//        println("periodic intake")
         voltageOutFeeder.Output = 5.0
         wheelFeederMotor.setControl(voltageOutFeeder)
         starFeederMotor.setControl(voltageOutFeeder)

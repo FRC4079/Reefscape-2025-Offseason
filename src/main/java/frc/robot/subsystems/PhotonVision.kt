@@ -63,7 +63,7 @@ object PhotonVision : SubsystemBase() {
      * instance.
      */
     init {
-        println("init photonvision")
+//        println("init photonvision")
         cameras.add(
             PhotonModule(
                 "RightCamera",
@@ -96,7 +96,7 @@ object PhotonVision : SubsystemBase() {
      * selects the best camera based on pose ambiguity, and updates logged information.
      */
     override fun periodic() {
-        println("periodic photonvision")
+//        println("periodic photonvision")
         this.resultPairs?.addAll(cameras.getDecentResultPairs())
 
         logs {
