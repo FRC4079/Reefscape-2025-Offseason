@@ -602,7 +602,8 @@ object Swerve : SubsystemBase() {
             NetworkPingu(
                 LoggedNetworkNumber("Tuning/Swerve/Align X P", X_PINGU.p),
                 LoggedNetworkNumber("Tuning/Swerve/Align X I", X_PINGU.i),
-                LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.d),
+                LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.d)
+
             )
 
         networkPinguYAutoAlign =
