@@ -7,7 +7,7 @@ plugins {
 	alias(libs.plugins.gradleRIO)
 	alias(libs.plugins.spotless)
 	alias(libs.plugins.dokka)
-}
+    }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -83,7 +83,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 	implementation libs.malefix
-	implementation libs.kermit
+    implementation("co.touchlab:kermit:2.0.4")
 
 	dokkaHtmlPlugin(libs.dokka.java)
 	def akitJson = new JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
