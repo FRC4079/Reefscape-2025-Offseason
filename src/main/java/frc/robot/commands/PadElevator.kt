@@ -3,8 +3,10 @@ package frc.robot.commands
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Elevator
+import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.leftStickPosition
 
 /** Command to control the robot's swerve drive using a Logitech gaming pad.  */
 class PadElevator(
@@ -22,8 +24,7 @@ class PadElevator(
      */
     override fun execute() {
         // Code to manually move elevator
-        //    Pair<Double, Double> position = positionSet(pad);
-        //    Elevator.getInstance().moveElevator(position.getSecond());
+        // Elevator.moveElevator(testPad.leftStickPosition().second)
 
         //    if (checkDPad(0)) {
         //      setElevatorState(L4).schedule();
@@ -41,18 +42,14 @@ class PadElevator(
         //      RobotParameters.CoralManipulatorParameters.coralState = CoralState.CORAL_HOLD;
         //    }
 
-        // THIS IS WHEN WE HAVE TWO CONTROLLERS,
-        // JAYDEN WILL CLICK A DPAD AND AUTOSCORE TAKES THIS VARIABLE AND GOES TO THAT HEIGHT
-
-        if (checkDPad(0)) {
-            elevatorToBeSetState = ElevatorState.L4
-        } else if (checkDPad(2)) {
-            elevatorToBeSetState = ElevatorState.L3
-        } else if (checkDPad(4)) {
-            elevatorToBeSetState = ElevatorState.L2
-        } else if (checkDPad(6)) {
-            elevatorToBeSetState = ElevatorState.L1
-        }
+        elevatorToBeSetState =
+            when {
+                checkDPad(0) -> ElevatorState.L4
+                checkDPad(2) -> ElevatorState.L3
+                checkDPad(4) -> ElevatorState.L2
+                checkDPad(6) -> ElevatorState.L1
+                else -> elevatorToBeSetState
+            }
     }
 
     /**

@@ -113,12 +113,12 @@ val AprilTagFields.layout: AprilTagFieldLayout
  * @return The coordinate representing the position of the left stick. The first element is the x-coordinate, and
  * the second element is the y-coordinate.
  */
-fun XboxController.leftStickPosition(): Pair<Double?, Double?> {
+fun XboxController.leftStickPosition(): Pair<Double, Double> {
     var x = leftX
     if (abs(x) < X_DEADZONE) x = 0.0
 
     var y = leftY
     if (abs(y) < Y_DEADZONE) y = 0.0
 
-    return Pair<Double?, Double?>(x, y)
+    return Pair(x, y)
 }
