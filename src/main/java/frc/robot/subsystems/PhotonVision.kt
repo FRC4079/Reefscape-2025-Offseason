@@ -8,9 +8,9 @@ import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.PhotonVisionConstants.CAMERA_ONE_HEIGHT_METER
-import frc.robot.utils.getDecentResultPairs
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
+import xyz.malefic.frc.extension.getDecentResultPairs
 import xyz.malefic.frc.extension.hasTargets
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -63,7 +63,6 @@ object PhotonVision : SubsystemBase() {
      * instance.
      */
     init {
-//        println("init photonvision")
         cameras.add(
             PhotonModule(
                 "RightCamera",
@@ -96,7 +95,6 @@ object PhotonVision : SubsystemBase() {
      * selects the best camera based on pose ambiguity, and updates logged information.
      */
     override fun periodic() {
-//        println("periodic photonvision")
         this.resultPairs?.addAll(cameras.getDecentResultPairs())
 
         logs {
@@ -104,16 +102,16 @@ object PhotonVision : SubsystemBase() {
             log("PhotonVision/Does any result pair exist", this.resultPairs != null)
             log("PhotonVision/Has tag", hasTag())
             log("PhotonVision/resultCamera List length", resultPairs!!.size)
-            this.resultPairs?.let { log("PhotonVision/Result pairs have targets", resultPairs!!.hasTargets()) }
+            log("PhotonVision/Result pairs have targets", resultPairs.hasTargets())
         }
 
         if (this.resultPairs != null) {
-            logs("PhotonVision/Best Target list is empty", resultPairs!!.isEmpty())
+            logs("PhotonVision/Best Target list is empty", resultPairs.isEmpty())
 
-            if (resultPairs!!.isNotEmpty()) {
+            if (resultPairs.isNotEmpty()) {
                 logCount++
                 logs("PhotonVision/Best Target updated counter", logCount)
-                val bestTarget = resultPairs!![0].second.bestTarget
+                val bestTarget = resultPairs[0].second.bestTarget
                 logs("PhotonVision/Best Target is not null", bestTarget != null)
 
                 if (bestTarget != null) {
@@ -142,8 +140,8 @@ object PhotonVision : SubsystemBase() {
         logs("PhotonVision/currentResultPair not null", this.resultPairs != null)
 
         return this.resultPairs?.let {
-            logs("PhotonVision/hasTargets currentResultPair", resultPairs!!.hasTargets())
-            return@let this.resultPairs != null && resultPairs!!.hasTargets()
+            logs("PhotonVision/hasTargets currentResultPair", resultPairs.hasTargets())
+            return@let resultPairs.hasTargets()
         } ?: false
     }
 

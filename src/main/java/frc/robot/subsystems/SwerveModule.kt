@@ -2,7 +2,6 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.configs.TorqueCurrentConfigs
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.hardware.CANcoder
@@ -25,9 +24,9 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PI
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PINGU_AUTO
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PINGU_TELE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
-import frc.robot.utils.setPingu
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.configureWithDefaults
+import xyz.malefic.frc.extension.setPingu
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -36,8 +35,8 @@ import xyz.malefic.frc.pingu.Pingu
 
 /** Represents a swerve module used in a swerve drive system.  */
 class SwerveModule(
-    driveId: Int,
-    steerId: Int,
+    val driveId: Int,
+    val steerId: Int,
     canCoderID: Int,
     canCoderDriveStraightSteerSetPoint: Double,
 ) {
@@ -47,14 +46,49 @@ class SwerveModule(
     private val positionSetter = PositionTorqueCurrentFOC(0.0)
     private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
     private val swerveModulePosition = SwerveModulePosition()
-    private var state: SwerveModuleState
+
+    var state: SwerveModuleState = SwerveModuleState(0.0, Rotation2d.fromDegrees(0.0))
+        get() {
+            field.angle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
+            field.speedMetersPerSecond =
+                driveMotor.rotorVelocity.valueAsDouble / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV
+            return field
+        }
+        set(desiredState) {
+            // Get the current angle
+            val currentAngle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
+
+            // Optimize the desired state based on current angle`
+            desiredState.optimize(currentAngle)
+
+            // Set the angle for the steer motor
+            val angleToSet = desiredState.angle.rotations
+            steerMotor.setControl(positionSetter.withPosition(angleToSet))
+
+            // Set the velocity for the drive motor
+            val velocityToSet: Double =
+                (desiredState.speedMetersPerSecond * (DRIVE_MOTOR_GEAR_RATIO / METERS_PER_REV))
+            driveMotor.setControl(velocitySetter.withVelocity(velocityToSet))
+
+            // Log the actual and set values for debugging
+            logs {
+                log("Swerve/Drive actual sped", driveMotor.velocity.valueAsDouble)
+                log("Swerve/Drive set sped", velocityToSet)
+                log("Swerve/Steer actual angle", canCoder.absolutePosition.valueAsDouble)
+                log("Swerve/Steer set angle", angleToSet)
+                log("Swerve/Desired state after optimize", desiredState.angle.rotations)
+            }
+
+            // Update the state with the optimized values
+            field = desiredState
+        }
+
     private var driveVelocity: Double
     private var drivePosition: Double
     private var steerPosition: Double
     private var steerVelocity: Double
-    private val driveConfigs: TalonFXConfiguration
-    private val steerConfigs: TalonFXConfiguration
-    private val driveTorqueConfigs: TorqueCurrentConfigs
+    private val driveConfigs: TalonFXConfiguration = TalonFXConfiguration()
+    private val steerConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
     private var networkPinguDrive: NetworkPingu
     private var networkPinguSteer: NetworkPingu
@@ -68,38 +102,26 @@ class SwerveModule(
      * @param canCoderDriveStraightSteerSetPoint The set point for the CANcoder drive straight steer.
      */
     init {
-        state = SwerveModuleState(0.0, Rotation2d.fromDegrees(0.0))
-
-        driveConfigs = TalonFXConfiguration()
-
-        // Configure drive motor with defaults using Malefix extension
         driveMotor.configureWithDefaults(
             DRIVE_PINGU_AUTO,
             neutralMode = NeutralModeValue.Brake,
             inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED,
             currentLimits = DRIVE_SUPPLY_LIMIT to DRIVE_STATOR_LIMIT,
-        )
+        ) {
+            Feedback.RotorToSensorRatio = DRIVE_MOTOR_GEAR_RATIO
+        }
 
-        // Additional drive motor configuration
-        driveConfigs.Feedback.RotorToSensorRatio = DRIVE_MOTOR_GEAR_RATIO
-
-        steerConfigs = TalonFXConfiguration()
-
-        // Configure steer motor with defaults using Malefix extension
         steerMotor.configureWithDefaults(
             STEER_PINGU_AUTO,
             neutralMode = NeutralModeValue.Brake,
             inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED,
             currentLimits = STEER_SUPPLY_LIMIT to 0.0,
-        )
-
-        // Additional steer motor configuration
-        steerConfigs.ClosedLoopGeneral.ContinuousWrap = true
-        steerConfigs.Feedback.FeedbackRemoteSensorID = canCoderID
-        steerConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
-        steerConfigs.Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
-
-        driveTorqueConfigs = TorqueCurrentConfigs()
+        ) {
+            ClosedLoopGeneral.ContinuousWrap = true
+            Feedback.FeedbackRemoteSensorID = canCoderID
+            Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
+            Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
+        }
 
         val canCoderConfiguration = CANcoderConfiguration()
 
@@ -136,6 +158,8 @@ class SwerveModule(
                 LoggedNetworkNumber("Tuning/Swerve/Steer D", steerConfigs.Slot0.kD),
                 LoggedNetworkNumber("Tuning/Swerve/Steer V", steerConfigs.Slot0.kV),
             )
+
+        initializeAlarms()
     }
 
     val position: SwerveModulePosition
@@ -155,53 +179,6 @@ class SwerveModule(
 
             return swerveModulePosition
         }
-
-    /**
-     * Gets the current state of the swerve module.
-     *
-     * @return SwerveModuleState, The current state of the swerve module, including the angle and
-     * speed.
-     */
-    fun getState(): SwerveModuleState {
-        state.angle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
-        state.speedMetersPerSecond =
-            driveMotor.rotorVelocity.valueAsDouble / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV
-        return state
-    }
-
-    /**
-     * Sets the state of the swerve module.
-     *
-     * @param desiredState The desired state of the swerve module.
-     */
-    fun setState(desiredState: SwerveModuleState) {
-        // Get the current angle
-        val currentAngle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
-
-        // Optimize the desired state based on current angle
-        desiredState.optimize(currentAngle)
-
-        // Set the angle for the steer motor
-        val angleToSet = desiredState.angle.rotations
-        steerMotor.setControl(positionSetter.withPosition(angleToSet))
-
-        // Set the velocity for the drive motor
-        val velocityToSet: Double =
-            (desiredState.speedMetersPerSecond * (DRIVE_MOTOR_GEAR_RATIO / METERS_PER_REV))
-        driveMotor.setControl(velocitySetter.withVelocity(velocityToSet))
-
-        // Log the actual and set values for debugging
-        logs {
-            log("Swerve/Drive actual sped", driveMotor.velocity.valueAsDouble)
-            log("Swerve/Drive set sped", velocityToSet)
-            log("Swerve/Steer actual angle", canCoder.absolutePosition.valueAsDouble)
-            log("Swerve/Steer set angle", angleToSet)
-            log("Swerve/Desired state after optimize", desiredState.angle.rotations)
-        }
-
-        // Update the state with the optimized values
-        state = desiredState
-    }
 
     /** Stops the swerve module motors.  */
     fun stop() {
@@ -262,8 +239,8 @@ class SwerveModule(
      * these configurations to the respective motors.
      */
     fun applyTelePIDValues() {
-        driveConfigs.setPingu(networkPinguDrive)
-        steerConfigs.setPingu(networkPinguSteer)
+        driveConfigs.setPingu(networkPinguDrive.pingu)
+        steerConfigs.setPingu(networkPinguSteer.pingu)
 
         driveMotor.configurator.apply(driveConfigs)
         steerMotor.configurator.apply(steerConfigs)
@@ -275,10 +252,7 @@ class SwerveModule(
      * @param driveId The ID of the drive motor.
      * @param steerId The ID of the steer motor.
      */
-    fun initializeAlarms(
-        driveId: Int,
-        steerId: Int,
-    ) {
+    fun initializeAlarms() {
         add(driveMotor, "drive motor $driveId")
         add(steerMotor, "steer motor $steerId")
         add(canCoder)

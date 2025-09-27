@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Elevator.setAlgaeLevel
-import frc.robot.subsystems.Outtake.setOuttakeSpeed
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_CANBORE_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
@@ -53,7 +52,6 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-//        println("init outtake")
         pivotMotor.configureWithDefaults(PIVOT_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
         outtakeMotor.configureWithDefaults(OUTTAKE_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
 
@@ -73,13 +71,12 @@ object Outtake : SubsystemBase() {
 
         pivotMotor.setPosition(0.0)
 
-//        add(pivotMotor, "algae pivot")
-//        add(outtakeMotor, "algae intake")
+        add(pivotMotor, "algae pivot")
+        add(outtakeMotor, "algae intake")
     }
 
     // This method will be called once per scheduler run
     override fun periodic() {
-//        println("periodic outtake")
         outtakeState.block(this)
 
         setPivotState(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.UP else OuttakePivotState.DOWN)

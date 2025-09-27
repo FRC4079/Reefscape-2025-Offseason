@@ -8,6 +8,8 @@ import frc.robot.utils.RobotParameters.FieldParameters.AprilTagField
 import frc.robot.utils.RobotParameters.FieldParameters.X_OFFSET_FROM_TAG_FOR_SCORING_INCHES
 import frc.robot.utils.RobotParameters.FieldParameters.Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES
 import frc.robot.utils.emu.Direction
+import xyz.malefic.frc.extension.inchesToMeters
+import xyz.malefic.frc.extension.layout
 
 /**
  * Utility object for pose-related calculations.

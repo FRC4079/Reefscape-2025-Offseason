@@ -57,6 +57,7 @@ object RobotParameters {
         const val BACK_RIGHT_CAN_CODER_ID: Int = 12
         const val ELEVATOR_MOTOR_LEFT_ID: Int = 13
         const val ELEVATOR_MOTOR_RIGHT_ID: Int = 14
+
 //        const val CORAL_SCORE_ID: Int = 15
         const val PIDGEY_ID: Int = 16
         const val OUTTAKE_PIVOT_MOTOR_ID: Int = 17

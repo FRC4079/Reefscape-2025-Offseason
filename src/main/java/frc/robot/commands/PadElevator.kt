@@ -41,18 +41,14 @@ class PadElevator(
         //      RobotParameters.CoralManipulatorParameters.coralState = CoralState.CORAL_HOLD;
         //    }
 
-        // THIS IS WHEN WE HAVE TWO CONTROLLERS,
-        // JAYDEN WILL CLICK A DPAD AND AUTOSCORE TAKES THIS VARIABLE AND GOES TO THAT HEIGHT
-
-        if (checkDPad(0)) {
-            elevatorToBeSetState = ElevatorState.L4
-        } else if (checkDPad(2)) {
-            elevatorToBeSetState = ElevatorState.L3
-        } else if (checkDPad(4)) {
-            elevatorToBeSetState = ElevatorState.L2
-        } else if (checkDPad(6)) {
-            elevatorToBeSetState = ElevatorState.L1
-        }
+        elevatorToBeSetState =
+            when {
+                checkDPad(0) -> ElevatorState.L4
+                checkDPad(2) -> ElevatorState.L3
+                checkDPad(4) -> ElevatorState.L2
+                checkDPad(6) -> ElevatorState.L1
+                else -> elevatorToBeSetState
+            }
     }
 
     /**

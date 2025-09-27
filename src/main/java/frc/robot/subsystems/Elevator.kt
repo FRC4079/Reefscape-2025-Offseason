@@ -15,11 +15,13 @@ import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_LEFT_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_RIGHT_ID
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
+import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.leftStickPosition
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.configureWithDefaults
+import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.extension.setPingu
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
@@ -127,13 +129,13 @@ object Elevator : SubsystemBase() {
     override fun periodic() {
 //        System.out.println("periodic Elevator")
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
-        // what Jayden clicks which will be displayed on leds but not necessarily = currenState
+        // what Jayden clicks which will be displayed on leds but not necessarily = currentState
         //    elevatorSetState = currentState;
         setElevatorPosition(this.state)
 
         logs {
-            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition().first)
-            log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition().second)
+            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
+            log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
             log(
                 "Elevator/Elevator Left Position",
                 elevatorMotorLeft.position.valueAsDouble,
