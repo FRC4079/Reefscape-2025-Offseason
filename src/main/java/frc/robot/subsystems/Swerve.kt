@@ -57,7 +57,6 @@ import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.SwerveDriveState
 import frc.robot.utils.leftStickPosition
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.photonvision.EstimatedRobotPose
 import xyz.malefic.frc.extension.getEstimatedPose
@@ -77,8 +76,7 @@ object Swerve : SubsystemBase() {
     private val poseEstimator3d: SwerveDrivePoseEstimator3d
     private val field = Field2d()
     private val pidgey = Pigeon2(PIDGEY_ID)
-    private val states = arrayOfNulls<SwerveModuleState>(4)
-    private var setStates = arrayOfNulls<SwerveModuleState>(4)
+    private var setStates = arrayOf<SwerveModuleState>()
 //    val modulePositions: ArrayList<SwerveModulePosition>
 
     private val modules: Array<SwerveModule>
@@ -88,25 +86,23 @@ object Swerve : SubsystemBase() {
     private lateinit var networkPinguYAutoAlign: NetworkPingu
     private lateinit var networkPinguRotAutoAlign: NetworkPingu
 
-    private val reefChooser: LoggedDashboardChooser<*>? = null
     private var desiredPoseForDriveToPoint: Pose2d
     private var maxVelocityOutputForDriveToPoint: Double
     private var maximumAngularVelocityForDriveToPoint: Double
 
-    //
-    //  Thread swerveLoggingThread =
-    //      new Thread(
-    //          () -> {
-    //            while (DriverStation.isEnabled()) {
-    //              logs("Swerve Module States", getModuleStates());
-    //              try {
-    //                Thread.sleep(100);
-    //              } catch (InterruptedException e) {
-    //                Thread.currentThread().interrupt();
-    //                break;
-    //              }
-    //            }
-    //          });
+//    val swerveLoggingThread: Thread =
+//        Thread {
+//            while (DriverStation.isEnabled()) {
+//                logs("Swerve Module States", moduleStates)
+//                try {
+//                    Thread.sleep(100)
+//                } catch (_: InterruptedException) {
+//                    Thread.currentThread().interrupt()
+//                    break
+//                }
+//            }
+//        }
+
     // from feeder to the goal and align itself
     // The plan is for it to path towards it then we use a set path to align itself
     // with the goal and
@@ -133,10 +129,8 @@ object Swerve : SubsystemBase() {
         //    configureAutoBuilder();
         initializePathPlannerLogging()
 
-        //    swerveLoggingThread.start();
+//        swerveLoggingThread.start()
         initializationAlignPingu()
-
-
     }
 
     /**
@@ -173,8 +167,7 @@ object Swerve : SubsystemBase() {
             ),
         )
 
-
-       /**
+    /**
      * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEsimator estimates the robot's
      * position. This is based on a combination of the robot's movement and vision.
      *
@@ -198,8 +191,6 @@ object Swerve : SubsystemBase() {
         return positions
     }
 
-
-
     /**
      * Initializes the SwerveDrivePoseEstimator3d. The SwerveDrivePoseEsimator3d estimates the robot's
      * position in 3D space. This is based on a combination of the robot's movement and vision.
@@ -209,7 +200,7 @@ object Swerve : SubsystemBase() {
     private fun initializePoseEstimator3d(): SwerveDrivePoseEstimator3d =
         SwerveDrivePoseEstimator3d(
             kinematics,
-            pidgey.getRotation3d(),
+            pidgey.rotation3d,
             this.getModulePositions().toTypedArray(),
             Pose3d(0.0, 0.0, 0.0, Rotation3d(0.0, 0.0, 0.0)),
         )
@@ -304,27 +295,15 @@ object Swerve : SubsystemBase() {
         }
     }
 
-
-    //    public void setSwerveState(SwerveRequest request) {
-    //        this.setControl(request);
-    //    }
-
     /**
      * This method is called periodically by the scheduler. It updates the pose estimator and
      * dashboard values.
      */
     override fun periodic() {
-//        println("periodic swerve")
         updatePos()
 
-        /*
-         * Updates the robot position based on movement and rotation from the pidgey and
-         * encoders.
-         */
-//        println("module positions size: " + this.modulePositions.size)
-//        println("number of modules: " + this.modules.size)
         poseEstimator.update(this.pidgeyRotation, this.getModulePositions().toTypedArray())
-        poseEstimator3d.update(pidgey.getRotation3d(), this.getModulePositions().toTypedArray())
+        poseEstimator3d.update(pidgey.rotation3d, this.getModulePositions().toTypedArray())
 
         field.robotPose = poseEstimator.estimatedPosition
         robotPos = poseEstimator.estimatedPosition
@@ -421,7 +400,7 @@ object Swerve : SubsystemBase() {
 
         speeds = ChassisSpeeds.discretize(speeds, 0.02)
 
-        val newStates: Array<SwerveModuleState?> = kinematics.toSwerveModuleStates(speeds)
+        val newStates: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(speeds)
         SwerveDriveKinematics.desaturateWheelSpeeds(newStates, MAX_SPEED)
 
         this.moduleStates = newStates
@@ -502,7 +481,7 @@ object Swerve : SubsystemBase() {
      */
     fun newPose(pose: Pose2d) {
         poseEstimator.resetPosition(this.pidgeyRotation, this.getModulePositions().toTypedArray(), pose)
-        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.getModulePositions().toTypedArray(), Pose3d(pose))
+        poseEstimator3d.resetPosition(pidgey.rotation3d, this.getModulePositions().toTypedArray(), Pose3d(pose))
     }
 
     val autoSpeeds: ChassisSpeeds?
@@ -519,19 +498,21 @@ object Swerve : SubsystemBase() {
      * @param chassisSpeeds The chassis speeds.
      */
     fun chassisSpeedsDrive(chassisSpeeds: ChassisSpeeds?) {
-        val newStates: Array<SwerveModuleState?> = kinematics.toSwerveModuleStates(chassisSpeeds)
+        val newStates: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(chassisSpeeds)
         this.moduleStates = newStates
     }
 
-    var moduleStates: Array<SwerveModuleState?>
+    /**
+     * The swerve module states as [SwerveModuleState]'s.
+     */
+    var moduleStates: Array<SwerveModuleState>
         /**
          * Gets the states of the swerve modules.
          *
          * @return SwerveModuleState[], The states of the swerve modules.
          */
         get() {
-            // TODO try returning new states maybe it is calling it too much why is why pp doesn't update
-            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
+            val moduleStates = Array(modules.size) { SwerveModuleState() }
             for (i in modules.indices) {
                 moduleStates[i] = modules[i].getState()
             }
@@ -540,17 +521,13 @@ object Swerve : SubsystemBase() {
 
         /**
          * Sets the states of the swerve modules.
-         *
-         * @param states The states of the swerve modules.
          */
         set(states) {
             setStates = states
             for (i in states.indices) {
-                modules[i].setState(states[i]!!)
+                modules[i].setState(states[i])
             }
         }
-
-
 
     /** Stops all swerve modules.  */
     fun stop() {
@@ -602,8 +579,7 @@ object Swerve : SubsystemBase() {
             NetworkPingu(
                 LoggedNetworkNumber("Tuning/Swerve/Align X P", X_PINGU.p),
                 LoggedNetworkNumber("Tuning/Swerve/Align X I", X_PINGU.i),
-                LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.d)
-
+                LoggedNetworkNumber("Tuning/Swerve/Align X D", X_PINGU.d),
             )
 
         networkPinguYAutoAlign =

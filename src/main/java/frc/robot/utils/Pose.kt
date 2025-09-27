@@ -18,7 +18,7 @@ object Pose {
      *
      * @param tagID The ID of the AprilTag (must be in the range 1..22).
      * @param dir The direction from which the robot will score (e.g., LEFT or RIGHT).
-     * @return The desired scoring [Pose2d] for the robot, or [Pose2d.kZero] if the tagID is invalid.
+     * @return The desired scoring [edu.wpi.first.math.geometry.Pose2d] for the robot, or [edu.wpi.first.math.geometry.Pose2d.kZero] if the tagID is invalid.
      */
     fun getDesiredScorePose(
         tagID: Int,
