@@ -4,24 +4,21 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import edu.wpi.first.wpilibj2.command.WaitCommand
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.PathPingu.findClosestScoringPosition
 import frc.robot.utils.PathPingu.findClosestScoringPositionNotL4
-import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.PATH_CONSTRAINTS
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.extension.Kommand.cmd
+import xyz.malefic.frc.extension.Kommand.sequential
+import xyz.malefic.frc.extension.Kommand.waitUntil
 import kotlin.math.abs
 
 /**
@@ -31,83 +28,6 @@ import kotlin.math.abs
  * This is called for instant commands instead of functions
  */
 object Kommand {
-    /**
-     * Creates a [WaitCommand] to wait for a specified number of seconds.
-     *
-     * @param seconds The number of seconds to wait.
-     * @return A [WaitCommand] that waits for the specified number of seconds.
-     */
-    fun waitFor(seconds: Double) = WaitCommand(seconds)
-
-    /**
-     * Creates a [WaitUntilCommand] that waits until the given condition is true.
-     *
-     * @param function The condition to evaluate.
-     * @return A [WaitUntilCommand] that waits until the condition is true.
-     */
-    fun waitUntil(function: () -> Boolean) = WaitUntilCommand(function)
-
-    /**
-     * Creates an [InstantCommand] to cancel all running commands.
-     *
-     * @return An [InstantCommand] that cancels all running commands.
-     */
-    fun cancel() = cmd { CommandScheduler.getInstance().cancelAll() }
-
-    /**
-     * A builder class for creating a [SequentialCommandGroup].
-     */
-    class SequentialBuilder {
-        private val commands = mutableListOf<Command>()
-
-        /**
-         * Adds a command to the sequence.
-         */
-        operator fun Command.unaryPlus() {
-            commands.add(this)
-        }
-
-        /**
-         * Builds and returns a [SequentialCommandGroup] with the added commands.
-         */
-        fun build(): SequentialCommandGroup = SequentialCommandGroup(*commands.toTypedArray())
-    }
-
-/**
-     * Creates a [SequentialCommandGroup] using the provided block to add commands.
-     *
-     * @param block The block to add commands to the sequence.
-     * @return A [SequentialCommandGroup] with the added commands.
-     */
-    fun sequential(block: SequentialBuilder.() -> Unit): SequentialCommandGroup = SequentialBuilder().apply(block).build()
-
-    /**
-     * A builder class for creating a [ParallelCommandGroup].
-     */
-    class ParallelBuilder {
-        private val commands = mutableListOf<Command>()
-
-        /**
-         * Adds a command to the sequence.
-         */
-        operator fun Command.unaryPlus() {
-            commands.add(this)
-        }
-
-        /**
-         * Builds and returns a [ParallelCommandGroup] with the added commands.
-         */
-        fun build(): ParallelCommandGroup = ParallelCommandGroup(*commands.toTypedArray())
-    }
-
-    /**
-     * Creates a [ParallelCommandGroup] that runs the given commands in parallel.
-     *
-     * @param block The commands to run in a dsl format.
-     * @return A [ParallelCommandGroup] that runs the given commands in parallel.
-     */
-    fun parallel(block: ParallelBuilder.() -> Unit): ParallelCommandGroup = ParallelBuilder().apply(block).build()
-
     /**
      * Creates an [InstantCommand] to set the state of the elevator.
      *
@@ -139,13 +59,6 @@ object Kommand {
      * @return An [InstantCommand] that sets the coral manipulator state.
      */
     fun setCoralState(state: OuttakeState) = cmd { outtakeState = state }
-
-    /**
-     * Creates an [InstantCommand] to set the coral scoring state to true, starting the coral scoring process.
-     *
-     * @return An [InstantCommand] that sets the coral scoring state to true.
-     */
-    fun coralScoring() = cmd { coralScoring = true }
 
     /**
      * Creates an [InstantCommand] to start the coral motors.
@@ -199,8 +112,6 @@ object Kommand {
      * @return A [PadElevator] command to control the robot's elevator.
      */
     fun padElevator(controller: XboxController) = PadElevator(controller)
-
-    fun coralScoreFalse() = cmd { coralScoring = false }
 
     /**
      * Creates a command to move the robot to the closest coral

@@ -8,7 +8,6 @@ import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
-import frc.robot.utils.RobotParameters.OuttakeParameters.coralScoring
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.pingu.AlertPingu.add
@@ -55,7 +54,6 @@ object Intake : SubsystemBase() {
         starFeederMotor.setControl(voltageOutFeeder)
 
         logs {
-            log("Coral/Coral Scoring", coralScoring)
             log("Coral/Coral State", outtakeState.toString())
         }
     }

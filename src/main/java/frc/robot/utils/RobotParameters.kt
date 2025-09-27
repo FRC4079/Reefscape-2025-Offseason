@@ -250,8 +250,6 @@ object RobotParameters {
 
         var outtakeState: OuttakeState = OuttakeState.CORAL_HOLD
 
-        var coralScoring: Boolean = false
-
         var algaeIntaking: Boolean = false
     }
 

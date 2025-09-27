@@ -1,6 +1,7 @@
 package frc.robot.commands
 
 import frc.robot.utils.emu.Direction
+import xyz.malefic.frc.extension.Kommand
 
 object Sequences {
     /**
