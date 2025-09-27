@@ -57,6 +57,10 @@ import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.SwerveDriveState
 import frc.robot.utils.leftStickPosition
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.photonvision.EstimatedRobotPose
 import xyz.malefic.frc.extension.getEstimatedPose
@@ -71,13 +75,14 @@ import java.util.function.Predicate
 import kotlin.math.abs
 import kotlin.math.min
 
+@OptIn(DelicateCoroutinesApi::class)
 object Swerve : SubsystemBase() {
     private val poseEstimator: SwerveDrivePoseEstimator
     private val poseEstimator3d: SwerveDrivePoseEstimator3d
     private val field = Field2d()
     private val pidgey = Pigeon2(PIDGEY_ID)
     private var setStates = arrayOf<SwerveModuleState>()
-//    val modulePositions: ArrayList<SwerveModulePosition>
+    // val modulePositions: ArrayList<SwerveModulePosition>
 
     private val modules: Array<SwerveModule>
 
@@ -89,19 +94,6 @@ object Swerve : SubsystemBase() {
     private var desiredPoseForDriveToPoint: Pose2d
     private var maxVelocityOutputForDriveToPoint: Double
     private var maximumAngularVelocityForDriveToPoint: Double
-
-//    val swerveLoggingThread: Thread =
-//        Thread {
-//            while (DriverStation.isEnabled()) {
-//                logs("Swerve Module States", moduleStates)
-//                try {
-//                    Thread.sleep(100)
-//                } catch (_: InterruptedException) {
-//                    Thread.currentThread().interrupt()
-//                    break
-//                }
-//            }
-//        }
 
     // from feeder to the goal and align itself
     // The plan is for it to path towards it then we use a set path to align itself
@@ -129,7 +121,12 @@ object Swerve : SubsystemBase() {
         //    configureAutoBuilder();
         initializePathPlannerLogging()
 
-//        swerveLoggingThread.start()
+        GlobalScope.launch {
+            while (DriverStation.isEnabled()) {
+                logs("Swerve Module States", moduleStates)
+                delay(100)
+            }
+        }
         initializationAlignPingu()
     }
 
