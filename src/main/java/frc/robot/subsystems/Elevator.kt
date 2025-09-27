@@ -9,19 +9,18 @@ import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
-import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
-import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_UP
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_LEFT_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_RIGHT_ID
 import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
-import frc.robot.utils.setPingu
+import frc.robot.utils.leftStickPosition
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.configureWithDefaults
-import xyz.malefic.frc.pingu.AlertPingu.add
+import xyz.malefic.frc.extension.setPingu
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
 import kotlin.math.abs
@@ -69,20 +68,25 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-//        System.out.println("init Elevator")
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
             inverted = InvertedValue.CounterClockwise_Positive,
-            currentLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            // limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        )
+        ) {
+            SoftwareLimitSwitch.ForwardSoftLimitEnable = false
+            SoftwareLimitSwitch.ReverseSoftLimitEnable = false
+        }
         elevatorMotorRight.configureWithDefaults(
             ELEVATOR_PINGU,
-            currentLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            // limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        )
+        ) {
+            SoftwareLimitSwitch.ForwardSoftLimitEnable = false
+            SoftwareLimitSwitch.ReverseSoftLimitEnable = false
+        }
 
         elevatorLeftConfigs = TalonFXConfiguration()
         elevatorRightConfigs = TalonFXConfiguration()
@@ -128,6 +132,8 @@ object Elevator : SubsystemBase() {
         setElevatorPosition(this.state)
 
         logs {
+            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition().first)
+            log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition().second)
             log(
                 "Elevator/Elevator Left Position",
                 elevatorMotorLeft.position.valueAsDouble,
