@@ -33,7 +33,7 @@ object RobotContainer {
     init {
         Elevator.defaultCommand = padElevator(testPad)
 
-        CommandPingu.registerCommands{
+        CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
             // bind("HasPieceFalse", hasPieceFalse())

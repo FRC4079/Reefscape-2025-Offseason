@@ -25,9 +25,9 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PI
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PINGU_AUTO
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PINGU_TELE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
-import frc.robot.utils.setPingu
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.configureWithDefaults
+import xyz.malefic.frc.extension.setPingu
 import xyz.malefic.frc.pingu.AlertPingu.add
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
