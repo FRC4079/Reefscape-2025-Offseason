@@ -123,21 +123,14 @@ class SwerveModule(
             Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
         }
 
-        val canCoderConfiguration = CANcoderConfiguration()
-
-        /*
-         * Sets the CANCoder direction, absolute sensor range, and magnet offset for the
-         * CANCoder Make sure the magnet offset is ACCURATE and based on when the wheel
-         * is straight!
-         */
-        canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive
-        canCoderConfiguration.MagnetSensor.MagnetOffset =
-            ENCODER_OFFSET + canCoderDriveStraightSteerSetPoint
-        canCoderConfiguration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0
+        canCoder.configureWithDefaults(
+            sensorDirection = SensorDirectionValue.CounterClockwise_Positive,
+            magnetOffset = ENCODER_OFFSET + canCoderDriveStraightSteerSetPoint,
+            discontinuityPoint = 1.0,
+        )
 
         driveMotor.configurator.apply(driveConfigs)
         steerMotor.configurator.apply(steerConfigs)
-        canCoder.configurator.apply(canCoderConfiguration)
 
         driveVelocity = driveMotor.velocity.valueAsDouble
         drivePosition = driveMotor.position.valueAsDouble
