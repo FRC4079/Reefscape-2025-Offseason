@@ -7,7 +7,7 @@ plugins {
 	alias(libs.plugins.gradleRIO)
 	alias(libs.plugins.spotless)
 	alias(libs.plugins.dokka)
-    }
+}
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
