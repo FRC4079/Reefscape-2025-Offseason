@@ -3,7 +3,6 @@ dokka = "2.0.0"
 spotless = "8.0.0"
 gradleRIO = "2025.3.2"
 junit = "5.13.4"
-<<<<<<< HEAD
 malefix = "1.2.8"
 kermit = "2.0.8"
 coroutines = "1.10.2"
