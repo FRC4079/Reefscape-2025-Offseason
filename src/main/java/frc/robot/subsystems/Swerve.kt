@@ -397,7 +397,7 @@ object Swerve : SubsystemBase() {
                 ChassisSpeeds(forwardSpeed, leftSpeed, turnSpeed)
             }
 
-        logs<ChassisSpeeds?>("Swerve/Chassis Speeds", speeds)
+        logs<ChassisSpeeds>("Swerve/Chassis Speeds", speeds)
 
         speeds = ChassisSpeeds.discretize(speeds, 0.02)
 

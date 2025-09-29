@@ -31,7 +31,7 @@ object RobotContainer {
     val networkChooser: SendableChooser<Command?>
 
     init {
-        Elevator.defaultCommand = padElevator(testPad)
+//        Elevator.defaultCommand = padElevator(testPad)
 
         CommandPingu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))

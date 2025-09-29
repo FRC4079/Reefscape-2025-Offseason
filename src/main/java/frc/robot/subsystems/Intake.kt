@@ -49,9 +49,9 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-        voltageOutFeeder.Output = 5.0
-        wheelFeederMotor.setControl(voltageOutFeeder)
-        starFeederMotor.setControl(voltageOutFeeder)
+//        voltageOutFeeder.Output = 5.0
+//        wheelFeederMotor.setControl(voltageOutFeeder)
+//        starFeederMotor.setControl(voltageOutFeeder)
 
         logs {
             log("Coral/Coral State", outtakeState.toString())
