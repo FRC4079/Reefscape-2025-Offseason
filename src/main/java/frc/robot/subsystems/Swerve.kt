@@ -302,7 +302,6 @@ object Swerve : SubsystemBase() {
      */
     override fun periodic() {
         updatePos()
-
         poseEstimator.update(this.pidgeyRotation, this.getModulePositions().toTypedArray())
         poseEstimator3d.update(pidgey.getRotation3d(), this.getModulePositions().toTypedArray())
 
