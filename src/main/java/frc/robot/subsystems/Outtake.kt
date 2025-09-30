@@ -17,7 +17,6 @@ import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.OUTTAKE_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.PIVOT_PINGU
-import frc.robot.utils.RobotParameters.OuttakeParameters.algaeIntaking
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
@@ -98,23 +97,23 @@ object Outtake : SubsystemBase() {
         }
 
         logs {
-            log("Algae/Algae Pivot Motor Position", this.pivotPosValue)
-            log("Algae/Algae State", outtakePivotState.toString())
-            log("Algae/IsAlgaeIntaking", algaeIntaking)
+            log("Outtake/Outtake Pivot Motor Position", this.pivotPosValue)
+            log("Outtake/Outtake Pivot State State", outtakePivotState.toString())
+            log("Outtake/Outtake State", outtakeState.toString())
             log(
-                "Algae/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
+                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
                 pivotMotor.isConnected,
             )
             log(
-                "Algae/Algae Pivot Stator Current",
+                "Outtake/Outtake Pivot Stator Current",
                 pivotMotor.statorCurrent.valueAsDouble,
             )
             log(
-                "Algae/Algae Pivot Supply Current",
+                "Outtake/Outtake Pivot Supply Current",
                 pivotMotor.supplyCurrent.valueAsDouble,
             )
             log(
-                "Algae/Algae Pivot Stall Current",
+                "Outtake/Outtake Pivot Stall Current",
                 pivotMotor.motorStallCurrent.valueAsDouble,
             )
         }

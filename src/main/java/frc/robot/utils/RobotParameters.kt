@@ -249,8 +249,6 @@ object RobotParameters {
         var outtakePivotState: OuttakePivotState = OuttakePivotState.UP
 
         var outtakeState: OuttakeState = OuttakeState.CORAL_HOLD
-
-        var algaeIntaking: Boolean = false
     }
 
     object FieldParameters {

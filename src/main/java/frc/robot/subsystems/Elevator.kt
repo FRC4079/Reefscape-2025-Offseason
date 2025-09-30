@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
@@ -10,10 +11,10 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
-import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
-import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_UP
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
+import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
+import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_UP
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_LEFT_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_RIGHT_ID
@@ -21,6 +22,8 @@ import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.emu.ElevatorState.L2
+import frc.robot.utils.emu.ElevatorState.L3
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.extension.leftStickPosition
@@ -74,14 +77,14 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
             inverted = InvertedValue.CounterClockwise_Positive,
-             limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             currentLimits = null,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
         )
         elevatorMotorRight.configureWithDefaults(
             ELEVATOR_PINGU,
-             limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             currentLimits = null,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
@@ -130,16 +133,16 @@ object Elevator : SubsystemBase() {
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
         // what Jayden clicks which will be displayed on leds but not necessarily = currentState
         //    elevatorSetState = currentState;
-//        setElevatorPosition(this.state)
+        // setElevatorPosition(this.state)
 
-//        setElevatorPosition(ElevatorState.L4)
+        // setElevatorPosition(ElevatorState.L4)
 
         moveElevator(testPad.leftY)
-//        recordOutput("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
-//        recordOutput("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
+        // recordOutput("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
+        // recordOutput("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
 
         logs {
-//            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
+            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
             log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
             log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.stickyFault_ForwardSoftLimit.value)
             log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.stickyFault_ReverseSoftLimit.value)
@@ -254,13 +257,11 @@ object Elevator : SubsystemBase() {
      * @param speed double, the velocity to move the elevator motor at
      */
     fun moveElevator(speed: Double) {
-        val deadband = 0.001
         val velocity = -speed * 15
-        co.touchlab.kermit.Logger
-            .d { "Speed is $velocity" }
+        Logger.d { "Speed is $velocity" }
 //        if (abs(velocity) >= deadband) {
-// //            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
-// //            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
+//            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
+//            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
 //            elevatorMotorRight.set(velocity)
 //            elevatorMotorLeft.set(velocity)
 //        } else {
@@ -349,8 +350,8 @@ object Elevator : SubsystemBase() {
         elevatorMotorRight.configurator.apply(elevatorRightConfigs)
 
         // Apply the Motion Magic configurations to the left and right elevator motors
-//        elevatorMotorLeft.configurator.apply(motionMagicConfigs)
-//        elevatorMotorRight.configurator.apply(motionMagicConfigs)
+        // elevatorMotorLeft.configurator.apply(motionMagicConfigs)
+        // elevatorMotorRight.configurator.apply(motionMagicConfigs)
     }
 
     /**
@@ -371,11 +372,11 @@ object Elevator : SubsystemBase() {
      */
     fun setAlgaeLevel(): Boolean =
         when (elevatorToBeSetState) {
-            ElevatorState.L2 -> {
+            L2 -> {
                 state = ElevatorState.ALGAE_LOW
                 true
             }
-            ElevatorState.L3 -> {
+            L3 -> {
                 state = ElevatorState.ALGAE_HIGH
                 true
             }
