@@ -208,9 +208,9 @@ object RobotParameters {
 
         val ELEVATOR_MAGIC_PINGU = MagicPingu(90.0, 180.0, 0.0)
 
-        const val ELEVATOR_SOFT_LIMIT_DOWN: Double = 0.1
+        const val ELEVATOR_SOFT_LIMIT_DOWN: Double = 0.0
 
-        const val ELEVATOR_SOFT_LIMIT_UP: Double = 65.0
+        const val ELEVATOR_SOFT_LIMIT_UP: Double = 200.0
 
         var elevatorToBeSetState: ElevatorState = ElevatorState.L4
 

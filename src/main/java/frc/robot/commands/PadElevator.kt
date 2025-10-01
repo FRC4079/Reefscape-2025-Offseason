@@ -23,8 +23,8 @@ class PadElevator(
     override fun execute() {
         // Code to manually move elevator
         //    Pair<Double, Double> position = positionSet(pad);
-        //    Elevator.getInstance().moveElevator(position.getSecond());
-
+//            Elevator.getInstance().moveElevator(position.getSecond());
+//
         //    if (checkDPad(0)) {
         //      setElevatorState(L4).schedule();
         //    } else if (checkDPad(2)) {

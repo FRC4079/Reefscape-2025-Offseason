@@ -106,6 +106,14 @@ object Outtake : SubsystemBase() {
                 pivotMotor.isConnected,
             )
             log(
+                "Algae/Pivot Supply Voltage",
+                pivotMotor.supplyVoltage.valueAsDouble,
+            )
+            log(
+                "Algae/Pivot Motor Voltage",
+                pivotMotor.motorVoltage.valueAsDouble,
+            )
+            log(
                 "Algae/Algae Pivot Stator Current",
                 pivotMotor.statorCurrent.valueAsDouble,
             )

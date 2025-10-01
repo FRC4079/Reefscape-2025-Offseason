@@ -27,6 +27,7 @@ import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.extension.setPingu
 import xyz.malefic.frc.pingu.LogPingu.log
 import xyz.malefic.frc.pingu.LogPingu.logs
+import kotlin.math.abs
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -65,6 +66,8 @@ object Elevator : SubsystemBase() {
 
     private val cycleOut: DutyCycleOut
 
+    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
+
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
      * is a Singleton. Code should use the [.getInstance] method to get the singleton
@@ -74,14 +77,14 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.configureWithDefaults(
             ELEVATOR_PINGU,
             inverted = InvertedValue.CounterClockwise_Positive,
-             limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             currentLimits = null,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
         )
         elevatorMotorRight.configureWithDefaults(
             ELEVATOR_PINGU,
-             limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
+            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
             currentLimits = null,
             dutyCycleNeutralDeadband = 0.1,
             motionMagicPingu = ELEVATOR_MAGIC_PINGU,
@@ -117,6 +120,15 @@ object Elevator : SubsystemBase() {
 
         elevatorMotorLeft.setPosition(0.0)
         elevatorMotorRight.setPosition(0.0)
+
+        elevatorMotorLeft.clearStickyFaults()
+        elevatorMotorRight.clearStickyFaults()
+
+        elevatorMotorLeft.clearStickyFault_ForwardSoftLimit()
+        elevatorMotorLeft.clearStickyFault_ReverseSoftLimit()
+        elevatorMotorRight.clearStickyFault_ForwardSoftLimit()
+        elevatorMotorRight.clearStickyFault_ReverseSoftLimit()
+
 
 //        add(elevatorMotorLeft, "left elevator")
 //        add(elevatorMotorRight, "right elevator")
@@ -172,8 +184,12 @@ object Elevator : SubsystemBase() {
                 elevatorMotorLeft.supplyVoltage.valueAsDouble,
             )
             log(
-                "Elevator/Elevator Motor Voltage",
+                "Elevator/Elevator Left Motor Voltage",
                 elevatorMotorLeft.motorVoltage.valueAsDouble,
+            )
+            log(
+                "Elevator/Elevator Right Motor Voltage",
+                elevatorMotorRight.motorVoltage.valueAsDouble,
             )
             log("Elevator/Elevator State", state.toString())
             log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
@@ -254,21 +270,13 @@ object Elevator : SubsystemBase() {
      * @param speed double, the velocity to move the elevator motor at
      */
     fun moveElevator(speed: Double) {
-        val deadband = 0.001
-        val velocity = -speed * 15
-        co.touchlab.kermit.Logger
-            .d { "Speed is $velocity" }
-//        if (abs(velocity) >= deadband) {
-// //            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
-// //            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
-//            elevatorMotorRight.set(velocity)
-//            elevatorMotorLeft.set(velocity)
-//        } else {
-//            stopMotors()
-//        }
+//        val velocityToSet = -speed * 100.0
+//        elevatorMotorRight.setControl(velocitySetter.withVelocity(velocityToSet))
+//        elevatorMotorLeft.setControl(velocitySetter.withVelocity(velocityToSet))
 
-        elevatorMotorRight.setVoltage(velocity)
-        elevatorMotorLeft.setVoltage(velocity)
+        val voltage = -speed * 12
+        elevatorMotorRight.setVoltage(voltage)
+        elevatorMotorLeft.setVoltage(voltage)
     }
 
     /**
@@ -352,7 +360,7 @@ object Elevator : SubsystemBase() {
 //        elevatorMotorLeft.configurator.apply(motionMagicConfigs)
 //        elevatorMotorRight.configurator.apply(motionMagicConfigs)
     }
-
+//67
     /**
      * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
      * until it stalls.
