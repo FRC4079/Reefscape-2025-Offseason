@@ -43,7 +43,7 @@ class SwerveModule(
     private val driveMotor =
         Mongu(TalonFX(driveId)) {
             this as TalonFXConfig
-            pingu = DRIVE_PINGU_AUTO
+            pingu = DRIVE_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
             inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED
             currentLimits = DRIVE_SUPPLY_LIMIT to DRIVE_STATOR_LIMIT
@@ -54,10 +54,10 @@ class SwerveModule(
     private val steerMotor =
         Mongu(TalonFX(steerId)) {
             this as TalonFXConfig
-            pingu = STEER_PINGU_AUTO
+            pingu = STEER_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
             inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED
-            currentLimits = STEER_SUPPLY_LIMIT to 0.0
+            currentLimits = STEER_SUPPLY_LIMIT to null
             extraConfig = {
                 ClosedLoopGeneral.ContinuousWrap = true
                 Feedback.FeedbackRemoteSensorID = canCoderID

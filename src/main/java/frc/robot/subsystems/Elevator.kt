@@ -251,7 +251,7 @@ object Elevator : SubsystemBase() {
      */
     fun moveElevator(speed: Double) {
         val velocity = -speed * 15
-        Logger.d { "Speed is $velocity" }
+//        Logger.d { "Speed is $velocity" }
 //        if (abs(velocity) >= deadband) {
 //            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
 //            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
