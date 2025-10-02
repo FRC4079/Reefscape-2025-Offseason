@@ -69,9 +69,9 @@ import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.extension.to3d
 import xyz.malefic.frc.extension.updateStdDev
 import xyz.malefic.frc.extension.updateStdDev3d
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.NetworkPingu
+import xyz.malefic.frc.pingu.control.NetworkPingu
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 import java.util.Optional
 import java.util.function.Predicate
 import kotlin.math.abs

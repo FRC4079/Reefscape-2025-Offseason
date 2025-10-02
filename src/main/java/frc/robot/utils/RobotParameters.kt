@@ -25,10 +25,10 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.SwerveDriveState
-import xyz.malefic.frc.pingu.LogPingu.metaLogs
-import xyz.malefic.frc.pingu.MagicPingu
-import xyz.malefic.frc.pingu.Pingu
-import xyz.malefic.frc.pingu.ProfiledPingu
+import xyz.malefic.frc.pingu.control.MagicPingu
+import xyz.malefic.frc.pingu.control.Pingu
+import xyz.malefic.frc.pingu.control.ProfiledPingu
+import xyz.malefic.frc.pingu.log.LogPingu.metaLogs
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

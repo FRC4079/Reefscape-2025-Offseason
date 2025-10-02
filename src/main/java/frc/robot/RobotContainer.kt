@@ -6,10 +6,8 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.commands.Kommand.moveElevatorState
-import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.Sequences.fullScoreAuto
-import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
@@ -24,8 +22,8 @@ import frc.robot.utils.emu.OuttakeState.*
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.State.ScoreManual
 import xyz.malefic.frc.emu.Button.*
-import xyz.malefic.frc.pingu.Bingu.bindings
-import xyz.malefic.frc.pingu.CommandPingu
+import xyz.malefic.frc.pingu.binding.Bingu.bindings
+import xyz.malefic.frc.pingu.command.Commangu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
@@ -33,7 +31,7 @@ object RobotContainer {
     init {
 //        Elevator.defaultCommand = padElevator(testPad)
 
-        CommandPingu.registerCommands {
+        Commangu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
             // bind("HasPieceFalse", hasPieceFalse())

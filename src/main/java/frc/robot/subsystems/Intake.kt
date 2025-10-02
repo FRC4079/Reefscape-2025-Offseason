@@ -2,22 +2,31 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
-import xyz.malefic.frc.extension.configureWithDefaults
-import xyz.malefic.frc.pingu.AlertPingu.add
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.VoltagePingu.setOutput
+import xyz.malefic.frc.pingu.alert.AlertPingu.add
+import xyz.malefic.frc.pingu.control.VoltagePingu.setOutput
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 
 object Intake : SubsystemBase() {
-    private val wheelFeederMotor: TalonFX = TalonFX(CORAL_FEEDER_ID)
-    private val starFeederMotor: TalonFX = TalonFX(STAR_FEEDER_ID)
+    private val wheelFeederMotor =
+        Mongu(TalonFX(CORAL_FEEDER_ID)) {
+            this as TalonFXConfig
+            pingu = WHEEL_FEEDER_PINGU
+        }
+
+    private val starFeederMotor =
+        Mongu(TalonFX(STAR_FEEDER_ID)) {
+            this as TalonFXConfig
+            pingu = STAR_FEEDER_PINGU
+        }
 
     private val voltageOut: VoltageOut
     private val voltageOutFeeder: VoltageOut
@@ -27,11 +36,8 @@ object Intake : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        wheelFeederMotor.configureWithDefaults(WHEEL_FEEDER_PINGU)
-        add(wheelFeederMotor, "Coral Feeder")
-
-        starFeederMotor.configureWithDefaults(STAR_FEEDER_PINGU, neutralMode = NeutralModeValue.Coast)
-        add(starFeederMotor, "Star Feeder Motor")
+        add(wheelFeederMotor.motor, "Coral Feeder")
+        add(starFeederMotor.motor, "Star Feeder Motor")
 
         voltageOut = VoltageOut(0.0)
         voltageOutFeeder = VoltageOut(0.0)

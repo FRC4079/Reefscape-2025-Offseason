@@ -19,8 +19,8 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.X_PINGU
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 
 /**
  * Command to align the robot to a specific pose.

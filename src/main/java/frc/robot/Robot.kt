@@ -27,8 +27,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import xyz.malefic.frc.path.LocalADStarAK
-import xyz.malefic.frc.pingu.AlertPingu
-import xyz.malefic.frc.pingu.Bingu
+import xyz.malefic.frc.pingu.alert.AlertPingu
+import xyz.malefic.frc.pingu.binding.Bingu
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to

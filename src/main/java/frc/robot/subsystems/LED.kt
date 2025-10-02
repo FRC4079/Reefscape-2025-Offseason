@@ -11,8 +11,8 @@ import frc.robot.utils.RobotParameters.LEDValues
 import frc.robot.utils.RobotParameters.LiveRobotValues
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.LEDState
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 import java.util.Random
 import kotlin.math.max
 import kotlin.math.pow

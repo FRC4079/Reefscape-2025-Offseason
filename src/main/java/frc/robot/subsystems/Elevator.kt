@@ -25,11 +25,13 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.ElevatorState.L2
 import frc.robot.utils.emu.ElevatorState.L3
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
-import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.extension.leftStickPosition
-import xyz.malefic.frc.extension.setPingu
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.position
+import xyz.malefic.frc.pingu.motor.control.voltage
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -37,11 +39,28 @@ import xyz.malefic.frc.pingu.LogPingu.logs
  * for the elevator motor.
  */
 object Elevator : SubsystemBase() {
-    private val elevatorMotorLeft = TalonFX(ELEVATOR_MOTOR_LEFT_ID)
-    private val elevatorMotorRight = TalonFX(ELEVATOR_MOTOR_RIGHT_ID)
+    private val elevatorMotorLeft =
+        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID)) {
+            this as TalonFXConfig
+            pingu = ELEVATOR_PINGU
+            inverted = InvertedValue.CounterClockwise_Positive
+            softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
+            currentLimits = null
+            dutyCycleNeutralDeadband = 0.1
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU
+        }
+    private val elevatorMotorRight =
+        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID)) {
+            this as TalonFXConfig
+            pingu = ELEVATOR_PINGU
+            softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
+            currentLimits = null
+            dutyCycleNeutralDeadband = 0.1
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU
+        }
 
-    private val posRequest: PositionDutyCycle
-    private val velocityRequest: VelocityTorqueCurrentFOC
+    private val posRequest: PositionDutyCycle = PositionDutyCycle(0.0)
+    private val velocityRequest: VelocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0)
 
     private lateinit var elevatorP: LoggedNetworkNumber
     private lateinit var elevatorI: LoggedNetworkNumber
@@ -53,9 +72,9 @@ object Elevator : SubsystemBase() {
     private lateinit var acc: LoggedNetworkNumber
     private lateinit var jerk: LoggedNetworkNumber
 
-    private val voltageOut: VoltageOut
-    private val elevatorLeftConfigs: TalonFXConfiguration
-    private val elevatorRightConfigs: TalonFXConfiguration
+    private val voltageOut: VoltageOut = VoltageOut(0.0)
+    private val elevatorLeftConfigs: TalonFXConfiguration = TalonFXConfiguration()
+    private val elevatorRightConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
     /**
      * The state of the elevator
@@ -64,9 +83,9 @@ object Elevator : SubsystemBase() {
      */
     var state: ElevatorState = ElevatorState.DEFAULT
 
-    private val motionMagicVoltage: MotionMagicVoltage
+    private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
-    private val cycleOut: DutyCycleOut
+    private val cycleOut: DutyCycleOut = DutyCycleOut(0.0)
 
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
@@ -74,32 +93,6 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-        elevatorMotorLeft.configureWithDefaults(
-            ELEVATOR_PINGU,
-            inverted = InvertedValue.CounterClockwise_Positive,
-            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
-            currentLimits = null,
-            dutyCycleNeutralDeadband = 0.1,
-            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        )
-        elevatorMotorRight.configureWithDefaults(
-            ELEVATOR_PINGU,
-            limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
-            currentLimits = null,
-            dutyCycleNeutralDeadband = 0.1,
-            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        )
-
-        elevatorLeftConfigs = TalonFXConfiguration()
-        elevatorRightConfigs = TalonFXConfiguration()
-
-//        elevatorLeftConfigs.ForwardSoftLimitEnable
-
-        velocityRequest = VelocityTorqueCurrentFOC(0.0)
-        posRequest = PositionDutyCycle(0.0)
-        voltageOut = VoltageOut(0.0)
-        motionMagicVoltage = MotionMagicVoltage(0.0)
-        cycleOut = DutyCycleOut(0.0)
 
         motionMagicVoltage.Slot = 0
 
@@ -118,8 +111,8 @@ object Elevator : SubsystemBase() {
 
         cycleOut.EnableFOC = false
 
-        elevatorMotorLeft.setPosition(0.0)
-        elevatorMotorRight.setPosition(0.0)
+        elevatorMotorLeft.set(0.0.position)
+        elevatorMotorRight.set(0.0.position)
 
 //        add(elevatorMotorLeft, "left elevator")
 //        add(elevatorMotorRight, "right elevator")
@@ -144,53 +137,53 @@ object Elevator : SubsystemBase() {
         logs {
             log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
             log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
-            log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.stickyFault_ForwardSoftLimit.value)
-            log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.stickyFault_ReverseSoftLimit.value)
+            log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.motor.stickyFault_ForwardSoftLimit.value)
+            log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.motor.stickyFault_ReverseSoftLimit.value)
             log(
                 "Elevator/Elevator Left Position",
-                elevatorMotorLeft.position.valueAsDouble,
+                elevatorMotorLeft.motor.position.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Position",
-                elevatorMotorRight.position.valueAsDouble,
+                elevatorMotorRight.motor.position.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Left Set Speed",
-                elevatorMotorLeft.velocity.valueAsDouble,
+                elevatorMotorLeft.motor.velocity.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Set Speed",
-                elevatorMotorRight.velocity.valueAsDouble,
+                elevatorMotorRight.motor.velocity.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Left Acceleration",
-                elevatorMotorLeft.acceleration.valueAsDouble,
+                elevatorMotorLeft.motor.acceleration.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Acceleration",
-                elevatorMotorRight.acceleration.valueAsDouble,
+                elevatorMotorRight.motor.acceleration.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Supply Voltage",
-                elevatorMotorLeft.supplyVoltage.valueAsDouble,
+                elevatorMotorLeft.motor.supplyVoltage.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Motor Voltage",
-                elevatorMotorLeft.motorVoltage.valueAsDouble,
+                elevatorMotorLeft.motor.motorVoltage.valueAsDouble,
             )
             log("Elevator/Elevator State", state.toString())
             log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
             log(
                 "Elevator/Elevator Stator Current",
-                elevatorMotorLeft.statorCurrent.valueAsDouble,
+                elevatorMotorLeft.motor.statorCurrent.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Supply Current",
-                elevatorMotorLeft.supplyCurrent.valueAsDouble,
+                elevatorMotorLeft.motor.supplyCurrent.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Stall Current",
-                elevatorMotorLeft.motorStallCurrent.valueAsDouble,
+                elevatorMotorLeft.motor.motorStallCurrent.valueAsDouble,
             )
         }
     }
@@ -220,8 +213,8 @@ object Elevator : SubsystemBase() {
      */
     fun getElevatorPosValue(motor: ElevatorMotor): Double =
         when (motor) {
-            ElevatorMotor.LEFT -> elevatorMotorLeft.position.valueAsDouble
-            ElevatorMotor.RIGHT -> elevatorMotorRight.position.valueAsDouble
+            ElevatorMotor.LEFT -> elevatorMotorLeft.motor.position.valueAsDouble
+            ElevatorMotor.RIGHT -> elevatorMotorRight.motor.position.valueAsDouble
         }
 
     val elevatorPosAvg: Double
@@ -234,8 +227,8 @@ object Elevator : SubsystemBase() {
 
     /** Soft resets the encoders on the elevator motors  */
     fun resetEncoders() {
-        elevatorMotorLeft.setPosition(0.0)
-        elevatorMotorRight.setPosition(0.0)
+        elevatorMotorLeft.set(0.0.position)
+        elevatorMotorRight.set(0.0.position)
     }
 
 //    /** Toggles the soft stop for the elevator motor  */
@@ -268,18 +261,8 @@ object Elevator : SubsystemBase() {
 //            stopMotors()
 //        }
 
-        elevatorMotorRight.setVoltage(velocity)
-        elevatorMotorLeft.setVoltage(velocity)
-    }
-
-    /**
-     * Sets the elevator motor to a specific position
-     *
-     * @param state the [ElevatorState] to set the elevator motor to
-     */
-    fun setElevatorPosition(state: ElevatorState) {
-        elevatorMotorLeft.setControl(motionMagicVoltage.withPosition(state.pos))
-        elevatorMotorRight.setControl(motionMagicVoltage.withPosition(state.pos))
+        elevatorMotorRight.set(velocity.voltage)
+        elevatorMotorLeft.set(velocity.voltage)
     }
 
     fun initializeLoggedNetworkPID() {
@@ -310,58 +293,13 @@ object Elevator : SubsystemBase() {
     }
 
     /**
-     * Updates the PID values for the elevator motors. This method sets the PID values for the
-     * elevator motors and updates the Motion Magic configurations.
-     */
-    fun updateElevatorPID() {
-        ELEVATOR_PINGU.setP(elevatorP)
-        ELEVATOR_PINGU.setI(elevatorI)
-        ELEVATOR_PINGU.setD(elevatorD)
-        ELEVATOR_PINGU.setV(elevatorV)
-        ELEVATOR_PINGU.setS(elevatorS)
-        ELEVATOR_PINGU.setG(elevatorG)
-
-        ELEVATOR_MAGIC_PINGU.setVelocity(cruiseV)
-        ELEVATOR_MAGIC_PINGU.setAcceleration(acc)
-        ELEVATOR_MAGIC_PINGU.setJerk(jerk)
-
-        applyElevatorPIDValues()
-    }
-
-    /**
-     * Applies the PID values to the elevator motors. This method sets the PID values for both the
-     * left and right elevator motor configurations and applies the Motion Magic configurations.
-     */
-    fun applyElevatorPIDValues() {
-        // Set the PID values for the left elevator motor configuration
-        elevatorLeftConfigs.setPingu(ELEVATOR_PINGU)
-
-        // Set the PID values for the right elevator motor configuration
-        elevatorRightConfigs.setPingu(ELEVATOR_PINGU)
-
-        // Update the Motion Magic configurations with the current PID values
-//        motionMagicConfigs = elevatorLeftConfigs.MotionMagic
-//        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV.get()
-//        motionMagicConfigs.MotionMagicAcceleration = acc.get()
-//        motionMagicConfigs.MotionMagicJerk = jerk.get()
-
-        // Apply the updated configurations to the left elevator motor
-        elevatorMotorLeft.configurator.apply(elevatorLeftConfigs)
-        elevatorMotorRight.configurator.apply(elevatorRightConfigs)
-
-        // Apply the Motion Magic configurations to the left and right elevator motors
-        // elevatorMotorLeft.configurator.apply(motionMagicConfigs)
-        // elevatorMotorRight.configurator.apply(motionMagicConfigs)
-    }
-
-    /**
      * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
      * until it stalls.
      */
     fun calibrateElevator() {
-        while (elevatorMotorLeft.motorStallCurrent.valueAsDouble < 3.0) {
-            elevatorMotorLeft.setControl(voltageOut.withOutput(0.5))
-            elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
+        while (elevatorMotorLeft.motor.motorStallCurrent.valueAsDouble < 3.0) {
+            elevatorMotorLeft.motor.setControl(voltageOut.withOutput(0.5))
+            elevatorMotorRight.motor.setControl(voltageOut.withOutput(0.5))
         }
     }
 

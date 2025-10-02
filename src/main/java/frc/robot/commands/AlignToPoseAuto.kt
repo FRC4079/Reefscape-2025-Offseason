@@ -20,9 +20,9 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.ElevatorState
 import org.photonvision.PhotonCamera
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.NetworkPingu
+import xyz.malefic.frc.pingu.control.NetworkPingu
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 
 class AlignToPoseAuto(
     private val offsetSide: Direction,

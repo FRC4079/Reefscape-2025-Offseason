@@ -24,10 +24,12 @@ import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.State
-import xyz.malefic.frc.extension.configureWithDefaults
-import xyz.malefic.frc.pingu.AlertPingu.add
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.alert.AlertPingu.add
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.position
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 
 /**
  * The Outtake class is a subsystem that interfaces with the arm system to provide control
@@ -36,8 +38,20 @@ import xyz.malefic.frc.pingu.LogPingu.logs
  */
 object Outtake : SubsystemBase() {
     /** Creates a new end effector.  */
-    private val pivotMotor: TalonFX = TalonFX(OUTTAKE_PIVOT_MOTOR_ID)
-    private val outtakeMotor: TalonFX = TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)
+    private val pivotMotor =
+        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID)) {
+            this as TalonFXConfig
+            pingu = PIVOT_PINGU
+            inverted = InvertedValue.CounterClockwise_Positive
+            currentLimits = 30.0 to 30.0
+        }
+    private val outtakeMotor =
+        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)) {
+            this as TalonFXConfig
+            pingu = OUTTAKE_PINGU
+            inverted = InvertedValue.CounterClockwise_Positive
+            currentLimits = 30.0 to 30.0
+        }
     private val canbore = CANcoder(OUTTAKE_PIVOT_CANBORE_ID)
 
     private val voltageOut: VoltageOut
@@ -51,9 +65,6 @@ object Outtake : SubsystemBase() {
      * Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        pivotMotor.configureWithDefaults(PIVOT_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
-        outtakeMotor.configureWithDefaults(OUTTAKE_PINGU, inverted = InvertedValue.CounterClockwise_Positive, currentLimits = 30.0 to 30.0)
-
         val canCoderConfiguration = CANcoderConfiguration()
 
         canCoderConfiguration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive
@@ -68,7 +79,7 @@ object Outtake : SubsystemBase() {
         voltageOut = VoltageOut(0.0)
         voltagePos = PositionVoltage(0.0)
 
-        pivotMotor.setPosition(0.0)
+        pivotMotor.set(0.0.position)
 
         add(pivotMotor, "algae pivot")
         add(outtakeMotor, "algae intake")
@@ -101,20 +112,20 @@ object Outtake : SubsystemBase() {
             log("Outtake/Outtake Pivot State State", outtakePivotState.toString())
             log("Outtake/Outtake State", outtakeState.toString())
             log(
-                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
-                pivotMotor.isConnected,
+                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.motor.deviceID,
+                pivotMotor.motor.isConnected,
             )
             log(
                 "Outtake/Outtake Pivot Stator Current",
-                pivotMotor.statorCurrent.valueAsDouble,
+                pivotMotor.motor.statorCurrent.valueAsDouble,
             )
             log(
                 "Outtake/Outtake Pivot Supply Current",
-                pivotMotor.supplyCurrent.valueAsDouble,
+                pivotMotor.motor.supplyCurrent.valueAsDouble,
             )
             log(
                 "Outtake/Outtake Pivot Stall Current",
-                pivotMotor.motorStallCurrent.valueAsDouble,
+                pivotMotor.motor.motorStallCurrent.valueAsDouble,
             )
         }
     }
@@ -134,7 +145,7 @@ object Outtake : SubsystemBase() {
          *
          * @return double, the position of the end effector motor
          */
-        get() = pivotMotor.position.valueAsDouble
+        get() = pivotMotor.motor.position.valueAsDouble
 
     /**
      * Sets the speed of the algae outtake motor.
