@@ -77,8 +77,8 @@ object Intake : SubsystemBase() {
      */
     fun startCoralIntake() {
         voltageOut.Output = 5.0
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
+        wheelFeederMotor.motor.setControl(voltageOut)
+        starFeederMotor.motor.setControl(voltageOut)
         //    isCoralIntaking = true;
     }
 
@@ -86,8 +86,8 @@ object Intake : SubsystemBase() {
      * Starts the coral manipulator motors
      */
     fun reverseMotors() {
-        wheelFeederMotor.setControl(setOutput(-4.5))
-        starFeederMotor.setControl(setOutput(-4.5))
+        wheelFeederMotor.motor.setControl(setOutput(-4.5))
+        starFeederMotor.motor.setControl(setOutput(-4.5))
     }
 
     /**
@@ -97,7 +97,7 @@ object Intake : SubsystemBase() {
      */
     fun setIntakeSpeed(speed: Double) {
         voltageOut.Output = speed
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
+        wheelFeederMotor.motor.setControl(voltageOut)
+        starFeederMotor.motor.setControl(voltageOut)
     }
 }

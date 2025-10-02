@@ -136,7 +136,7 @@ object Outtake : SubsystemBase() {
      * @param state the state to set the algae pivot
      */
     fun setPivotState(state: OuttakePivotState) {
-        pivotMotor.setControl(voltagePos.withPosition(state.pos))
+        pivotMotor.motor.setControl(voltagePos.withPosition(state.pos))
     }
 
     val pivotPosValue: Double
@@ -154,7 +154,7 @@ object Outtake : SubsystemBase() {
      */
     fun setOuttakeSpeed(speed: Double) {
         voltageOut.Output = speed
-        outtakeMotor.setControl(voltageOut)
+        outtakeMotor.motor.setControl(voltageOut)
     }
 
     /** Stops the algae intake motor.  */

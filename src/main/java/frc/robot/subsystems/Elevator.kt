@@ -200,8 +200,8 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.stopMotor()
         elevatorMotorRight.stopMotor()
         voltageOut.Output = -0.014
-        elevatorMotorLeft.setControl(voltageOut)
-        elevatorMotorRight.setControl(voltageOut)
+        elevatorMotorLeft.motor.setControl(voltageOut)
+        elevatorMotorRight.motor.setControl(voltageOut)
     }
 
     /**
