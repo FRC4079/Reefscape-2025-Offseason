@@ -10,10 +10,10 @@ import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import xyz.malefic.frc.pingu.alert.AlertPingu.add
 import xyz.malefic.frc.pingu.control.VoltagePingu.setOutput
-import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.Mongu
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
 
 object Intake : SubsystemBase() {
     private val wheelFeederMotor =
@@ -55,13 +55,7 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-//        voltageOutFeeder.Output = 5.0
-//        wheelFeederMotor.setControl(voltageOutFeeder)
-//        starFeederMotor.setControl(voltageOutFeeder)
-
-        logs {
-            log("Coral/Coral State", outtakeState.toString())
-        }
+        logs("Coral/Coral State", outtakeState.toString())
     }
 
     /**
@@ -77,8 +71,8 @@ object Intake : SubsystemBase() {
      */
     fun startCoralIntake() {
         voltageOut.Output = 5.0
-        wheelFeederMotor.motor.setControl(voltageOut)
-        starFeederMotor.motor.setControl(voltageOut)
+        wheelFeederMotor.setControl(voltageOut)
+        starFeederMotor.setControl(voltageOut)
         //    isCoralIntaking = true;
     }
 
@@ -86,8 +80,8 @@ object Intake : SubsystemBase() {
      * Starts the coral manipulator motors
      */
     fun reverseMotors() {
-        wheelFeederMotor.motor.setControl(setOutput(-4.5))
-        starFeederMotor.motor.setControl(setOutput(-4.5))
+        wheelFeederMotor.setControl(setOutput(-4.5))
+        starFeederMotor.setControl(setOutput(-4.5))
     }
 
     /**
@@ -97,7 +91,7 @@ object Intake : SubsystemBase() {
      */
     fun setIntakeSpeed(speed: Double) {
         voltageOut.Output = speed
-        wheelFeederMotor.motor.setControl(voltageOut)
-        starFeederMotor.motor.setControl(voltageOut)
+        wheelFeederMotor.setControl(voltageOut)
+        starFeederMotor.setControl(voltageOut)
     }
 }

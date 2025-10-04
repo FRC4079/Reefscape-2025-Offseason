@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
@@ -32,6 +31,15 @@ import xyz.malefic.frc.pingu.motor.Mongu
 import xyz.malefic.frc.pingu.motor.control.position
 import xyz.malefic.frc.pingu.motor.control.voltage
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.acceleration
+import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.motorVoltage
+import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
+import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.supplyVoltage
+import xyz.malefic.frc.pingu.motor.talonfx.velocity
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -141,49 +149,49 @@ object Elevator : SubsystemBase() {
             log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.motor.stickyFault_ReverseSoftLimit.value)
             log(
                 "Elevator/Elevator Left Position",
-                elevatorMotorLeft.motor.position.valueAsDouble,
+                elevatorMotorLeft.position,
             )
             log(
                 "Elevator/Elevator Right Position",
-                elevatorMotorRight.motor.position.valueAsDouble,
+                elevatorMotorRight.position,
             )
             log(
                 "Elevator/Elevator Left Set Speed",
-                elevatorMotorLeft.motor.velocity.valueAsDouble,
+                elevatorMotorLeft.velocity,
             )
             log(
                 "Elevator/Elevator Right Set Speed",
-                elevatorMotorRight.motor.velocity.valueAsDouble,
+                elevatorMotorRight.velocity,
             )
             log(
                 "Elevator/Elevator Left Acceleration",
-                elevatorMotorLeft.motor.acceleration.valueAsDouble,
+                elevatorMotorLeft.acceleration,
             )
             log(
                 "Elevator/Elevator Right Acceleration",
-                elevatorMotorRight.motor.acceleration.valueAsDouble,
+                elevatorMotorRight.acceleration,
             )
             log(
                 "Elevator/Elevator Supply Voltage",
-                elevatorMotorLeft.motor.supplyVoltage.valueAsDouble,
+                elevatorMotorLeft.supplyVoltage,
             )
             log(
                 "Elevator/Elevator Motor Voltage",
-                elevatorMotorLeft.motor.motorVoltage.valueAsDouble,
+                elevatorMotorLeft.motorVoltage,
             )
             log("Elevator/Elevator State", state.toString())
             log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
             log(
                 "Elevator/Elevator Stator Current",
-                elevatorMotorLeft.motor.statorCurrent.valueAsDouble,
+                elevatorMotorLeft.statorCurrent,
             )
             log(
                 "Elevator/Elevator Supply Current",
-                elevatorMotorLeft.motor.supplyCurrent.valueAsDouble,
+                elevatorMotorLeft.supplyCurrent,
             )
             log(
                 "Elevator/Elevator Stall Current",
-                elevatorMotorLeft.motor.motorStallCurrent.valueAsDouble,
+                elevatorMotorLeft.motorStallCurrent,
             )
         }
     }
@@ -200,8 +208,8 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.stopMotor()
         elevatorMotorRight.stopMotor()
         voltageOut.Output = -0.014
-        elevatorMotorLeft.motor.setControl(voltageOut)
-        elevatorMotorRight.motor.setControl(voltageOut)
+        elevatorMotorLeft.setControl(voltageOut)
+        elevatorMotorRight.setControl(voltageOut)
     }
 
     /**
@@ -213,8 +221,8 @@ object Elevator : SubsystemBase() {
      */
     fun getElevatorPosValue(motor: ElevatorMotor): Double =
         when (motor) {
-            ElevatorMotor.LEFT -> elevatorMotorLeft.motor.position.valueAsDouble
-            ElevatorMotor.RIGHT -> elevatorMotorRight.motor.position.valueAsDouble
+            ElevatorMotor.LEFT -> elevatorMotorLeft.position
+            ElevatorMotor.RIGHT -> elevatorMotorRight.position
         }
 
     val elevatorPosAvg: Double
@@ -297,9 +305,9 @@ object Elevator : SubsystemBase() {
      * until it stalls.
      */
     fun calibrateElevator() {
-        while (elevatorMotorLeft.motor.motorStallCurrent.valueAsDouble < 3.0) {
-            elevatorMotorLeft.motor.setControl(voltageOut.withOutput(0.5))
-            elevatorMotorRight.motor.setControl(voltageOut.withOutput(0.5))
+        while (elevatorMotorLeft.motorStallCurrent < 3.0) {
+            elevatorMotorLeft.setControl(voltageOut.withOutput(0.5))
+            elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
         }
     }
 

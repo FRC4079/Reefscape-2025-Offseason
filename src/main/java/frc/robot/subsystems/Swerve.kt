@@ -639,6 +639,6 @@ object Swerve : SubsystemBase() {
             log("Rotation", rotation)
         }
 
-        setDriveSpeeds(y, x, rotation*0.5, true)
+        setDriveSpeeds(y, x, rotation * 0.5, true)
     }
 }

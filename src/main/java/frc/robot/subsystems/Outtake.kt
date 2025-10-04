@@ -30,6 +30,13 @@ import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.Mongu
 import xyz.malefic.frc.pingu.motor.control.position
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.deviceID
+import xyz.malefic.frc.pingu.motor.talonfx.isConnected
+import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
+import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 
 /**
  * The Outtake class is a subsystem that interfaces with the arm system to provide control
@@ -112,20 +119,20 @@ object Outtake : SubsystemBase() {
             log("Outtake/Outtake Pivot State State", outtakePivotState.toString())
             log("Outtake/Outtake State", outtakeState.toString())
             log(
-                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.motor.deviceID,
-                pivotMotor.motor.isConnected,
+                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
+                pivotMotor.isConnected,
             )
             log(
                 "Outtake/Outtake Pivot Stator Current",
-                pivotMotor.motor.statorCurrent.valueAsDouble,
+                pivotMotor.statorCurrent,
             )
             log(
                 "Outtake/Outtake Pivot Supply Current",
-                pivotMotor.motor.supplyCurrent.valueAsDouble,
+                pivotMotor.supplyCurrent,
             )
             log(
                 "Outtake/Outtake Pivot Stall Current",
-                pivotMotor.motor.motorStallCurrent.valueAsDouble,
+                pivotMotor.motorStallCurrent,
             )
         }
     }
@@ -136,7 +143,7 @@ object Outtake : SubsystemBase() {
      * @param state the state to set the algae pivot
      */
     fun setPivotState(state: OuttakePivotState) {
-        pivotMotor.motor.setControl(voltagePos.withPosition(state.pos))
+        pivotMotor.setControl(voltagePos.withPosition(state.pos))
     }
 
     val pivotPosValue: Double
@@ -145,7 +152,7 @@ object Outtake : SubsystemBase() {
          *
          * @return double, the position of the end effector motor
          */
-        get() = pivotMotor.motor.position.valueAsDouble
+        get() = pivotMotor.position
 
     /**
      * Sets the speed of the algae outtake motor.
@@ -154,7 +161,7 @@ object Outtake : SubsystemBase() {
      */
     fun setOuttakeSpeed(speed: Double) {
         voltageOut.Output = speed
-        outtakeMotor.motor.setControl(voltageOut)
+        outtakeMotor.setControl(voltageOut)
     }
 
     /** Stops the algae intake motor.  */
