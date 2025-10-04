@@ -2,6 +2,7 @@
 
 package frc.robot
 
+import co.touchlab.kermit.Logger
 import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
@@ -11,16 +12,20 @@ import frc.robot.commands.Sequences.fullScoreAuto
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
+import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.Direction.LEFT
 import frc.robot.utils.emu.Direction.RIGHT
+import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.ElevatorState.*
+import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.OuttakeState.*
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.State.ScoreManual
+import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.*
 import xyz.malefic.frc.pingu.binding.Bingu.bindings
 import xyz.malefic.frc.pingu.command.Commangu
@@ -98,6 +103,9 @@ object RobotContainer {
             press(RIGHT_STICK) {
                 visionDead = !visionDead
             }
+            press(DPAD_DOWN) {
+                Swerve.flipPidgey()
+            }
         }
 
         testPad.bindings {
@@ -112,6 +120,13 @@ object RobotContainer {
             }
             release(B) {
                 SuperStructure.cancel()
+            }
+            press(Y) {
+                setElevatorState(L4).schedule()
+                outtakeState = CORAL_SHOOT
+            }
+            press(Button.X) {
+                setElevatorState(DEFAULT).schedule()
             }
         }
     }

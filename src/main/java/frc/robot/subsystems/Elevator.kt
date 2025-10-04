@@ -1,9 +1,11 @@
 package frc.robot.subsystems
 
+import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionDutyCycle
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
@@ -81,6 +83,7 @@ object Elevator : SubsystemBase() {
     private lateinit var jerk: LoggedNetworkNumber
 
     private val voltageOut: VoltageOut = VoltageOut(0.0)
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
     private val elevatorLeftConfigs: TalonFXConfiguration = TalonFXConfiguration()
     private val elevatorRightConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
@@ -89,7 +92,7 @@ object Elevator : SubsystemBase() {
      *
      * @return [ElevatorState], the state of the elevator
      */
-    var state: ElevatorState = ElevatorState.DEFAULT
+    var elevatorState: ElevatorState = ElevatorState.DEFAULT
 
     private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
@@ -136,9 +139,9 @@ object Elevator : SubsystemBase() {
         //    elevatorSetState = currentState;
         // setElevatorPosition(this.state)
 
-        // setElevatorPosition(ElevatorState.L4)
+        moveElevator(elevatorState)
 
-        moveElevator(testPad.leftY)
+//        moveElevator(testPad.leftY)
         // recordOutput("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
         // recordOutput("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
 
@@ -179,8 +182,8 @@ object Elevator : SubsystemBase() {
                 "Elevator/Elevator Motor Voltage",
                 elevatorMotorLeft.motorVoltage,
             )
-            log("Elevator/Elevator State", state.toString())
-            log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
+            log("Elevator/Elevator State", elevatorState)
+            log("Elevator/Elevator To Be State", elevatorToBeSetState)
             log(
                 "Elevator/Elevator Stator Current",
                 elevatorMotorLeft.statorCurrent,
@@ -273,6 +276,11 @@ object Elevator : SubsystemBase() {
         elevatorMotorLeft.set(velocity.voltage)
     }
 
+    fun moveElevator(state: ElevatorState) {
+        elevatorMotorLeft.setControl(voltagePos.withPosition(state.pos))
+        elevatorMotorRight.setControl(voltagePos.withPosition(state.pos))
+    }
+
     fun initializeLoggedNetworkPID() {
         elevatorP =
             LoggedNetworkNumber("Tuning/Elevator/Elevator P", elevatorRightConfigs.Slot0.kP)
@@ -319,13 +327,16 @@ object Elevator : SubsystemBase() {
     fun setAlgaeLevel(): Boolean =
         when (elevatorToBeSetState) {
             L2 -> {
-                state = ElevatorState.ALGAE_LOW
+                elevatorState = ElevatorState.ALGAE_LOW
                 true
             }
             L3 -> {
-                state = ElevatorState.ALGAE_HIGH
+                elevatorState = ElevatorState.ALGAE_HIGH
                 true
             }
             else -> false
         }
+
+    val atState: Boolean
+        get() = elevatorMotorLeft.motor.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
 }

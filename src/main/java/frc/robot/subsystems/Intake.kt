@@ -10,6 +10,7 @@ import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import xyz.malefic.frc.pingu.alert.AlertPingu.add
 import xyz.malefic.frc.pingu.control.VoltagePingu.setOutput
+import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.Mongu
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
@@ -55,7 +56,9 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-        logs("Coral/Coral State", outtakeState.toString())
+//        voltageOutFeeder.Output = 5.0
+//        wheelFeederMotor.setControl(voltageOutFeeder)
+//        starFeederMotor.setControl(voltageOutFeeder)
     }
 
     /**
