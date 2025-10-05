@@ -39,6 +39,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
  */
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
+    val intakeTimer: Timer = Timer()
     //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
 
     /** Creates a new end effector.  */
@@ -72,6 +73,16 @@ object Outtake : SubsystemBase() {
 
         if (outtakeState == OuttakeState.STOWED) {
             movePivotTo(OuttakePivotState.INTAKE)
+            if (!getCoralSensor()) {
+                setOuttakeSpeed(30.0)
+            } else if (!intakeTimer.hasElapsed(0.5) && !intakeTimer.isRunning) {
+                intakeTimer.start()
+            } else if (intakeTimer.hasElapsed(0.5)) {
+                intakeTimer.stop()
+                intakeTimer.reset()
+                stopOuttakeMotor()
+            }
+            // otherwise we wait for 0.5 seconds to pass
         } else if (outtakeState == OuttakeState.CORAL_SHOOT) {
             when (elevatorState) {
                 ElevatorState.L4 -> {
@@ -190,7 +201,7 @@ object Outtake : SubsystemBase() {
      * Stows the outtake by stopping the outtake motor and moving the pivot to the UP position.
      */
     fun stow() {
-        stopMotors()
+//        stopMotors()
     }
 
     /**
@@ -202,7 +213,7 @@ object Outtake : SubsystemBase() {
     fun shootCoral() {
         if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25 && Elevator.atState) {
             shootTimer.start()
-            setOuttakeSpeed(30.0)
+            setOuttakeSpeed(155.0)
         }
     }
 
