@@ -109,17 +109,20 @@ object RobotContainer {
         }
 
         testPad.bindings {
+//            press(A) {
+//                SuperStructure.driveToScoringPose(LEFT)
+//            }
+//            release(A) {
+//                SuperStructure.cancel()
+//            }
+//            press(B) {
+//                SuperStructure.driveToScoringPose(RIGHT)
+//            }
+//            release(B) {
+//                SuperStructure.cancel()
+//            }
             press(A) {
-                SuperStructure.driveToScoringPose(LEFT)
-            }
-            release(A) {
-                SuperStructure.cancel()
-            }
-            press(B) {
-                SuperStructure.driveToScoringPose(RIGHT)
-            }
-            release(B) {
-                SuperStructure.cancel()
+                Swerve.resetPidgey()
             }
             press(Y) {
                 setElevatorState(L4).schedule()

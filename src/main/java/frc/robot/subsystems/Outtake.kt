@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
@@ -47,6 +48,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
  */
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
+    val intakeTimer: Timer = Timer()
     //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
 
     /** Creates a new end effector.  */
@@ -68,10 +70,9 @@ object Outtake : SubsystemBase() {
             pingu = OUTTAKE_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
-            currentLimits = 30.0 to 30.0
         }
 
-    private val voltageOut: VoltageOut
+    private val voltageVelo: VelocityVoltage
     private val voltagePos: PositionVoltage
 
     private val coralSensor: DigitalInput = DigitalInput(CORAL_SENSOR_ID)
@@ -93,7 +94,7 @@ object Outtake : SubsystemBase() {
         //
         //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
         // algaeManipulatorMotorSoftLimitConfig;
-        voltageOut = VoltageOut(0.0)
+        voltageVelo = VelocityVoltage(0.0)
         voltagePos = PositionVoltage(0.0)
 
         pivotMotor.set(0.0.position)
@@ -149,7 +150,12 @@ object Outtake : SubsystemBase() {
 
             (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor())
             -> {
-                if (shootTimer.hasElapsed(0.5)) {
+                if (shootTimer.hasElapsed(0.75)) {
+                    println("TIME HAS ELPASED**********************************************")
+                    println("TIME HAS ELPASED**********************************************")
+                    println("TIME HAS ELPASED**********************************************")
+                    println("TIME HAS ELPASED**********************************************")
+
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.STOWED
                     shootTimer.stop()
@@ -219,8 +225,7 @@ object Outtake : SubsystemBase() {
      * @param speed the desired speed to set for the intake motor
      */
     fun setOuttakeSpeed(speed: Double) {
-        voltageOut.Output = speed
-        outtakeMotor.setControl(voltageOut)
+        outtakeMotor.setControl(voltageVelo.withVelocity(speed))
     }
 
     /** Stops the algae intake motor.  */
@@ -235,7 +240,15 @@ object Outtake : SubsystemBase() {
      * Stows the outtake by stopping the outtake motor and moving the pivot to the UP position.
      */
     fun stow() {
-        stopMotors()
+        if (!getCoralSensor()) {
+            setOuttakeSpeed(45.0)
+        } else if (!intakeTimer.isRunning) {
+            intakeTimer.start()
+        } else if (intakeTimer.hasElapsed(0.5)) {
+            outtakeMotor.stopMotor()
+            intakeTimer.stop()
+            intakeTimer.reset()
+        }
     }
 
     /**
@@ -248,7 +261,9 @@ object Outtake : SubsystemBase() {
         if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25) {
             if (Elevator.atState) {
                 shootTimer.start()
-                setOuttakeSpeed(30.0)
+                setOuttakeSpeed(155.0)
+                println("SHOOTING CORAL $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+                println("SHOOTING CORAL $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
             }
         }
     }
@@ -267,7 +282,7 @@ object Outtake : SubsystemBase() {
      * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
      * scoring process.
      */
-    fun slowAlgaeScoreMotors() = setOuttakeSpeed(-3.0)
+    fun slowAlgaeScoreMotors() = setOuttakeSpeed(-30.0)
 
     /**
      * Initiates the algae intake process. Sets the elevator to the algae level, starts the intake
@@ -276,7 +291,7 @@ object Outtake : SubsystemBase() {
     fun intakeAlgae() {
         stopMotors()
         if (!setAlgaeLevel()) return
-        setOuttakeSpeed(-30.0)
+        setOuttakeSpeed(-100.0)
     }
 
     /**
@@ -287,7 +302,7 @@ object Outtake : SubsystemBase() {
      */
     fun shootAlgae() {
         // TODO: Weird elevator timing (in this file or somewhere else?)
-        setOuttakeSpeed(-30.0)
+        setOuttakeSpeed(-100.0)
         stopAlgaeIntake()
     }
 

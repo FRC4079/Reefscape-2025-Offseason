@@ -235,15 +235,15 @@ object RobotParameters {
     }
 
     object IntakeParameters {
-        val STAR_FEEDER_PINGU = Pingu(0.001, 0.0, 0.0, 0.0)
-        val WHEEL_FEEDER_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
+        val STAR_FEEDER_PINGU = Pingu(25.0, 0.0, 0.0, 1.0)
+        val WHEEL_FEEDER_PINGU = Pingu(25.0, 0.0, 0.0, 1.0)
     }
 
     object OuttakeParameters {
         const val CORAL_SENSOR_ID: Int = 1
         const val ALGAE_SENSOR_ID: Int = 0
 
-        val OUTTAKE_PINGU = Pingu(5.0, 0.0, 0.0, 0.0)
+        val OUTTAKE_PINGU = Pingu(25.0, 0.001, 0.125, 1.5)
         val PIVOT_PINGU = Pingu(8.033, 0.0, 0.0, 0.0)
 
         var outtakePivotState: OuttakePivotState = OuttakePivotState.INTAKE

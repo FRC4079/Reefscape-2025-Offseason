@@ -1,13 +1,17 @@
 package frc.robot.subsystems
 
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.subsystems.Outtake.getCoralSensor
 import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
+import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
+import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.pingu.alert.AlertPingu.add
 import xyz.malefic.frc.pingu.control.VoltagePingu.setOutput
 import xyz.malefic.frc.pingu.log.LogPingu.log
@@ -29,8 +33,7 @@ object Intake : SubsystemBase() {
             pingu = STAR_FEEDER_PINGU
         }
 
-    private val voltageOut: VoltageOut
-    private val voltageOutFeeder: VoltageOut
+    private val voltageVelo: VelocityVoltage
 
     /**
      * Creates a new instance of this IntakeSubsystem. This constructor is private since this class is
@@ -40,8 +43,7 @@ object Intake : SubsystemBase() {
         add(wheelFeederMotor.motor, "Coral Feeder")
         add(starFeederMotor.motor, "Star Feeder Motor")
 
-        voltageOut = VoltageOut(0.0)
-        voltageOutFeeder = VoltageOut(0.0)
+        voltageVelo = VelocityVoltage(0.0)
     }
 
     /**
@@ -56,9 +58,11 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-//        voltageOutFeeder.Output = 5.0
-//        wheelFeederMotor.setControl(voltageOutFeeder)
-//        starFeederMotor.setControl(voltageOutFeeder)
+        if (outtakeState == OuttakeState.STOWED && !getCoralSensor() && outtakeState != OuttakeState.CORAL_SHOOT) {
+            startCoralIntake()
+        } else {
+            stopMotors()
+        }
     }
 
     /**
@@ -73,9 +77,8 @@ object Intake : SubsystemBase() {
      * Starts the coral manipulator motors
      */
     fun startCoralIntake() {
-        voltageOut.Output = 5.0
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
+//        wheelFeederMotor.setControl(voltageVelo.withVelocity(0.5))
+//        starFeederMotor.setControl(voltageVelo.withVelocity(10.0))
         //    isCoralIntaking = true;
     }
 
@@ -93,8 +96,7 @@ object Intake : SubsystemBase() {
      * @param speed the desired speed to set for the intake motor
      */
     fun setIntakeSpeed(speed: Double) {
-        voltageOut.Output = speed
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
+        wheelFeederMotor.setControl(voltageVelo.withVelocity(speed))
+        starFeederMotor.setControl(voltageVelo.withVelocity(speed))
     }
 }

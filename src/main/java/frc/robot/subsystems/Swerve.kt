@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_DRIVE_ID
@@ -243,7 +244,7 @@ object Swerve : SubsystemBase() {
         // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
         if (swerveState is SwerveDriveState.ManualDrive) {
-            stickDrive(aacrn)
+            stickDrive(testPad)
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
             // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
             val translationToDesiredPoint =
