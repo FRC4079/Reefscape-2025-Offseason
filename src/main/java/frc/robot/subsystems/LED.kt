@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj.AddressableLED
@@ -46,8 +48,6 @@ object LED : SubsystemBase() {
         leds.setLength(ledBuffer.length)
         leds.setData(ledBuffer)
         leds.start()
-
-//        println("LED init")
 
         robonautLEDTimer.start()
 
@@ -234,12 +234,16 @@ object LED : SubsystemBase() {
             for (i in 0..<ledBuffer.length) {
                 val color = rand.nextInt(0, 100)
 
-                if (color < 70) {
-                    ledBuffer.setRGB(i, 0, 0, 0)
-                } else if (color < 85) {
-                    ledBuffer.setRGB(i, 244, 177, 25)
-                } else if (color < 100) {
-                    ledBuffer.setRGB(i, 255, 255, 255)
+                when {
+                    color < 70 -> {
+                        ledBuffer.setRGB(i, 0, 0, 0)
+                    }
+                    color < 85 -> {
+                        ledBuffer.setRGB(i, 244, 177, 25)
+                    }
+                    color < 100 -> {
+                        ledBuffer.setRGB(i, 255, 255, 255)
+                    }
                 }
 
                 leds.setData(ledBuffer)

@@ -68,7 +68,7 @@ object Kommand {
      *
      * @return An [InstantCommand] that starts the coral motors.
      */
-    fun startCoralMotors() = cmd { Intake.startCoralIntake() }
+    fun startCoralMotors() = cmd { Intake.intakeCoral() }
 
     /**
      * Creates an [InstantCommand] to reset the Pidgey sensor.
