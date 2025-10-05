@@ -1,9 +1,5 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration
-import com.ctre.phoenix6.controls.PositionVoltage
-import com.ctre.phoenix6.controls.VoltageOut
-import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -13,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Elevator.elevatorState
 import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
-import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_CANBORE_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.CORAL_SENSOR_ID
@@ -21,22 +16,18 @@ import frc.robot.utils.RobotParameters.OuttakeParameters.OUTTAKE_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.PIVOT_PINGU
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakePivotState
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
-import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.OuttakePivotState
 import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.State
-import xyz.malefic.frc.pingu.alert.AlertPingu.add
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.position
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
-import xyz.malefic.frc.pingu.motor.talonfx.deviceID
 import xyz.malefic.frc.pingu.motor.talonfx.isConnected
 import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.position
-import xyz.malefic.frc.pingu.motor.talonfx.setControl
 import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 
@@ -47,66 +38,32 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
  */
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
-    //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
 
     /** Creates a new end effector.  */
     private val pivotMotor =
-        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID)) {
+        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID), control = ControlType.POSITION) {
             this as TalonFXConfig
             pingu = PIVOT_PINGU
             inverted = InvertedValue.Clockwise_Positive
             currentLimits = 30.0 to 30.0
-//            extraConfig = {
-//                Feedback.FeedbackRemoteSensorID = OUTTAKE_PIVOT_CANBORE_ID
-//                Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
-//            }
+            name = "Outtake Pivot Motor"
         }
 
     private val outtakeMotor =
-        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)) {
+        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID), control = ControlType.VELOCITY) {
             this as TalonFXConfig
             pingu = OUTTAKE_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
             currentLimits = 30.0 to 30.0
+            name = "Outtake Outtake Motor"
         }
-
-    private val voltageOut: VoltageOut
-    private val voltagePos: PositionVoltage
 
     private val coralSensor: DigitalInput = DigitalInput(CORAL_SENSOR_ID)
     private val algaeSensor: DigitalInput = DigitalInput(ALGAE_SENSOR_ID)
 
-    /**
-     * Creates a new instance of this Outtake. This constructor is private since this class is a
-     * Singleton. Code should use the [.getInstance] method to get the singleton instance.
-     */
-    init {
-//        canbore.configure {
-//            MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive
-//            MagnetSensor.MagnetOffset = ENCODER_OFFSET
-//            MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0
-//        }
-
-        //    algaeManipulatorMotorConfiguration.MotorOutput.Inverted =
-        // InvertedValue.Clockwise_Positive;
-        //
-        //    algaeManipulatorMotorConfiguration.SoftwareLimitSwitch =
-        // algaeManipulatorMotorSoftLimitConfig;
-        voltageOut = VoltageOut(0.0)
-        voltagePos = PositionVoltage(0.0)
-
-        pivotMotor.set(0.0.position)
-
-        add(pivotMotor, "algae pivot")
-        add(outtakeMotor, "algae intake")
-    }
-
-    // This method will be called once per scheduler run
     override fun periodic() {
         outtakeState.block(this)
-
-//        movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
 
         if (outtakeState == OuttakeState.STOWED) {
             movePivotTo(OuttakePivotState.INTAKE)
@@ -124,13 +81,9 @@ object Outtake : SubsystemBase() {
                     movePivotTo(OuttakePivotState.CORAL_L1)
                     outtakePivotState = OuttakePivotState.CORAL_L1
                 }
-                else -> {
-                    //                    Logger.d("Outtake") { "THE ELEVATOR STATE IS SOMEHOW NONE OF THE ELEVATOR STATES" }
-                }
+                else -> { /* no-op */ }
             }
         }
-
-//        else if (outtakeState == OuttakeState.ALGAE_SHOOT)
 
         when {
             outtakeState !in listOf(OuttakeState.CORAL_SHOOT, OuttakeState.ALGAE_SHOOT) -> {
@@ -141,14 +94,8 @@ object Outtake : SubsystemBase() {
                         else -> OuttakeState.STOWED
                     }
             }
-//            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) ||
-//                (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
-//                outtakeState = OuttakeState.STOWED
-//                stopOuttakeMotor()
-//            }
 
-            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor())
-            -> {
+            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) -> {
                 if (shootTimer.hasElapsed(0.5)) {
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.STOWED
@@ -157,8 +104,7 @@ object Outtake : SubsystemBase() {
                 }
             }
 
-            (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor())
-            -> {
+            (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
                 outtakeState = OuttakeState.STOWED
                 stopOuttakeMotor()
             }
@@ -167,32 +113,15 @@ object Outtake : SubsystemBase() {
         }
 
         logs {
-            log("Outtake/Outtake Pivot Motor Position", pivotPosValue)
-            log("Outtake/Outtake Pivot Motor Velocity", pivotMotor.motor.velocity.valueAsDouble)
+            log("Outtake/Outtake Pivot Motor Position", pivotMotor.position)
             log("Outtake/Outtake Pivot State State", outtakePivotState)
             log("Outtake/Outtake State", outtakeState)
-            log(
-                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
-                pivotMotor.isConnected,
-            )
-            log(
-                "Outtake/Outtake Pivot Stator Current",
-                pivotMotor.statorCurrent,
-            )
-            log(
-                "Outtake/Outtake Pivot Supply Current",
-                pivotMotor.supplyCurrent,
-            )
-            log(
-                "Outtake/Outtake Pivot Stall Current",
-                pivotMotor.motorStallCurrent,
-            )
+            log("Outtake/Disconnected Pivot Motor", pivotMotor.isConnected)
+            log("Outtake/Outtake Pivot Stator Current", pivotMotor.statorCurrent)
+            log("Outtake/Outtake Pivot Supply Current", pivotMotor.supplyCurrent)
+            log("Outtake/Outtake Pivot Stall Current", pivotMotor.motorStallCurrent)
             log("Outtake/Coral Sensor", getCoralSensor())
             log("Outtake/Algae Sensor", getAlgaeSensor())
-//            log (
-//                "Outtake/Outtake Pivot Abs Encoder",
-//                canbore.position.valueAsDouble
-//            )
         }
     }
 
@@ -202,16 +131,8 @@ object Outtake : SubsystemBase() {
      * @param state the state to set the algae pivot
      */
     fun movePivotTo(state: OuttakePivotState) {
-        pivotMotor.motor.setControl(voltagePos.withPosition(state.pos))
+        pivotMotor.move(state.pos)
     }
-
-    val pivotPosValue: Double
-        /**
-         * Get the position of the end effector motor
-         *
-         * @return double, the position of the end effector motor
-         */
-        get() = pivotMotor.position
 
     /**
      * Sets the speed of the coral outtake motor.
@@ -219,8 +140,7 @@ object Outtake : SubsystemBase() {
      * @param speed the desired speed to set for the intake motor
      */
     fun setOuttakeSpeed(speed: Double) {
-        voltageOut.Output = speed
-        outtakeMotor.setControl(voltageOut)
+        outtakeMotor.move(speed)
     }
 
     /** Stops the algae intake motor.  */
@@ -240,27 +160,23 @@ object Outtake : SubsystemBase() {
 
     /**
      * Shoots coral by running the outtake at a fixed positive command.
-     *
-     * Uses `setOuttakeSpeed(100.0)` to eject coral for scoring.
      * @see setOuttakeSpeed
      */
     fun shootCoral() {
-        if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25) {
-            if (Elevator.atState) {
-                shootTimer.start()
-                setOuttakeSpeed(30.0)
-            }
+        Intake.forward = true
+        if ((pivotMotor.position - outtakePivotState.pos) <= 0.25 && Elevator.atState) {
+            shootTimer.start()
+            setOuttakeSpeed(30.0)
         }
     }
 
     /**
      * Reverses coral by running the outtake at a fixed negative command.
-     *
-     * Uses `setOuttakeSpeed(-30.0)` to shoot the coral into the intake.
      * @see setOuttakeSpeed
      */
     fun reverseCoral() {
-//        setOuttakeSpeed(-30.0) // TODO: Reverse Intake as well
+        setOuttakeSpeed(-30.0)
+        Intake.forward = false
     }
 
     /**
@@ -286,7 +202,6 @@ object Outtake : SubsystemBase() {
      * @see setOuttakeSpeed
      */
     fun shootAlgae() {
-        // TODO: Weird elevator timing (in this file or somewhere else?)
         setOuttakeSpeed(-30.0)
         stopAlgaeIntake()
     }

@@ -1,13 +1,7 @@
 package frc.robot.subsystems
 
-import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionDutyCycle
-import com.ctre.phoenix6.controls.PositionVoltage
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -29,15 +23,13 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.position
-import xyz.malefic.frc.pingu.motor.control.voltage
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.acceleration
 import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.motorVoltage
 import xyz.malefic.frc.pingu.motor.talonfx.position
-import xyz.malefic.frc.pingu.motor.talonfx.setControl
 import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyVoltage
@@ -50,7 +42,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.velocity
  */
 object Elevator : SubsystemBase() {
     private val elevatorMotorLeft =
-        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID)) {
+        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID), control = ControlType.POSITION) {
             this as TalonFXConfig
             pingu = ELEVATOR_PINGU
             inverted = InvertedValue.CounterClockwise_Positive
@@ -58,19 +50,18 @@ object Elevator : SubsystemBase() {
             currentLimits = null
             dutyCycleNeutralDeadband = 0.1
             motionMagicPingu = ELEVATOR_MAGIC_PINGU
+            name = "Elevator Left Motor"
         }
     private val elevatorMotorRight =
-        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID)) {
+        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID), control = ControlType.POSITION) {
             this as TalonFXConfig
             pingu = ELEVATOR_PINGU
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
             currentLimits = null
             dutyCycleNeutralDeadband = 0.1
             motionMagicPingu = ELEVATOR_MAGIC_PINGU
+            name = "Elevator Right Motor"
         }
-
-    private val posRequest: PositionDutyCycle = PositionDutyCycle(0.0)
-    private val velocityRequest: VelocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0)
 
     private lateinit var elevatorP: LoggedNetworkNumber
     private lateinit var elevatorI: LoggedNetworkNumber
@@ -82,9 +73,6 @@ object Elevator : SubsystemBase() {
     private lateinit var acc: LoggedNetworkNumber
     private lateinit var jerk: LoggedNetworkNumber
 
-    private val voltageOut: VoltageOut = VoltageOut(0.0)
-    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
-    private val elevatorLeftConfigs: TalonFXConfiguration = TalonFXConfiguration()
     private val elevatorRightConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
     /**
@@ -96,44 +84,31 @@ object Elevator : SubsystemBase() {
 
     private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
-    private val cycleOut: DutyCycleOut = DutyCycleOut(0.0)
-
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
      * is a Singleton. Code should use the [.getInstance] method to get the singleton
      * instance.
      */
     init {
-
         motionMagicVoltage.Slot = 0
 
         //    motionMagicVoltage.EnableFOC = true;
         //    motionMagicVoltage.FeedForward = 0;
 
-        // TODO test elevator with FOC, increase acceleration, cruise velocity, and graph it all to see
+        // TODO increase acceleration, cruise velocity, and graph it all to see
         // how to speed it up
         // reduce timeouts for automatic scoring, autoalign speed it up even more, test in autonomous
         // with 180 command
         // algae and intake prob add or remove idkk yet
-        velocityRequest.OverrideCoastDurNeutral = false
 
-        voltageOut.OverrideBrakeDurNeutral = false
-        voltageOut.EnableFOC = true
-
-        cycleOut.EnableFOC = false
-
-        elevatorMotorLeft.set(0.0.position)
-        elevatorMotorRight.set(0.0.position)
-
-//        add(elevatorMotorLeft, "left elevator")
-//        add(elevatorMotorRight, "right elevator")
+        elevatorMotorLeft.move(0.0)
+        elevatorMotorRight.move(0.0)
 
         initializeLoggedNetworkPID()
     }
 
     // This method will be called once per scheduler run
     override fun periodic() {
-//        System.out.println("periodic Elevator")
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
         // what Jayden clicks which will be displayed on leds but not necessarily = currentState
         //    elevatorSetState = currentState;
@@ -141,9 +116,7 @@ object Elevator : SubsystemBase() {
 
         moveElevator(elevatorState)
 
-//        moveElevator(testPad.leftY)
-        // recordOutput("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
-        // recordOutput("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
+        // moveElevator(testPad.leftY)
 
         logs {
             log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
@@ -210,9 +183,6 @@ object Elevator : SubsystemBase() {
     fun stopMotors() {
         elevatorMotorLeft.stopMotor()
         elevatorMotorRight.stopMotor()
-        voltageOut.Output = -0.014
-        elevatorMotorLeft.setControl(voltageOut)
-        elevatorMotorRight.setControl(voltageOut)
     }
 
     /**
@@ -238,47 +208,18 @@ object Elevator : SubsystemBase() {
 
     /** Soft resets the encoders on the elevator motors  */
     fun resetEncoders() {
-        elevatorMotorLeft.set(0.0.position)
-        elevatorMotorRight.set(0.0.position)
+        elevatorMotorLeft.move(0.0)
+        elevatorMotorRight.move(0.0)
     }
-
-//    /** Toggles the soft stop for the elevator motor  */
-//    fun toggleSoftStop() {
-//        ElevatorParameters.isSoftLimitEnabled = !ElevatorParameters.isSoftLimitEnabled
-//        leftSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-//        leftSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-//
-//        rightSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-//        rightSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-//
-//        elevatorMotorLeft.configurator.apply(leftSoftLimitConfig)
-//        elevatorMotorRight.configurator.apply(rightSoftLimitConfig)
-//    }
 
     /**
-     * Move the elevator motor at a specific velocity
+     * Moves both elevator motors to the position specified by the given ElevatorState.
      *
-     * @param speed double, the velocity to move the elevator motor at
+     * @param state The target ElevatorState whose position will be used for both motors.
      */
-    fun moveElevator(speed: Double) {
-        val velocity = -speed * 15
-//        Logger.d { "Speed is $velocity" }
-//        if (abs(velocity) >= deadband) {
-//            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
-//            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
-//            elevatorMotorRight.set(velocity)
-//            elevatorMotorLeft.set(velocity)
-//        } else {
-//            stopMotors()
-//        }
-
-        elevatorMotorRight.set(velocity.voltage)
-        elevatorMotorLeft.set(velocity.voltage)
-    }
-
     fun moveElevator(state: ElevatorState) {
-        elevatorMotorLeft.setControl(voltagePos.withPosition(state.pos))
-        elevatorMotorRight.setControl(voltagePos.withPosition(state.pos))
+        elevatorMotorLeft.move(state.pos)
+        elevatorMotorRight.move(state.pos)
     }
 
     fun initializeLoggedNetworkPID() {
@@ -306,17 +247,6 @@ object Elevator : SubsystemBase() {
                 ELEVATOR_MAGIC_PINGU.acceleration,
             )
         jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", ELEVATOR_MAGIC_PINGU.jerk)
-    }
-
-    /**
-     * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
-     * until it stalls.
-     */
-    fun calibrateElevator() {
-        while (elevatorMotorLeft.motorStallCurrent < 3.0) {
-            elevatorMotorLeft.setControl(voltageOut.withOutput(0.5))
-            elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
-        }
     }
 
     /**
