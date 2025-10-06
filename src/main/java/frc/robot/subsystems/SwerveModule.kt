@@ -28,7 +28,6 @@ import xyz.malefic.frc.pingu.control.Pingu
 import xyz.malefic.frc.pingu.encoder.Engu
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
-import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.position
@@ -45,7 +44,7 @@ class SwerveModule(
     canCoderDriveStraightSteerSetPoint: Double,
 ) {
     private val driveMotor =
-        Mongu(TalonFX(driveId), control = ControlType.VELOCITY) {
+        Mongu(TalonFX(driveId)) {
             this as TalonFXConfig
             pingu = DRIVE_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
@@ -57,7 +56,7 @@ class SwerveModule(
             name = "Swerve Drive Motor $driveId"
         }
     private val steerMotor =
-        Mongu(TalonFX(steerId), control = ControlType.POSITION) {
+        Mongu(TalonFX(steerId)) {
             this as TalonFXConfig
             pingu = STEER_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
@@ -98,7 +97,6 @@ class SwerveModule(
             val velocityToSet: Double =
                 (desiredState.speedMetersPerSecond * (DRIVE_MOTOR_GEAR_RATIO / METERS_PER_REV))
             driveMotor.setControl(velocitySetter.withVelocity(velocityToSet))
-
             // Log the actual and set values for debugging
             logs {
                 log("Swerve/Drive actual sped", driveMotor.velocity)

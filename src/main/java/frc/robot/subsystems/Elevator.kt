@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -23,13 +24,15 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
-import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.position
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.acceleration
 import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.motorVoltage
 import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
 import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyVoltage
@@ -42,7 +45,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.velocity
  */
 object Elevator : SubsystemBase() {
     private val elevatorMotorLeft =
-        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID), control = ControlType.POSITION) {
+        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID)) {
             this as TalonFXConfig
             pingu = ELEVATOR_PINGU
             inverted = InvertedValue.CounterClockwise_Positive
@@ -53,7 +56,7 @@ object Elevator : SubsystemBase() {
             name = "Elevator Left Motor"
         }
     private val elevatorMotorRight =
-        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID), control = ControlType.POSITION) {
+        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID)) {
             this as TalonFXConfig
             pingu = ELEVATOR_PINGU
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
@@ -84,6 +87,8 @@ object Elevator : SubsystemBase() {
 
     private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
+
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
      * is a Singleton. Code should use the [.getInstance] method to get the singleton
@@ -100,9 +105,6 @@ object Elevator : SubsystemBase() {
         // reduce timeouts for automatic scoring, autoalign speed it up even more, test in autonomous
         // with 180 command
         // algae and intake prob add or remove idkk yet
-
-        elevatorMotorLeft.move(0.0)
-        elevatorMotorRight.move(0.0)
 
         initializeLoggedNetworkPID()
     }
@@ -208,8 +210,8 @@ object Elevator : SubsystemBase() {
 
     /** Soft resets the encoders on the elevator motors  */
     fun resetEncoders() {
-        elevatorMotorLeft.move(0.0)
-        elevatorMotorRight.move(0.0)
+        elevatorMotorLeft.resetPosition(0.0)
+        elevatorMotorRight.resetPosition(0.0)
     }
 
     /**
@@ -218,8 +220,10 @@ object Elevator : SubsystemBase() {
      * @param state The target ElevatorState whose position will be used for both motors.
      */
     fun moveElevator(state: ElevatorState) {
-        elevatorMotorLeft.move(state.pos)
-        elevatorMotorRight.move(state.pos)
+//        elevatorMotorLeft.move(state.pos.position)
+//        elevatorMotorRight.move(state.pos.position)
+        elevatorMotorLeft.setControl(voltagePos.withPosition(state.pos))
+        elevatorMotorRight.setControl(voltagePos.withPosition(state.pos))
     }
 
     fun initializeLoggedNetworkPID() {

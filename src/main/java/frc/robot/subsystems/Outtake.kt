@@ -1,5 +1,9 @@
 package frc.robot.subsystems
 
+import co.touchlab.kermit.Logger
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -22,13 +26,15 @@ import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.State
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
-import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.position
+import xyz.malefic.frc.pingu.motor.control.velocity
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.deviceID
 import xyz.malefic.frc.pingu.motor.talonfx.isConnected
 import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
 import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
 import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 
@@ -41,10 +47,11 @@ object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
     //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
+    // Shawn was here
 
     /** Creates a new end effector.  */
     private val pivotMotor =
-        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID), control = ControlType.POSITION) {
+        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID)) {
             this as TalonFXConfig
             pingu = PIVOT_PINGU
             inverted = InvertedValue.Clockwise_Positive
@@ -53,7 +60,7 @@ object Outtake : SubsystemBase() {
         }
 
     private val outtakeMotor =
-        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID), control = ControlType.VELOCITY) {
+        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)) {
             this as TalonFXConfig
             pingu = OUTTAKE_PINGU
             neutralMode = NeutralModeValue.Brake
@@ -65,57 +72,63 @@ object Outtake : SubsystemBase() {
     private val coralSensor: DigitalInput = DigitalInput(CORAL_SENSOR_ID)
     private val algaeSensor: DigitalInput = DigitalInput(ALGAE_SENSOR_ID)
 
+    private val voltageVelo: VelocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0)
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
+
     // This method will be called once per scheduler run
     override fun periodic() {
         outtakeState.block(this)
 
-//        movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
+        //        movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
 
-        if (outtakeState == OuttakeState.STOWED) {
-            movePivotTo(OuttakePivotState.INTAKE)
-            if (!getCoralSensor()) {
-                setOuttakeSpeed(30.0)
-            } else if (!intakeTimer.hasElapsed(0.5) && !intakeTimer.isRunning) {
-                intakeTimer.start()
-            } else if (intakeTimer.hasElapsed(0.5)) {
-                intakeTimer.stop()
-                intakeTimer.reset()
-                stopOuttakeMotor()
+        when (outtakeState) {
+            OuttakeState.STOWED -> {
+                movePivotTo(OuttakePivotState.INTAKE)
+                if (!getCoralSensor()) {
+                    setOuttakeSpeed(30.0)
+                } else if (!intakeTimer.hasElapsed(0.75) && !intakeTimer.isRunning) {
+                    Logger.d("Outtake") { "Intake Timer Started <----------------------------------------------------" }
+                    intakeTimer.start()
+                }
+                if (getCoralSensor() && intakeTimer.hasElapsed(0.75) && intakeTimer.isRunning) {
+                    outtakeState = OuttakeState.CORAL_HOLD
+                }
+                // otherwise we wait for 0.5 seconds to pass
             }
-            // otherwise we wait for 0.5 seconds to pass
-        } else if (outtakeState == OuttakeState.CORAL_SHOOT) {
-            when (elevatorState) {
-                ElevatorState.L4 -> {
-                    movePivotTo(OuttakePivotState.CORAL_L4)
-                    outtakePivotState = OuttakePivotState.CORAL_L4
+
+            OuttakeState.CORAL_HOLD -> {
+                if (intakeTimer.hasElapsed(0.75) && !getCoralSensor()) {
+                    Logger.d("Outtake") { "Intake Timer Stopped <#########################################################" }
+                    intakeTimer.stop()
+                    intakeTimer.reset()
+                    stopOuttakeMotor()
                 }
-                ElevatorState.L3, ElevatorState.L2 -> {
-                    movePivotTo(OuttakePivotState.CORAL_L23)
-                    outtakePivotState = OuttakePivotState.CORAL_L23
-                }
-                ElevatorState.L1 -> {
-                    movePivotTo(OuttakePivotState.CORAL_L1)
-                    outtakePivotState = OuttakePivotState.CORAL_L1
-                }
-                else -> { /* no-op */ }
             }
+
+            OuttakeState.CORAL_SHOOT -> {
+                when (elevatorState) {
+                    ElevatorState.L4 -> {
+                        movePivotTo(OuttakePivotState.CORAL_L4)
+                        outtakePivotState = OuttakePivotState.CORAL_L4
+                    }
+
+                    ElevatorState.L3, ElevatorState.L2 -> {
+                        movePivotTo(OuttakePivotState.CORAL_L23)
+                        outtakePivotState = OuttakePivotState.CORAL_L23
+                    }
+
+                    ElevatorState.L1 -> {
+                        movePivotTo(OuttakePivotState.CORAL_L1)
+                        outtakePivotState = OuttakePivotState.CORAL_L1
+                    }
+
+                    else -> { /* no-op */ }
+                }
+            }
+            else -> { /* no-op */ }
         }
 
         when {
-            outtakeState !in listOf(OuttakeState.CORAL_SHOOT, OuttakeState.ALGAE_SHOOT) -> {
-                outtakeState =
-                    when {
-                        getCoralSensor() -> OuttakeState.CORAL_HOLD
-//                        getAlgaeSensor() -> OuttakeState.ALGAE_HOLD //TODO: Fix Algae logic
-                        else -> OuttakeState.STOWED
-                    }
-            }
-//            (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) ||
-//                (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
-//                outtakeState = OuttakeState.STOWED
-//                stopOuttakeMotor()
-//            }
-
             (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) -> {
                 if (shootTimer.hasElapsed(0.5)) {
                     stopOuttakeMotor()
@@ -169,7 +182,7 @@ object Outtake : SubsystemBase() {
      * @param state the state to set the algae pivot
      */
     fun movePivotTo(state: OuttakePivotState) {
-        pivotMotor.move(state.pos)
+        pivotMotor.setControl(voltagePos.withPosition(state.pos))
     }
 
     val pivotPosValue: Double
@@ -186,7 +199,7 @@ object Outtake : SubsystemBase() {
      * @param speed the desired speed to set for the intake motor
      */
     fun setOuttakeSpeed(speed: Double) {
-        outtakeMotor.move(speed)
+        outtakeMotor.setControl(voltageVelo.withVelocity(speed))
     }
 
     /** Stops the algae intake motor.  */
@@ -213,7 +226,7 @@ object Outtake : SubsystemBase() {
     fun shootCoral() {
         if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25 && Elevator.atState) {
             shootTimer.start()
-            setOuttakeSpeed(155.0)
+            setOuttakeSpeed(30.0)
         }
     }
 

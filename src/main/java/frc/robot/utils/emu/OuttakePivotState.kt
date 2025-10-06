@@ -20,5 +20,5 @@ enum class OuttakePivotState(
 
     CORAL_L4(-3.0),
 
-    INTAKE(-1.47),
+    INTAKE(-0.75),
 }

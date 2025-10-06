@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
@@ -16,29 +17,29 @@ import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.RobotParameters.SwerveParameters
 import frc.robot.utils.emu.OuttakeState
-import xyz.malefic.frc.pingu.motor.ControlType
 import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.velocity
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.setControl
 
 object Intake : SubsystemBase() {
     private val wheelFeederMotor =
-        Mongu(TalonFX(CORAL_FEEDER_ID), control = ControlType.VELOCITY) {
+        Mongu(TalonFX(CORAL_FEEDER_ID)) {
             this as TalonFXConfig
             pingu = WHEEL_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
-            inverted = InvertedValue.CounterClockwise_Positive
+            inverted = InvertedValue.Clockwise_Positive
             name = "Wheel Feeder Motor"
         }
-
     private val starFeederMotor =
-        Mongu(TalonFX(STAR_FEEDER_ID), control = ControlType.VELOCITY) {
+        Mongu(TalonFX(STAR_FEEDER_ID)) {
             this as TalonFXConfig
             pingu = STAR_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
             name = "Star Feeder Motor"
         }
+    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
 
     init {
         intakeCoral()
@@ -74,7 +75,7 @@ object Intake : SubsystemBase() {
     /**
      * Starts the coral manipulator motors
      */
-    fun intakeCoral() = setIntakeVelocity(0.5)
+    fun intakeCoral() = setIntakeVelocity(30.0)
 
     /**
      * Starts the coral manipulator motors
@@ -87,7 +88,9 @@ object Intake : SubsystemBase() {
      * @param speed the desired speed to set for the intake motor
      */
     fun setIntakeVelocity(speed: Double) {
-        wheelFeederMotor.move(speed)
-        starFeederMotor.move(speed)
+//        wheelFeederMotor.move(speed.velocity)
+//        starFeederMotor.move(speed.velocity)
+        wheelFeederMotor.setControl(velocitySetter.withVelocity(speed))
+        starFeederMotor.setControl(velocitySetter.withVelocity(speed))
     }
 }
