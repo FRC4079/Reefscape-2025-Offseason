@@ -243,7 +243,7 @@ object RobotParameters {
         const val CORAL_SENSOR_ID: Int = 1
         const val ALGAE_SENSOR_ID: Int = 0
 
-        val OUTTAKE_PINGU = Pingu(5.0, 0.0, 0.0, 1.0)
+        val OUTTAKE_PINGU = Pingu(5.05, 0.0, 0.0, 1.0)
         val PIVOT_PINGU = Pingu(8.0, 0.0, 0.0, 0.0)
 
         var outtakePivotState: OuttakePivotState = OuttakePivotState.INTAKE

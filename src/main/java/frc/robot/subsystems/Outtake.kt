@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Elevator.elevatorState
 import frc.robot.subsystems.Elevator.setAlgaeLevel
@@ -46,6 +47,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
+    val testPadThree: XboxController = XboxController(3)
     //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
     // Shawn was here
 
@@ -80,6 +82,10 @@ object Outtake : SubsystemBase() {
         outtakeState.block(this)
 
         //        movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
+
+//        setOuttakeSpeed(testPadThree.leftY * 150)
+
+        println(intakeTimer.get())
 
         when (outtakeState) {
             OuttakeState.STOWED -> {
@@ -169,6 +175,9 @@ object Outtake : SubsystemBase() {
             )
             log("Outtake/Coral Sensor", getCoralSensor())
             log("Outtake/Algae Sensor", getAlgaeSensor())
+            log("Outtake/Voltage Velo", voltageVelo.Velocity)
+            log("Outtake/Supplied voltage", outtakeMotor.motor.supplyVoltage.value)
+            log("Outtake/Supplied Current", outtakeMotor.motor.supplyCurrent.value)
 //            log (
 //                "Outtake/Outtake Pivot Abs Encoder",
 //                canbore.position.valueAsDouble

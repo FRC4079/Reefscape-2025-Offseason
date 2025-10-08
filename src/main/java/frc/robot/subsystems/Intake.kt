@@ -41,10 +41,6 @@ object Intake : SubsystemBase() {
         }
     private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
 
-    init {
-        intakeCoral()
-    }
-
     /**
      * If the coral sensor is triggered, set the hasPiece boolean to true. (hasPiece = true,
      * sensorDetect = true), motors spinning If the manipulator has a piece, but the sensor no longer
