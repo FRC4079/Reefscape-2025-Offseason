@@ -158,8 +158,7 @@ object RobotContainer {
             press(RIGHT_TRIGGER) {
                 if (outtakeState == OuttakeState.CORAL_HOLD) {
                     outtakeState = OuttakeState.CORAL_SHOOT
-                }
-                if (outtakeState == OuttakeState.ALGAE_HOLD) {
+                } else if (outtakeState == OuttakeState.ALGAE_HOLD) {
                     outtakeState = OuttakeState.ALGAE_SHOOT
                     setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
                 }

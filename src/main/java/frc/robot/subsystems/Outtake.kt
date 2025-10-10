@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.subsystems.Elevator.elevatorState
 import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
@@ -161,11 +162,18 @@ object Outtake : SubsystemBase() {
 
             OuttakeState.ALGAE_INTAKE -> {
                 movePivotTo(OuttakePivotState.ALGAE_INTAKE)
-                if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25) {
+                if (pivotMotor.motor.position.valueAsDouble in
+                    OuttakePivotState.ALGAE_INTAKE.pos - 0.1..OuttakePivotState.ALGAE_INTAKE.pos + 0.1
+                ) {
                     if (getAlgaeSensor()) {
                         outtakeState = OuttakeState.ALGAE_HOLD
                     }
                 }
+            }
+
+            OuttakeState.ALGAE_HOLD -> {
+                outtakePivotState = OuttakePivotState.ALGAE_HOLD
+                setElevatorState(ElevatorState.DEFAULT).schedule()
             }
             else -> { /* no-op */ }
         }
@@ -298,7 +306,7 @@ object Outtake : SubsystemBase() {
      * Sets the voltage output to -3.0 and controls the coral score motor to slow down the algae
      * scoring process.
      */
-    fun slowAlgaeScoreMotors() = setOuttakeSpeed(-3.0)
+    fun slowAlgaeScoreMotors() = setOuttakeSpeed(75.0)
 
     /**
      * Initiates the algae intake process. Sets the elevator to the algae level, starts the intake

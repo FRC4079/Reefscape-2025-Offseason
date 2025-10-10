@@ -26,7 +26,7 @@ enum class ElevatorState(
 
     ALGAE_LOW(12.0),
 
-    ALGAE_HIGH(25.0),
+    ALGAE_HIGH(26.0),
 
-    ALGAE_SHOOT(50.0),
+    ALGAE_SHOOT(49.0),
 }

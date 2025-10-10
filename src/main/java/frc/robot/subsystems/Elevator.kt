@@ -275,7 +275,7 @@ object Elevator : SubsystemBase() {
         get() = elevatorMotorLeft.motor.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
 
     fun isAlgaeReadyForShoot(): Boolean {
-        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 5.0)) {
+        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 10.0)) {
             return true
         }
         return false
