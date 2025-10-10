@@ -91,10 +91,8 @@ object Outtake : SubsystemBase() {
             return
         }
 
-        if (outtakeState == OuttakeState.ALGAE_HOLD) {
-            if (!getAlgaeSensor()) {
+        if (outtakeState == OuttakeState.ALGAE_HOLD && !getAlgaeSensor()) {
                 outtakeState = OuttakeState.STOWED
-            }
         }
 
         // movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
@@ -109,14 +107,7 @@ object Outtake : SubsystemBase() {
                 @Suppress("ktlint:standard:if-else-wrapping")
                 if (!getCoralSensor()) {
                     setOuttakeSpeed(100.0)
-                }
-//                } else if (!intakeTimer.hasElapsed(intakeTime) && !intakeTimer.isRunning) {
-//                    Logger.d("Outtake") { "Intake Timer Started <----------------------------------------------------" }
-//                    intakeTimer.start()
-//                    correctIntakingState = OuttakePivotState.INTAKE
-//                }
-                else if (getCoralSensor()) {
-//                    outtakeState = OuttakeState.CORAL_HOLD
+                } else if (getCoralSensor()) {
                     intakeTimer.start()
                 }
 
@@ -189,7 +180,6 @@ object Outtake : SubsystemBase() {
         }
 
         if (intakeTimer.hasElapsed(0.35) && intakeTimer.isRunning) {
-//            Logger.d("Outtake") { "Intake Timer Stopped <#########################################################" }
             outtakeState = OuttakeState.CORAL_HOLD
             intakeTimer.stop()
             intakeTimer.reset()
