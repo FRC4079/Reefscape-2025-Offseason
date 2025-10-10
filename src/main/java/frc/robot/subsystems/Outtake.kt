@@ -1,19 +1,15 @@
 package frc.robot.subsystems
 
-import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.subsystems.Elevator.elevatorState
-import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
@@ -29,8 +25,6 @@ import frc.robot.utils.emu.State
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.position
-import xyz.malefic.frc.pingu.motor.control.velocity
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.deviceID
 import xyz.malefic.frc.pingu.motor.talonfx.isConnected
@@ -113,7 +107,7 @@ object Outtake : SubsystemBase() {
 
                 if (intakeTimer.hasElapsed(0.1)) {
                     stopOuttakeMotor()
-                    correctIntakingState = OuttakePivotState.INTAKE
+                    correctIntakingState = OuttakePivotState.CORAL_INTAKE
                 }
 
                 if (intakeTimer.hasElapsed(0.3)) {
