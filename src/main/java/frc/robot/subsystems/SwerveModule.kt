@@ -1,10 +1,7 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration
-import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -25,13 +22,19 @@ import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PI
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.STEER_PINGU_TELE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.ENCODER_OFFSET
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
-import xyz.malefic.frc.extension.configureWithDefaults
-import xyz.malefic.frc.extension.setPingu
-import xyz.malefic.frc.pingu.AlertPingu.add
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.NetworkPingu
-import xyz.malefic.frc.pingu.Pingu
+import xyz.malefic.frc.pingu.alert.AlertPingu.add
+import xyz.malefic.frc.pingu.control.NetworkPingu
+import xyz.malefic.frc.pingu.control.Pingu
+import xyz.malefic.frc.pingu.encoder.Engu
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
+import xyz.malefic.frc.pingu.motor.talonfx.rotorVelocity
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
+import xyz.malefic.frc.pingu.motor.talonfx.velocity
 
 /** Represents a swerve module used in a swerve drive system.  */
 class SwerveModule(
@@ -40,9 +43,34 @@ class SwerveModule(
     canCoderID: Int,
     canCoderDriveStraightSteerSetPoint: Double,
 ) {
-    private val driveMotor = TalonFX(driveId)
-    private val canCoder = CANcoder(canCoderID)
-    private val steerMotor = TalonFX(steerId)
+    private val driveMotor =
+        Mongu(TalonFX(driveId)) {
+            this as TalonFXConfig
+            pingu = DRIVE_PINGU_TELE
+            neutralMode = NeutralModeValue.Brake
+            inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED
+            currentLimits = DRIVE_SUPPLY_LIMIT to DRIVE_STATOR_LIMIT
+            extraConfig = {
+                Feedback.RotorToSensorRatio = DRIVE_MOTOR_GEAR_RATIO
+            }
+            name = "Swerve Drive Motor $driveId"
+        }
+    private val steerMotor =
+        Mongu(TalonFX(steerId)) {
+            this as TalonFXConfig
+            pingu = STEER_PINGU_TELE
+            neutralMode = NeutralModeValue.Brake
+            inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED
+            currentLimits = STEER_SUPPLY_LIMIT to null
+            extraConfig = {
+                ClosedLoopGeneral.ContinuousWrap = true
+                Feedback.FeedbackRemoteSensorID = canCoderID
+                Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
+                Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
+            }
+            name = "Swerve Steer Motor $steerId"
+        }
+    private val canCoder = Engu(canCoderID)
     private val positionSetter = PositionTorqueCurrentFOC(0.0)
     private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
     private val swerveModulePosition = SwerveModulePosition()
@@ -51,7 +79,7 @@ class SwerveModule(
         get() {
             field.angle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
             field.speedMetersPerSecond =
-                driveMotor.rotorVelocity.valueAsDouble / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV
+                driveMotor.rotorVelocity / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV
             return field
         }
         set(desiredState) {
@@ -69,10 +97,9 @@ class SwerveModule(
             val velocityToSet: Double =
                 (desiredState.speedMetersPerSecond * (DRIVE_MOTOR_GEAR_RATIO / METERS_PER_REV))
             driveMotor.setControl(velocitySetter.withVelocity(velocityToSet))
-
             // Log the actual and set values for debugging
             logs {
-                log("Swerve/Drive actual sped", driveMotor.velocity.valueAsDouble)
+                log("Swerve/Drive actual sped", driveMotor.velocity)
                 log("Swerve/Drive set sped", velocityToSet)
                 log("Swerve/Steer actual angle", canCoder.absolutePosition.valueAsDouble)
                 log("Swerve/Steer set angle", angleToSet)
@@ -87,8 +114,6 @@ class SwerveModule(
     private var drivePosition: Double
     private var steerPosition: Double
     private var steerVelocity: Double
-    private val driveConfigs: TalonFXConfiguration = TalonFXConfiguration()
-    private val steerConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
     private var networkPinguDrive: NetworkPingu
     private var networkPinguSteer: NetworkPingu
@@ -102,54 +127,35 @@ class SwerveModule(
      * @param canCoderDriveStraightSteerSetPoint The set point for the CANcoder drive straight steer.
      */
     init {
-        driveMotor.configureWithDefaults(
-            DRIVE_PINGU_AUTO,
-            neutralMode = NeutralModeValue.Brake,
-            inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED,
-            currentLimits = DRIVE_SUPPLY_LIMIT to DRIVE_STATOR_LIMIT,
-        ) {
-            Feedback.RotorToSensorRatio = DRIVE_MOTOR_GEAR_RATIO
+        canCoder.configure {
+            MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive
+            MagnetSensor.MagnetOffset = ENCODER_OFFSET + canCoderDriveStraightSteerSetPoint
+            MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0
         }
 
-        steerMotor.configureWithDefaults(
-            STEER_PINGU_AUTO,
-            neutralMode = NeutralModeValue.Brake,
-            inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED,
-            currentLimits = STEER_SUPPLY_LIMIT to 0.0,
-        ) {
-            ClosedLoopGeneral.ContinuousWrap = true
-            Feedback.FeedbackRemoteSensorID = canCoderID
-            Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder
-            Feedback.RotorToSensorRatio = STEER_MOTOR_GEAR_RATIO
-        }
+        driveVelocity = driveMotor.velocity
+        drivePosition = driveMotor.position
+        steerVelocity = steerMotor.velocity
+        steerPosition = steerMotor.position
 
-        canCoder.configureWithDefaults(
-            sensorDirection = SensorDirectionValue.CounterClockwise_Positive,
-            magnetOffset = ENCODER_OFFSET + canCoderDriveStraightSteerSetPoint,
-            discontinuityPoint = 1.0,
-        )
-
-        driveMotor.configurator.apply(driveConfigs)
-        steerMotor.configurator.apply(steerConfigs)
-
-        driveVelocity = driveMotor.velocity.valueAsDouble
-        drivePosition = driveMotor.position.valueAsDouble
-        steerVelocity = steerMotor.velocity.valueAsDouble
-        steerPosition = steerMotor.position.valueAsDouble
+        val driveMotorConfig = driveMotor.configuration as TalonFXConfig
 
         networkPinguDrive =
             NetworkPingu(
-                LoggedNetworkNumber("Tuning/Swerve/Drive P", driveConfigs.Slot0.kP),
-                LoggedNetworkNumber("Tuning/Swerve/Drive I", driveConfigs.Slot0.kI),
-                LoggedNetworkNumber("Tuning/Swerve/Drive D", driveConfigs.Slot0.kD),
-                LoggedNetworkNumber("Tuning/Swerve/Drive V", driveConfigs.Slot0.kV),
+                LoggedNetworkNumber("Tuning/Swerve/Drive P", driveMotorConfig.pingu.p),
+                LoggedNetworkNumber("Tuning/Swerve/Drive I", driveMotorConfig.pingu.i),
+                LoggedNetworkNumber("Tuning/Swerve/Drive D", driveMotorConfig.pingu.d),
+                LoggedNetworkNumber("Tuning/Swerve/Drive V", driveMotorConfig.pingu.v),
             )
+
+        val steerMotorConfig = steerMotor.configuration as TalonFXConfig
+
         networkPinguSteer =
             NetworkPingu(
-                LoggedNetworkNumber("Tuning/Swerve/Steer P", steerConfigs.Slot0.kP),
-                LoggedNetworkNumber("Tuning/Swerve/Steer I", steerConfigs.Slot0.kI),
-                LoggedNetworkNumber("Tuning/Swerve/Steer D", steerConfigs.Slot0.kD),
-                LoggedNetworkNumber("Tuning/Swerve/Steer V", steerConfigs.Slot0.kV),
+                LoggedNetworkNumber("Tuning/Swerve/Steer P", steerMotorConfig.pingu.p),
+                LoggedNetworkNumber("Tuning/Swerve/Steer I", steerMotorConfig.pingu.i),
+                LoggedNetworkNumber("Tuning/Swerve/Steer D", steerMotorConfig.pingu.d),
+                LoggedNetworkNumber("Tuning/Swerve/Steer V", steerMotorConfig.pingu.v),
             )
 
         initializeAlarms()
@@ -162,10 +168,10 @@ class SwerveModule(
          * @return SwerveModulePosition, The current position of the swerve module.
          */
         get() {
-            driveVelocity = driveMotor.velocity.valueAsDouble
-            drivePosition = driveMotor.position.valueAsDouble
-            steerVelocity = steerMotor.velocity.valueAsDouble
-            steerPosition = steerMotor.position.valueAsDouble
+            driveVelocity = driveMotor.velocity
+            drivePosition = driveMotor.position
+            steerVelocity = steerMotor.velocity
+            steerPosition = steerMotor.position
 
             swerveModulePosition.angle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
             swerveModulePosition.distanceMeters = drivePosition / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV
@@ -185,8 +191,10 @@ class SwerveModule(
      * @param pingu A Pingu object containing PID and feedforward values (P, I, D, V)
      */
     fun setDrivePingu(pingu: Pingu) {
-        driveConfigs.setPingu(pingu)
-        driveMotor.configurator.apply(driveConfigs)
+        driveMotor.configure {
+            this as TalonFXConfig
+            this.pingu = pingu
+        }
     }
 
     /**
@@ -195,8 +203,10 @@ class SwerveModule(
      * @param pingu A Pingu object containing PID and feedforward values (P, I, D, V)
      */
     fun setSteerPingu(pingu: Pingu) {
-        steerConfigs.setPingu(pingu)
-        driveMotor.configurator.apply(steerConfigs)
+        steerMotor.configure {
+            this as TalonFXConfig
+            this.pingu = pingu
+        }
     }
 
     /** Sets the PID values for teleoperation mode.  */
@@ -208,12 +218,11 @@ class SwerveModule(
     /** Sets the PID values for autonomous mode.  */
     fun setAutoPID() {
         setDrivePingu(DRIVE_PINGU_AUTO)
+        setSteerPingu(STEER_PINGU_AUTO)
     }
 
     /** Resets the drive motor position to zero.  */
-    fun resetDrivePosition() {
-        driveMotor.setPosition(0.0)
-    }
+    fun resetDrivePosition() = driveMotor.resetPosition(0.0)
 
     /**
      * Updates the PID values for teleoperation mode. This method retrieves the PID values from the
@@ -232,11 +241,14 @@ class SwerveModule(
      * these configurations to the respective motors.
      */
     fun applyTelePIDValues() {
-        driveConfigs.setPingu(networkPinguDrive.pingu)
-        steerConfigs.setPingu(networkPinguSteer.pingu)
-
-        driveMotor.configurator.apply(driveConfigs)
-        steerMotor.configurator.apply(steerConfigs)
+        driveMotor.configure {
+            this as TalonFXConfig
+            this.pingu = networkPinguDrive.pingu
+        }
+        steerMotor.configure {
+            this as TalonFXConfig
+            this.pingu = networkPinguSteer.pingu
+        }
     }
 
     /**

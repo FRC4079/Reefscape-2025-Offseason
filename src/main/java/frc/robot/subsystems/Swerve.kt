@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
+import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_DRIVE_ID
@@ -65,13 +66,12 @@ import kotlinx.coroutines.launch
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.photonvision.EstimatedRobotPose
 import xyz.malefic.frc.extension.getEstimatedPose
-import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.extension.to3d
 import xyz.malefic.frc.extension.updateStdDev
 import xyz.malefic.frc.extension.updateStdDev3d
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.NetworkPingu
+import xyz.malefic.frc.pingu.control.NetworkPingu
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 import java.util.Optional
 import java.util.function.Predicate
 import kotlin.math.abs
@@ -118,6 +118,7 @@ object Swerve : SubsystemBase() {
         this.desiredPoseForDriveToPoint = Pose2d()
         this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = 0.0
+        swerveState = SwerveDriveState.ManualDrive
         //    configureAutoBuilder();
         initializePathPlannerLogging()
 
@@ -243,7 +244,7 @@ object Swerve : SubsystemBase() {
         // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
         if (swerveState is SwerveDriveState.ManualDrive) {
-            stickDrive(aacrn)
+            stickDrive(testPad)
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
             // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
             val translationToDesiredPoint =
@@ -302,7 +303,6 @@ object Swerve : SubsystemBase() {
      */
     override fun periodic() {
         updatePos()
-
         poseEstimator.update(this.pidgeyRotation, this.getModulePositions().toTypedArray())
         poseEstimator3d.update(pidgey.getRotation3d(), this.getModulePositions().toTypedArray())
 
@@ -318,6 +318,7 @@ object Swerve : SubsystemBase() {
             log("Swerve/Robot Pose", field.robotPose)
             log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
             log("Swerve/Robot Pose 2D extra", robotPos)
+            log("Swerve/Swerve State", swerveState)
         }
         applySwerveState()
     }
@@ -397,11 +398,12 @@ object Swerve : SubsystemBase() {
                 ChassisSpeeds(forwardSpeed, leftSpeed, turnSpeed)
             }
 
-        logs<ChassisSpeeds?>("Swerve/Chassis Speeds", speeds)
+        logs<ChassisSpeeds>("Swerve/Chassis Speeds", speeds)
 
         speeds = ChassisSpeeds.discretize(speeds, 0.02)
 
         val newStates: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(speeds)
+
         SwerveDriveKinematics.desaturateWheelSpeeds(newStates, MAX_SPEED)
 
         this.moduleStates = newStates
@@ -624,7 +626,12 @@ object Swerve : SubsystemBase() {
      * @param controller The XboxController providing joystick input.
      */
     fun stickDrive(controller: XboxController) {
-        val (x, y) = controller.leftStickPosition(X_DEADZONE, Y_DEADZONE)
+        var x: Double = -controller.leftX * MAX_SPEED
+        if (abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0
+
+        var y: Double = -controller.leftY * MAX_SPEED
+        if (abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0
+
         val rotation = if (abs(controller.rightX) >= 0.1) -controller.rightX * MAX_ANGULAR_SPEED * 0.5 else 0.0
 
         logs {
@@ -633,6 +640,6 @@ object Swerve : SubsystemBase() {
             log("Rotation", rotation)
         }
 
-        setDriveSpeeds(y, x, rotation)
+        setDriveSpeeds(y, x, rotation * 0.5, true)
     }
 }

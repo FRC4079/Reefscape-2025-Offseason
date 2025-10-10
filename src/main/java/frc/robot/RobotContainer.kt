@@ -2,38 +2,42 @@
 
 package frc.robot
 
+import co.touchlab.kermit.Logger
 import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.commands.Kommand.moveElevatorState
-import frc.robot.commands.Kommand.padElevator
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.Sequences.fullScoreAuto
-import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
+import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.Direction.LEFT
 import frc.robot.utils.emu.Direction.RIGHT
+import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.ElevatorState.*
+import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.OuttakeState.*
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.State.ScoreManual
+import xyz.malefic.frc.emu.Button
 import xyz.malefic.frc.emu.Button.*
-import xyz.malefic.frc.pingu.Bingu.bindings
-import xyz.malefic.frc.pingu.CommandPingu
+import xyz.malefic.frc.pingu.binding.Bingu.bindings
+import xyz.malefic.frc.pingu.command.Commangu
 
 object RobotContainer {
     val networkChooser: SendableChooser<Command?>
 
     init {
-        Elevator.defaultCommand = padElevator(testPad)
+//        Elevator.defaultCommand = padElevator(testPad)
 
-        CommandPingu.registerCommands {
+        Commangu.registerCommands {
             bind("ScoreL4Left", fullScoreAuto(LEFT))
             bind("ScoreL4Right", fullScoreAuto(RIGHT))
             // bind("HasPieceFalse", hasPieceFalse())
@@ -92,7 +96,7 @@ object RobotContainer {
             }
             press(RIGHT_TRIGGER) {
                 when (outtakeState) {
-                    ALGAE_HOLD -> outtakeState = ALGAE_SHOOT
+                    ALGAE_HOLD -> outtakeState = OuttakeState.ALGAE_SHOOT
                     CORAL_HOLD -> SuperStructure + ScoreManual
                     else -> { /* no-op */ }
                 }
@@ -100,20 +104,64 @@ object RobotContainer {
             press(RIGHT_STICK) {
                 visionDead = !visionDead
             }
+            press(DPAD_DOWN) {
+                Swerve.flipPidgey()
+            }
         }
 
         testPad.bindings {
-            press(A) {
-                SuperStructure.driveToScoringPose(LEFT)
+//            press(A) {
+//                SuperStructure.driveToScoringPose(LEFT)
+//            }
+//            release(A) {
+//                SuperStructure.cancel()
+//            }
+//            press(B) {
+//                SuperStructure.driveToScoringPose(RIGHT)
+//            }
+//            release(B) {
+//                SuperStructure.cancel()
+//            }
+            press(DPAD_DOWN) {
+                Swerve.resetPidgey()
             }
-            release(A) {
-                SuperStructure.cancel()
+            press(DPAD_UP) {
+                Outtake.reverseCoral()
+                Intake.reverseCoral()
             }
             press(B) {
-                SuperStructure.driveToScoringPose(RIGHT)
+                if (Outtake.getCoralSensor()) {
+                    setElevatorState(L2).schedule()
+                } else {
+                    setElevatorState(ElevatorState.ALGAE_LOW).schedule()
+                    outtakeState = OuttakeState.ALGAE_INTAKE
+                }
+//                outtakeState = CORAL_SHOOT
             }
-            release(B) {
-                SuperStructure.cancel()
+            press(X) {
+                setElevatorState(L4).schedule()
+//                outtakeState = CORAL_SHOOT
+            }
+            press(Y) {
+                if (Outtake.getCoralSensor()) {
+                    setElevatorState(L3).schedule()
+                } else {
+                    setElevatorState(ElevatorState.ALGAE_HIGH).schedule()
+                    outtakeState = OuttakeState.ALGAE_INTAKE
+                }
+
+//                outtakeState = CORAL_SHOOT
+            }
+            press(A) {
+                setElevatorState(DEFAULT).schedule()
+            }
+            press(RIGHT_TRIGGER) {
+                if (outtakeState == OuttakeState.CORAL_HOLD) {
+                    outtakeState = OuttakeState.CORAL_SHOOT
+                } else if (outtakeState == OuttakeState.ALGAE_HOLD) {
+                    outtakeState = OuttakeState.ALGAE_SHOOT
+                    setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
+                }
             }
         }
     }

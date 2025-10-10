@@ -1,17 +1,16 @@
 package frc.robot.subsystems
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.controls.DutyCycleOut
 import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionDutyCycle
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
+import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
+import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_UP
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_LEFT_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_RIGHT_ID
@@ -19,13 +18,25 @@ import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
 import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
+import frc.robot.utils.emu.ElevatorState.L2
+import frc.robot.utils.emu.ElevatorState.L3
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
-import xyz.malefic.frc.extension.configureWithDefaults
 import xyz.malefic.frc.extension.leftStickPosition
-import xyz.malefic.frc.extension.setPingu
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import kotlin.math.abs
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.position
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.acceleration
+import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.motorVoltage
+import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
+import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.supplyVoltage
+import xyz.malefic.frc.pingu.motor.talonfx.velocity
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -33,11 +44,27 @@ import kotlin.math.abs
  * for the elevator motor.
  */
 object Elevator : SubsystemBase() {
-    private val elevatorMotorLeft = TalonFX(ELEVATOR_MOTOR_LEFT_ID)
-    private val elevatorMotorRight = TalonFX(ELEVATOR_MOTOR_RIGHT_ID)
-
-    private val posRequest: PositionDutyCycle
-    private val velocityRequest: VelocityTorqueCurrentFOC
+    private val elevatorMotorLeft =
+        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID)) {
+            this as TalonFXConfig
+            pingu = ELEVATOR_PINGU
+            inverted = InvertedValue.CounterClockwise_Positive
+            softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
+            currentLimits = null
+            dutyCycleNeutralDeadband = 0.1
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU
+            name = "Elevator Left Motor"
+        }
+    private val elevatorMotorRight =
+        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID)) {
+            this as TalonFXConfig
+            pingu = ELEVATOR_PINGU
+            softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
+            currentLimits = null
+            dutyCycleNeutralDeadband = 0.1
+            motionMagicPingu = ELEVATOR_MAGIC_PINGU
+            name = "Elevator Right Motor"
+        }
 
     private lateinit var elevatorP: LoggedNetworkNumber
     private lateinit var elevatorI: LoggedNetworkNumber
@@ -49,20 +76,18 @@ object Elevator : SubsystemBase() {
     private lateinit var acc: LoggedNetworkNumber
     private lateinit var jerk: LoggedNetworkNumber
 
-    private val voltageOut: VoltageOut
-    private val elevatorLeftConfigs: TalonFXConfiguration
-    private val elevatorRightConfigs: TalonFXConfiguration
+    private val elevatorRightConfigs: TalonFXConfiguration = TalonFXConfiguration()
 
     /**
      * The state of the elevator
      *
      * @return [ElevatorState], the state of the elevator
      */
-    var state: ElevatorState = ElevatorState.DEFAULT
+    var elevatorState: ElevatorState = ElevatorState.DEFAULT
 
-    private val motionMagicVoltage: MotionMagicVoltage
+    private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
-    private val cycleOut: DutyCycleOut
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
 
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
@@ -70,117 +95,81 @@ object Elevator : SubsystemBase() {
      * instance.
      */
     init {
-        elevatorMotorLeft.configureWithDefaults(
-            ELEVATOR_PINGU,
-            inverted = InvertedValue.CounterClockwise_Positive,
-            // limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
-            dutyCycleNeutralDeadband = 0.1,
-            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        ) {
-            SoftwareLimitSwitch.ForwardSoftLimitEnable = false
-            SoftwareLimitSwitch.ReverseSoftLimitEnable = false
-        }
-        elevatorMotorRight.configureWithDefaults(
-            ELEVATOR_PINGU,
-            // limitThresholds = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN,
-            dutyCycleNeutralDeadband = 0.1,
-            motionMagicPingu = ELEVATOR_MAGIC_PINGU,
-        ) {
-            SoftwareLimitSwitch.ForwardSoftLimitEnable = false
-            SoftwareLimitSwitch.ReverseSoftLimitEnable = false
-        }
-
-        elevatorLeftConfigs = TalonFXConfiguration()
-        elevatorRightConfigs = TalonFXConfiguration()
-
-        velocityRequest = VelocityTorqueCurrentFOC(0.0)
-        posRequest = PositionDutyCycle(0.0)
-        voltageOut = VoltageOut(0.0)
-        motionMagicVoltage = MotionMagicVoltage(0.0)
-        cycleOut = DutyCycleOut(0.0)
-
         motionMagicVoltage.Slot = 0
 
         //    motionMagicVoltage.EnableFOC = true;
         //    motionMagicVoltage.FeedForward = 0;
 
-        // TODO test elevator with FOC, increase acceleration, cruise velocity, and graph it all to see
+        // TODO increase acceleration, cruise velocity, and graph it all to see
         // how to speed it up
         // reduce timeouts for automatic scoring, autoalign speed it up even more, test in autonomous
         // with 180 command
         // algae and intake prob add or remove idkk yet
-        velocityRequest.OverrideCoastDurNeutral = false
-
-        voltageOut.OverrideBrakeDurNeutral = false
-        voltageOut.EnableFOC = true
-
-        cycleOut.EnableFOC = false
-
-        elevatorMotorLeft.setPosition(0.0)
-        elevatorMotorRight.setPosition(0.0)
-
-//        add(elevatorMotorLeft, "left elevator")
-//        add(elevatorMotorRight, "right elevator")
 
         initializeLoggedNetworkPID()
     }
 
     // This method will be called once per scheduler run
     override fun periodic() {
-//        System.out.println("periodic Elevator")
         // THIS IS JUST FOR TESTING, in reality, elevator set state is based on
         // what Jayden clicks which will be displayed on leds but not necessarily = currentState
         //    elevatorSetState = currentState;
-        setElevatorPosition(this.state)
+        // setElevatorPosition(this.state)
+
+        moveElevator(elevatorState)
+
+        // moveElevator(testPad.leftY)
 
         logs {
             log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
             log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
+            log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.motor.stickyFault_ForwardSoftLimit.value)
+            log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.motor.stickyFault_ReverseSoftLimit.value)
             log(
                 "Elevator/Elevator Left Position",
-                elevatorMotorLeft.position.valueAsDouble,
+                elevatorMotorLeft.position,
             )
             log(
                 "Elevator/Elevator Right Position",
-                elevatorMotorRight.position.valueAsDouble,
+                elevatorMotorRight.position,
             )
             log(
                 "Elevator/Elevator Left Set Speed",
-                elevatorMotorLeft.velocity.valueAsDouble,
+                elevatorMotorLeft.velocity,
             )
             log(
                 "Elevator/Elevator Right Set Speed",
-                elevatorMotorRight.velocity.valueAsDouble,
+                elevatorMotorRight.velocity,
             )
             log(
                 "Elevator/Elevator Left Acceleration",
-                elevatorMotorLeft.acceleration.valueAsDouble,
+                elevatorMotorLeft.acceleration,
             )
             log(
                 "Elevator/Elevator Right Acceleration",
-                elevatorMotorRight.acceleration.valueAsDouble,
+                elevatorMotorRight.acceleration,
             )
             log(
                 "Elevator/Elevator Supply Voltage",
-                elevatorMotorLeft.supplyVoltage.valueAsDouble,
+                elevatorMotorLeft.supplyVoltage,
             )
             log(
                 "Elevator/Elevator Motor Voltage",
-                elevatorMotorLeft.motorVoltage.valueAsDouble,
+                elevatorMotorLeft.motorVoltage,
             )
-            log("Elevator/Elevator State", state.toString())
-            log("Elevator/Elevator To Be State", elevatorToBeSetState.toString())
+            log("Elevator/Elevator State", elevatorState)
+            log("Elevator/Elevator To Be State", elevatorToBeSetState)
             log(
                 "Elevator/Elevator Stator Current",
-                elevatorMotorLeft.statorCurrent.valueAsDouble,
+                elevatorMotorLeft.statorCurrent,
             )
             log(
                 "Elevator/Elevator Supply Current",
-                elevatorMotorLeft.supplyCurrent.valueAsDouble,
+                elevatorMotorLeft.supplyCurrent,
             )
             log(
                 "Elevator/Elevator Stall Current",
-                elevatorMotorLeft.motorStallCurrent.valueAsDouble,
+                elevatorMotorLeft.motorStallCurrent,
             )
         }
     }
@@ -196,9 +185,6 @@ object Elevator : SubsystemBase() {
     fun stopMotors() {
         elevatorMotorLeft.stopMotor()
         elevatorMotorRight.stopMotor()
-        voltageOut.Output = -0.014
-        elevatorMotorLeft.setControl(voltageOut)
-        elevatorMotorRight.setControl(voltageOut)
     }
 
     /**
@@ -210,8 +196,8 @@ object Elevator : SubsystemBase() {
      */
     fun getElevatorPosValue(motor: ElevatorMotor): Double =
         when (motor) {
-            ElevatorMotor.LEFT -> elevatorMotorLeft.position.valueAsDouble
-            ElevatorMotor.RIGHT -> elevatorMotorRight.position.valueAsDouble
+            ElevatorMotor.LEFT -> elevatorMotorLeft.position
+            ElevatorMotor.RIGHT -> elevatorMotorRight.position
         }
 
     val elevatorPosAvg: Double
@@ -224,47 +210,20 @@ object Elevator : SubsystemBase() {
 
     /** Soft resets the encoders on the elevator motors  */
     fun resetEncoders() {
-        elevatorMotorLeft.setPosition(0.0)
-        elevatorMotorRight.setPosition(0.0)
-    }
-
-//    /** Toggles the soft stop for the elevator motor  */
-//    fun toggleSoftStop() {
-//        ElevatorParameters.isSoftLimitEnabled = !ElevatorParameters.isSoftLimitEnabled
-//        leftSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-//        leftSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-//
-//        rightSoftLimitConfig.ReverseSoftLimitEnable = ElevatorParameters.isSoftLimitEnabled
-//        rightSoftLimitConfig.ReverseSoftLimitThreshold = 0.0
-//
-//        elevatorMotorLeft.configurator.apply(leftSoftLimitConfig)
-//        elevatorMotorRight.configurator.apply(rightSoftLimitConfig)
-//    }
-
-    /**
-     * Move the elevator motor at a specific velocity
-     *
-     * @param speed double, the velocity to move the elevator motor at
-     */
-    fun moveElevator(speed: Double) {
-        val deadband = 0.001
-        val velocity = -speed * 0.3309
-        if (abs(velocity) >= deadband) {
-            elevatorMotorLeft.setControl(cycleOut.withOutput(velocity))
-            elevatorMotorRight.setControl(cycleOut.withOutput(velocity))
-        } else {
-            stopMotors()
-        }
+        elevatorMotorLeft.resetPosition(0.0)
+        elevatorMotorRight.resetPosition(0.0)
     }
 
     /**
-     * Sets the elevator motor to a specific position
+     * Moves both elevator motors to the position specified by the given ElevatorState.
      *
-     * @param state the [ElevatorState] to set the elevator motor to
+     * @param state The target ElevatorState whose position will be used for both motors.
      */
-    fun setElevatorPosition(state: ElevatorState) {
-        elevatorMotorLeft.setControl(motionMagicVoltage.withPosition(state.pos))
-        elevatorMotorRight.setControl(motionMagicVoltage.withPosition(state.pos))
+    fun moveElevator(state: ElevatorState) {
+//        elevatorMotorLeft.move(state.pos.position)
+//        elevatorMotorRight.move(state.pos.position)
+        elevatorMotorLeft.setControl(voltagePos.withPosition(state.pos))
+        elevatorMotorRight.setControl(voltagePos.withPosition(state.pos))
     }
 
     fun initializeLoggedNetworkPID() {
@@ -295,76 +254,30 @@ object Elevator : SubsystemBase() {
     }
 
     /**
-     * Updates the PID values for the elevator motors. This method sets the PID values for the
-     * elevator motors and updates the Motion Magic configurations.
-     */
-    fun updateElevatorPID() {
-        ELEVATOR_PINGU.setP(elevatorP)
-        ELEVATOR_PINGU.setI(elevatorI)
-        ELEVATOR_PINGU.setD(elevatorD)
-        ELEVATOR_PINGU.setV(elevatorV)
-        ELEVATOR_PINGU.setS(elevatorS)
-        ELEVATOR_PINGU.setG(elevatorG)
-
-        ELEVATOR_MAGIC_PINGU.setVelocity(cruiseV)
-        ELEVATOR_MAGIC_PINGU.setAcceleration(acc)
-        ELEVATOR_MAGIC_PINGU.setJerk(jerk)
-
-        applyElevatorPIDValues()
-    }
-
-    /**
-     * Applies the PID values to the elevator motors. This method sets the PID values for both the
-     * left and right elevator motor configurations and applies the Motion Magic configurations.
-     */
-    fun applyElevatorPIDValues() {
-        // Set the PID values for the left elevator motor configuration
-        elevatorLeftConfigs.setPingu(ELEVATOR_PINGU)
-
-        // Set the PID values for the right elevator motor configuration
-        elevatorRightConfigs.setPingu(ELEVATOR_PINGU)
-
-        // Update the Motion Magic configurations with the current PID values
-//        motionMagicConfigs = elevatorLeftConfigs.MotionMagic
-//        motionMagicConfigs.MotionMagicCruiseVelocity = cruiseV.get()
-//        motionMagicConfigs.MotionMagicAcceleration = acc.get()
-//        motionMagicConfigs.MotionMagicJerk = jerk.get()
-
-        // Apply the updated configurations to the left elevator motor
-        elevatorMotorLeft.configurator.apply(elevatorLeftConfigs)
-        elevatorMotorRight.configurator.apply(elevatorRightConfigs)
-
-        // Apply the Motion Magic configurations to the left and right elevator motors
-//        elevatorMotorLeft.configurator.apply(motionMagicConfigs)
-//        elevatorMotorRight.configurator.apply(motionMagicConfigs)
-    }
-
-    /**
-     * Calibrates the elevator motor. This method calibrates the elevator motor by moving the motor up
-     * until it stalls.
-     */
-    fun calibrateElevator() {
-        while (elevatorMotorLeft.motorStallCurrent.valueAsDouble < 3.0) {
-            elevatorMotorLeft.setControl(voltageOut.withOutput(0.5))
-            elevatorMotorRight.setControl(voltageOut.withOutput(0.5))
-        }
-    }
-
-    /**
      * Sets the elevator state to the appropriate algae level based on the value of elevatorToBeSetState.
      *
      * @return true if the state was set to ALGAE_LOW or ALGAE_HIGH, false otherwise.
      */
     fun setAlgaeLevel(): Boolean =
         when (elevatorToBeSetState) {
-            ElevatorState.L2 -> {
-                state = ElevatorState.ALGAE_LOW
+            L2 -> {
+                elevatorState = ElevatorState.ALGAE_LOW
                 true
             }
-            ElevatorState.L3 -> {
-                state = ElevatorState.ALGAE_HIGH
+            L3 -> {
+                elevatorState = ElevatorState.ALGAE_HIGH
                 true
             }
             else -> false
         }
+
+    val atState: Boolean
+        get() = elevatorMotorLeft.motor.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
+
+    fun isAlgaeReadyForShoot(): Boolean {
+        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 10.0)) {
+            return true
+        }
+        return false
+    }
 }

@@ -34,7 +34,10 @@ object Kommand {
      * @param state The desired state of the elevator.
      * @return An [InstantCommand] that sets the elevator state.
      */
-    fun setElevatorState(state: ElevatorState) = cmd { Elevator.state = state }
+    fun setElevatorState(state: ElevatorState) =
+        cmd {
+            Elevator.elevatorState = state
+        }
 
     /**
      * Creates a [SequentialCommandGroup] to move the elevator to a specified state.
@@ -45,7 +48,7 @@ object Kommand {
     fun moveElevatorState(state: ElevatorState) =
         sequential {
             +cmd(Elevator) {
-                Elevator.state = state
+                Elevator.elevatorState = state
             }
             +waitUntil {
                 abs(Elevator.elevatorPosAvg - state.pos) < 0.3
@@ -65,7 +68,7 @@ object Kommand {
      *
      * @return An [InstantCommand] that starts the coral motors.
      */
-    fun startCoralMotors() = cmd { Intake.startCoralIntake() }
+    fun startCoralMotors() = cmd { Intake.intakeCoral() }
 
     /**
      * Creates an [InstantCommand] to reset the Pidgey sensor.

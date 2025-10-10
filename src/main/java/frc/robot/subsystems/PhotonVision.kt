@@ -12,8 +12,8 @@ import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
 import xyz.malefic.frc.extension.getDecentResultPairs
 import xyz.malefic.frc.extension.hasTargets
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.sub.PhotonModule
 
 /**

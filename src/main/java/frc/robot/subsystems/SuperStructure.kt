@@ -6,6 +6,8 @@ import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
 import frc.robot.utils.emu.State
 import frc.robot.utils.emu.SwerveDriveState
+import xyz.malefic.frc.pingu.log.LogPingu.log
+import xyz.malefic.frc.pingu.log.LogPingu.logs
 
 object SuperStructure : SubsystemBase() {
     var currentState: State = State.TeleOpDrive
@@ -53,5 +55,9 @@ object SuperStructure : SubsystemBase() {
             currentState = wantedState.removeFirst()
         }
         applyState()
+
+        logs {
+            log("Superstructure/Robot State", currentState)
+        }
     }
 }

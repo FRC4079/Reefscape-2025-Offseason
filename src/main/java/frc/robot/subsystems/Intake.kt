@@ -1,41 +1,45 @@
 package frc.robot.subsystems
 
-import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.subsystems.Outtake.getCoralSensor
 import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
+import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_MOTOR_GEAR_RATIO
+import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_STATOR_LIMIT
+import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_SUPPLY_LIMIT
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
-import xyz.malefic.frc.extension.configureWithDefaults
-import xyz.malefic.frc.pingu.AlertPingu.add
-import xyz.malefic.frc.pingu.LogPingu.log
-import xyz.malefic.frc.pingu.LogPingu.logs
-import xyz.malefic.frc.pingu.VoltagePingu.setOutput
+import frc.robot.utils.RobotParameters.SwerveParameters
+import frc.robot.utils.emu.OuttakeState
+import xyz.malefic.frc.pingu.motor.Mongu
+import xyz.malefic.frc.pingu.motor.control.velocity
+import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
+import xyz.malefic.frc.pingu.motor.talonfx.setControl
 
 object Intake : SubsystemBase() {
-    private val wheelFeederMotor: TalonFX = TalonFX(CORAL_FEEDER_ID)
-    private val starFeederMotor: TalonFX = TalonFX(STAR_FEEDER_ID)
-
-    private val voltageOut: VoltageOut
-    private val voltageOutFeeder: VoltageOut
-
-    /**
-     * Creates a new instance of this IntakeSubsystem. This constructor is private since this class is
-     * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
-     */
-    init {
-        wheelFeederMotor.configureWithDefaults(WHEEL_FEEDER_PINGU)
-        add(wheelFeederMotor, "Coral Feeder")
-
-        starFeederMotor.configureWithDefaults(STAR_FEEDER_PINGU, neutralMode = NeutralModeValue.Coast)
-        add(starFeederMotor, "Star Feeder Motor")
-
-        voltageOut = VoltageOut(0.0)
-        voltageOutFeeder = VoltageOut(0.0)
-    }
+    private val wheelFeederMotor =
+        Mongu(TalonFX(CORAL_FEEDER_ID)) {
+            this as TalonFXConfig
+            pingu = WHEEL_FEEDER_PINGU
+            neutralMode = NeutralModeValue.Brake
+            inverted = InvertedValue.Clockwise_Positive
+            name = "Wheel Feeder Motor"
+        }
+    private val starFeederMotor =
+        Mongu(TalonFX(STAR_FEEDER_ID)) {
+            this as TalonFXConfig
+            pingu = STAR_FEEDER_PINGU
+            neutralMode = NeutralModeValue.Brake
+            inverted = InvertedValue.CounterClockwise_Positive
+            name = "Star Feeder Motor"
+        }
+    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
 
     /**
      * If the coral sensor is triggered, set the hasPiece boolean to true. (hasPiece = true,
@@ -49,12 +53,10 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
-        voltageOutFeeder.Output = 5.0
-        wheelFeederMotor.setControl(voltageOutFeeder)
-        starFeederMotor.setControl(voltageOutFeeder)
-
-        logs {
-            log("Coral/Coral State", outtakeState.toString())
+        if (!getCoralSensor() && outtakeState != OuttakeState.CORAL_SHOOT) {
+            intakeCoral()
+        } else {
+            stopMotors()
         }
     }
 
@@ -69,29 +71,22 @@ object Intake : SubsystemBase() {
     /**
      * Starts the coral manipulator motors
      */
-    fun startCoralIntake() {
-        voltageOut.Output = 5.0
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
-        //    isCoralIntaking = true;
-    }
+    fun intakeCoral() = setIntakeVelocity(30.0)
 
     /**
      * Starts the coral manipulator motors
      */
-    fun reverseMotors() {
-        wheelFeederMotor.setControl(setOutput(-4.5))
-        starFeederMotor.setControl(setOutput(-4.5))
-    }
+    fun reverseCoral() = setIntakeVelocity(-30.0)
 
     /**
      * Sets the speed of the algae intake motor.
      *
      * @param speed the desired speed to set for the intake motor
      */
-    fun setIntakeSpeed(speed: Double) {
-        voltageOut.Output = speed
-        wheelFeederMotor.setControl(voltageOut)
-        starFeederMotor.setControl(voltageOut)
+    fun setIntakeVelocity(speed: Double) {
+//        wheelFeederMotor.move(speed.velocity)
+//        starFeederMotor.move(speed.velocity)
+        wheelFeederMotor.setControl(velocitySetter.withVelocity(speed))
+        starFeederMotor.setControl(velocitySetter.withVelocity(speed))
     }
 }
