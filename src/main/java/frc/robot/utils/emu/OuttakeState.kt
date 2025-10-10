@@ -19,6 +19,8 @@ enum class OuttakeState(
     /** Represents the state when the coral manipulator is reversing a coral piece. */
     CORAL_REVERSE({ reverseCoral() }),
 
+    ALGAE_INTAKE({ intakeAlgae() }),
+
     /** Represents the state when the coral manipulator is holding algae. */
     ALGAE_HOLD({ slowAlgaeScoreMotors() }),
 

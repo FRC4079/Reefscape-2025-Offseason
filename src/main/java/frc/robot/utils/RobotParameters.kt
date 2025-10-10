@@ -235,8 +235,8 @@ object RobotParameters {
     }
 
     object IntakeParameters {
-        val STAR_FEEDER_PINGU = Pingu(7.0, 0.0, .0, 1.0)
-        val WHEEL_FEEDER_PINGU = Pingu(7.0, 0.0, 0.0, 1.0)
+        val STAR_FEEDER_PINGU = Pingu(3.0, 0.0, .0, 0.75)
+        val WHEEL_FEEDER_PINGU = Pingu(3.0, 0.0, 0.0, 0.75)
     }
 
     object OuttakeParameters {

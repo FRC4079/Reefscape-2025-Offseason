@@ -8,7 +8,7 @@ package frc.robot.utils.emu
 enum class OuttakePivotState(
     val pos: Double,
 ) {
-    ALGAE_INTAKE(3.5),
+    ALGAE_INTAKE(-4.5),
 
     ALGAE_HOLD(0.0),
 
@@ -16,9 +16,11 @@ enum class OuttakePivotState(
 
     CORAL_L1(0.0),
 
-    CORAL_L23(-2.9),
+    CORAL_L23(-3.05),
 
     CORAL_L4(-3.0),
 
-    INTAKE(-0.75),
+    INTAKE(-2.0),
+
+    STOW(0.0),
 }

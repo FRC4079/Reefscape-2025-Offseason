@@ -10,6 +10,7 @@ import frc.robot.commands.Kommand.moveElevatorState
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.commands.Sequences.fullScoreAuto
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
@@ -95,7 +96,7 @@ object RobotContainer {
             }
             press(RIGHT_TRIGGER) {
                 when (outtakeState) {
-                    ALGAE_HOLD -> outtakeState = ALGAE_SHOOT
+                    ALGAE_HOLD -> outtakeState = OuttakeState.ALGAE_SHOOT
                     CORAL_HOLD -> SuperStructure + ScoreManual
                     else -> { /* no-op */ }
                 }
@@ -121,15 +122,47 @@ object RobotContainer {
 //            release(B) {
 //                SuperStructure.cancel()
 //            }
-            press(A) {
+            press(DPAD_DOWN) {
                 Swerve.resetPidgey()
             }
-            press(Y) {
-                setElevatorState(L4).schedule()
-                outtakeState = CORAL_SHOOT
+            press(DPAD_UP) {
+                Outtake.reverseCoral()
+                Intake.reverseCoral()
             }
-            press(Button.X) {
+            press(B) {
+                if (Outtake.getCoralSensor()) {
+                    setElevatorState(L2).schedule()
+                } else {
+                    setElevatorState(ElevatorState.ALGAE_LOW).schedule()
+                    outtakeState = OuttakeState.ALGAE_INTAKE
+                }
+//                outtakeState = CORAL_SHOOT
+            }
+            press(X) {
+                setElevatorState(L4).schedule()
+//                outtakeState = CORAL_SHOOT
+            }
+            press(Y) {
+                if (Outtake.getCoralSensor()) {
+                    setElevatorState(L3).schedule()
+                } else {
+                    setElevatorState(ElevatorState.ALGAE_HIGH).schedule()
+                    outtakeState = OuttakeState.ALGAE_INTAKE
+                }
+
+//                outtakeState = CORAL_SHOOT
+            }
+            press(A) {
                 setElevatorState(DEFAULT).schedule()
+            }
+            press(RIGHT_TRIGGER) {
+                if (outtakeState == OuttakeState.CORAL_HOLD) {
+                    outtakeState = OuttakeState.CORAL_SHOOT
+                }
+                if (outtakeState == OuttakeState.ALGAE_HOLD) {
+                    outtakeState = OuttakeState.ALGAE_SHOOT
+                    setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
+                }
             }
         }
     }

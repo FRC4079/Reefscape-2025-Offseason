@@ -47,7 +47,10 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
-    val testPadThree: XboxController = XboxController(3)
+
+//    val testPadThree: XboxController = XboxController(3)
+    val intakeTime = 0.3
+    var correctIntakingState: OuttakePivotState = OuttakePivotState.STOW
     //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
     // Shawn was here
 
@@ -81,33 +84,57 @@ object Outtake : SubsystemBase() {
     override fun periodic() {
         outtakeState.block(this)
 
-        //        movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
+        if (outtakeState == OuttakeState.ALGAE_HOLD) {
+            if (!getAlgaeSensor()) {
+                outtakeState = OuttakeState.STOWED
+            }
+        }
 
-//        setOuttakeSpeed(testPadThree.leftY * 150)
+        // movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
+
+        // setOuttakeSpeed(testPadThree.leftY * 150)
 
         println(intakeTimer.get())
 
         when (outtakeState) {
             OuttakeState.STOWED -> {
-                movePivotTo(OuttakePivotState.INTAKE)
+                movePivotTo(correctIntakingState)
+                @Suppress("ktlint:standard:if-else-wrapping")
                 if (!getCoralSensor()) {
-                    setOuttakeSpeed(30.0)
-                } else if (!intakeTimer.hasElapsed(0.75) && !intakeTimer.isRunning) {
-                    Logger.d("Outtake") { "Intake Timer Started <----------------------------------------------------" }
+                    setOuttakeSpeed(100.0)
+                }
+//                } else if (!intakeTimer.hasElapsed(intakeTime) && !intakeTimer.isRunning) {
+//                    Logger.d("Outtake") { "Intake Timer Started <----------------------------------------------------" }
+//                    intakeTimer.start()
+//                    correctIntakingState = OuttakePivotState.INTAKE
+//                }
+                else if (getCoralSensor()) {
+//                    outtakeState = OuttakeState.CORAL_HOLD
                     intakeTimer.start()
                 }
-                if (getCoralSensor() && intakeTimer.hasElapsed(0.75) && intakeTimer.isRunning) {
+
+                if (intakeTimer.hasElapsed(0.1)) {
+                    stopOuttakeMotor()
+                    correctIntakingState = OuttakePivotState.INTAKE
+                }
+
+                if (intakeTimer.hasElapsed(0.3)) {
+                    setOuttakeSpeed(100.0)
+                }
+
+                if (intakeTimer.hasElapsed(1.3)) {
+                    stopOuttakeMotor()
                     outtakeState = OuttakeState.CORAL_HOLD
+                    correctIntakingState = OuttakePivotState.STOW
                 }
                 // otherwise we wait for 0.5 seconds to pass
             }
 
             OuttakeState.CORAL_HOLD -> {
-                if (intakeTimer.hasElapsed(0.75) && !getCoralSensor()) {
-                    Logger.d("Outtake") { "Intake Timer Stopped <#########################################################" }
-                    intakeTimer.stop()
-                    intakeTimer.reset()
-                    stopOuttakeMotor()
+                movePivotTo(correctIntakingState)
+                if (!getCoralSensor()) {
+                    outtakeState = OuttakeState.STOWED
+                    correctIntakingState = OuttakePivotState.STOW
                 }
             }
 
@@ -131,7 +158,24 @@ object Outtake : SubsystemBase() {
                     else -> { /* no-op */ }
                 }
             }
+
+            OuttakeState.ALGAE_INTAKE -> {
+                movePivotTo(OuttakePivotState.ALGAE_INTAKE)
+                if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25) {
+                    if (getAlgaeSensor()) {
+                        outtakeState = OuttakeState.ALGAE_HOLD
+                    }
+                }
+            }
             else -> { /* no-op */ }
+        }
+
+        if (intakeTimer.hasElapsed(0.35) && intakeTimer.isRunning) {
+//            Logger.d("Outtake") { "Intake Timer Stopped <#########################################################" }
+            outtakeState = OuttakeState.CORAL_HOLD
+            intakeTimer.stop()
+            intakeTimer.reset()
+            stopOuttakeMotor()
         }
 
         when {
@@ -141,13 +185,14 @@ object Outtake : SubsystemBase() {
                     outtakeState = OuttakeState.STOWED
                     shootTimer.stop()
                     shootTimer.reset()
+                    correctIntakingState = OuttakePivotState.STOW
                 }
             }
-
-            (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
-                outtakeState = OuttakeState.STOWED
-                stopOuttakeMotor()
-            }
+//
+//            (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
+//                outtakeState = OuttakeState.STOWED
+//                stopOuttakeMotor()
+//            }
 
             // otherwise, keep the current state (i.e., continue shooting)
         }
@@ -246,7 +291,7 @@ object Outtake : SubsystemBase() {
      * @see setOuttakeSpeed
      */
     fun reverseCoral() {
-//        setOuttakeSpeed(-30.0) // TODO: Reverse Intake as well
+        setOuttakeSpeed(-30.0) // TODO: Reverse Intake as well
     }
 
     /**
@@ -260,9 +305,8 @@ object Outtake : SubsystemBase() {
      * motor, and marks the algaeIntaking flag as true.
      */
     fun intakeAlgae() {
-        stopMotors()
-        if (!setAlgaeLevel()) return
-        setOuttakeSpeed(-30.0)
+        setOuttakeSpeed(75.0)
+        outtakePivotState = OuttakePivotState.ALGAE_INTAKE
     }
 
     /**
@@ -273,8 +317,12 @@ object Outtake : SubsystemBase() {
      */
     fun shootAlgae() {
         // TODO: Weird elevator timing (in this file or somewhere else?)
-        setOuttakeSpeed(-30.0)
-        stopAlgaeIntake()
+        if (Elevator.isAlgaeReadyForShoot()) {
+            setOuttakeSpeed(-100.00)
+        }
+        if (!getAlgaeSensor()) {
+            outtakeState = OuttakeState.STOWED
+        }
     }
 
     /**

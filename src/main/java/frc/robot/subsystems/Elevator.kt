@@ -273,4 +273,11 @@ object Elevator : SubsystemBase() {
 
     val atState: Boolean
         get() = elevatorMotorLeft.motor.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
+
+    fun isAlgaeReadyForShoot(): Boolean {
+        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 5.0)) {
+            return true
+        }
+        return false
+    }
 }
