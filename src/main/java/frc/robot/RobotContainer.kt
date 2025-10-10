@@ -126,8 +126,7 @@ object RobotContainer {
                 Swerve.resetPidgey()
             }
             press(DPAD_UP) {
-                Outtake.reverseCoral()
-                Intake.reverseCoral()
+                outtakeState = CORAL_REVERSE
             }
             press(B) {
                 if (Outtake.getCoralSensor()) {

@@ -48,6 +48,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
+    val algaeTimer: Timer = Timer()
 
 //    val testPadThree: XboxController = XboxController(3)
     val intakeTime = 0.3
@@ -84,6 +85,11 @@ object Outtake : SubsystemBase() {
     // This method will be called once per scheduler run
     override fun periodic() {
         outtakeState.block(this)
+
+        if (outtakeState == OuttakeState.CORAL_REVERSE) {
+            reverseCoral()
+            return
+        }
 
         if (outtakeState == OuttakeState.ALGAE_HOLD) {
             if (!getAlgaeSensor()) {
@@ -166,7 +172,11 @@ object Outtake : SubsystemBase() {
                     OuttakePivotState.ALGAE_INTAKE.pos - 0.1..OuttakePivotState.ALGAE_INTAKE.pos + 0.1
                 ) {
                     if (getAlgaeSensor()) {
+                        algaeTimer.start()
+                    } else if (algaeTimer.hasElapsed(0.5)) {
                         outtakeState = OuttakeState.ALGAE_HOLD
+                        algaeTimer.stop()
+                        algaeTimer.reset()
                     }
                 }
             }

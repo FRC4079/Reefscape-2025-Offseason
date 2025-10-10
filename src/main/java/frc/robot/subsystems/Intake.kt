@@ -53,6 +53,10 @@ object Intake : SubsystemBase() {
      * The manipulator motors should be on by default, as per Aaron's request.
      */
     override fun periodic() {
+        if (outtakeState == OuttakeState.CORAL_REVERSE) {
+            reverseCoral()
+            return
+        }
         if (!getCoralSensor() && outtakeState != OuttakeState.CORAL_SHOOT) {
             intakeCoral()
         } else {
