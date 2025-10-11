@@ -246,7 +246,7 @@ object RobotParameters {
         val OUTTAKE_PINGU = Pingu(5.05, 0.0, 0.0, 1.0)
         val PIVOT_PINGU = Pingu(8.0, 0.0, 0.0, 0.0)
 
-        var outtakePivotState: OuttakePivotState = OuttakePivotState.INTAKE
+        var outtakePivotState: OuttakePivotState = OuttakePivotState.CORAL_INTAKE
 
         var outtakeState: OuttakeState = OuttakeState.STOWED
     }

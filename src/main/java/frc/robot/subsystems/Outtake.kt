@@ -1,19 +1,15 @@
 package frc.robot.subsystems
 
-import co.touchlab.kermit.Logger
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.subsystems.Elevator.elevatorState
-import frc.robot.subsystems.Elevator.setAlgaeLevel
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
@@ -29,8 +25,6 @@ import frc.robot.utils.emu.State
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.position
-import xyz.malefic.frc.pingu.motor.control.velocity
 import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
 import xyz.malefic.frc.pingu.motor.talonfx.deviceID
 import xyz.malefic.frc.pingu.motor.talonfx.isConnected
@@ -48,6 +42,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
 object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
+    val algaeTimer: Timer = Timer()
 
 //    val testPadThree: XboxController = XboxController(3)
     val intakeTime = 0.3
@@ -85,10 +80,13 @@ object Outtake : SubsystemBase() {
     override fun periodic() {
         outtakeState.block(this)
 
-        if (outtakeState == OuttakeState.ALGAE_HOLD) {
-            if (!getAlgaeSensor()) {
+        if (outtakeState == OuttakeState.CORAL_REVERSE) {
+            reverseCoral()
+            return
+        }
+
+        if (outtakeState == OuttakeState.ALGAE_HOLD && !getAlgaeSensor()) {
                 outtakeState = OuttakeState.STOWED
-            }
         }
 
         // movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
@@ -103,20 +101,13 @@ object Outtake : SubsystemBase() {
                 @Suppress("ktlint:standard:if-else-wrapping")
                 if (!getCoralSensor()) {
                     setOuttakeSpeed(100.0)
-                }
-//                } else if (!intakeTimer.hasElapsed(intakeTime) && !intakeTimer.isRunning) {
-//                    Logger.d("Outtake") { "Intake Timer Started <----------------------------------------------------" }
-//                    intakeTimer.start()
-//                    correctIntakingState = OuttakePivotState.INTAKE
-//                }
-                else if (getCoralSensor()) {
-//                    outtakeState = OuttakeState.CORAL_HOLD
+                } else if (getCoralSensor()) {
                     intakeTimer.start()
                 }
 
                 if (intakeTimer.hasElapsed(0.1)) {
                     stopOuttakeMotor()
-                    correctIntakingState = OuttakePivotState.INTAKE
+                    correctIntakingState = OuttakePivotState.CORAL_INTAKE
                 }
 
                 if (intakeTimer.hasElapsed(0.3)) {
@@ -166,7 +157,11 @@ object Outtake : SubsystemBase() {
                     OuttakePivotState.ALGAE_INTAKE.pos - 0.1..OuttakePivotState.ALGAE_INTAKE.pos + 0.1
                 ) {
                     if (getAlgaeSensor()) {
+                        algaeTimer.start()
+                    } else if (algaeTimer.hasElapsed(0.5)) {
                         outtakeState = OuttakeState.ALGAE_HOLD
+                        algaeTimer.stop()
+                        algaeTimer.reset()
                     }
                 }
             }
@@ -179,7 +174,6 @@ object Outtake : SubsystemBase() {
         }
 
         if (intakeTimer.hasElapsed(0.35) && intakeTimer.isRunning) {
-//            Logger.d("Outtake") { "Intake Timer Stopped <#########################################################" }
             outtakeState = OuttakeState.CORAL_HOLD
             intakeTimer.stop()
             intakeTimer.reset()
