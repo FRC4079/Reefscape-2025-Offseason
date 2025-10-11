@@ -31,5 +31,5 @@ enum class ElevatorState(
     ALGAE_HIGH(26.0),
 
     /** Represents the barge level of the elevator for algae.  */
-    ALGAE_SHOOT(49.0),
+    ALGAE_SHOOT(50.0),
 }

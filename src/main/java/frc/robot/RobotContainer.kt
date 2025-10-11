@@ -12,6 +12,7 @@ import frc.robot.commands.Sequences.fullScoreAuto
 import frc.robot.subsystems.Elevator.setElevatorToBeSetState
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Outtake
+import frc.robot.subsystems.Outtake.getCoralSensor
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
@@ -155,7 +156,7 @@ object RobotContainer {
                 setElevatorState(DEFAULT).schedule()
             }
             press(RIGHT_TRIGGER) {
-                if (outtakeState == OuttakeState.CORAL_HOLD) {
+                if (getCoralSensor()) {
                     outtakeState = OuttakeState.CORAL_SHOOT
                 } else if (outtakeState == OuttakeState.ALGAE_HOLD) {
                     outtakeState = OuttakeState.ALGAE_SHOOT
