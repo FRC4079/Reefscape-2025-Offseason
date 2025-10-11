@@ -86,14 +86,14 @@ object Outtake : SubsystemBase() {
         }
 
         if (outtakeState == OuttakeState.ALGAE_HOLD && !getAlgaeSensor()) {
-                outtakeState = OuttakeState.STOWED
+            outtakeState = OuttakeState.STOWED
         }
 
         // movePivotTo(if (outtakeState == OuttakeState.STOWED) OuttakePivotState.STOWED)
 
         // setOuttakeSpeed(testPadThree.leftY * 150)
 
-        println(intakeTimer.get())
+//        println(intakeTimer.get())
 
         when (outtakeState) {
             OuttakeState.STOWED -> {
@@ -114,7 +114,7 @@ object Outtake : SubsystemBase() {
                     setOuttakeSpeed(100.0)
                 }
 
-                if (intakeTimer.hasElapsed(1.3)) {
+                if (intakeTimer.hasElapsed(2.0)) {
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.CORAL_HOLD
                     correctIntakingState = OuttakePivotState.STOW

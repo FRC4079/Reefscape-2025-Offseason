@@ -38,7 +38,8 @@ import xyz.malefic.frc.pingu.command.Commangu
 import kotlin.time.Instant
 
 object RobotContainer {
-    val networkChooser: SendableChooser<Command?>
+//    val networkChooser: SendableChooser<Command?>
+    var queuedState: OuttakeState = OuttakeState.STOWED
 
     init {
 //        Elevator.defaultCommand = padElevator(testPad)
@@ -64,18 +65,23 @@ object RobotContainer {
             bind("ScoreCoral", ScoreCoral())
         }
 
-        networkChooser = AutoBuilder.buildAutoChooser()
+//        networkChooser = AutoBuilder.buildAutoChooser()
 
         configureBindings()
     }
 
     private fun configureBindings() {
-        aacrn.bindings {
+        testPad.bindings {
             press(DPAD_DOWN) {
                 Swerve.resetPidgey()
             }
             press(DPAD_UP) {
+                queuedState = outtakeState
                 outtakeState = CORAL_REVERSE
+            }
+            release(DPAD_UP) {
+                outtakeState = queuedState
+                outtakeState
             }
             press(B) {
                 if (Outtake.getCoralSensor()) {

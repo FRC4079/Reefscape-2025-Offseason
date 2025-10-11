@@ -15,11 +15,15 @@ import frc.robot.subsystems.LED
 import frc.robot.subsystems.Outtake
 import frc.robot.subsystems.PhotonVision
 import frc.robot.subsystems.SuperStructure
+import frc.robot.subsystems.SuperStructure.currentState
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList
 import frc.robot.utils.RobotParameters.Info.logInfo
 import frc.robot.utils.RobotParameters.LiveRobotValues.LOW_BATTERY_VOLTAGE
 import frc.robot.utils.RobotParameters.LiveRobotValues.lowBattery
+import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
+import frc.robot.utils.emu.State
+import frc.robot.utils.emu.SwerveDriveState
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger
@@ -146,15 +150,19 @@ class Robot : LoggedRobot() {
      */
     override fun autonomousInit() {
         //    autonomousCommand = robotContainer.networkChooser.getSelected();
+//        currentState = State.Auto
+//        swerveState = SwerveDriveState.Auto
         flipPidgey()
-        autonomousCommand = PathPlannerAuto("4l4autoA")
+        autonomousCommand = PathPlannerAuto("Straight Auto")
         autonomousCommand.schedule()
     }
 
     /** This function is called once when teleop mode is initialized.  */
     override fun teleopInit() {
         if (::autonomousCommand.isInitialized) autonomousCommand.cancel()
-        //    flipPidgey();
+//        currentState = State.TeleOpDrive
+//        swerveState = SwerveDriveState.ManualDrive
+//        flipPidgey()
     }
 
     /** This function is called once when test mode is initialized.  */

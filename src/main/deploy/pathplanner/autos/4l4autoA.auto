@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AlignLeft"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 0.65
@@ -59,12 +53,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AlignRight"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 0.65
@@ -104,12 +92,6 @@
           "type": "path",
           "data": {
             "pathName": "e4l4a"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AlignLeft"
           }
         },
         {
