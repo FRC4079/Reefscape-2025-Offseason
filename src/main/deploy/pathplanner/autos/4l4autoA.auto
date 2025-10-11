@@ -13,7 +13,31 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4Left"
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowElevator"
           }
         },
         {
@@ -37,7 +61,31 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4Right"
+            "name": "AlignRight"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowElevator"
           }
         },
         {
@@ -61,7 +109,31 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4Left"
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowElevator"
           }
         }
       ]
