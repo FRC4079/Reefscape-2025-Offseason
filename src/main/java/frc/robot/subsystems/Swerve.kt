@@ -124,7 +124,7 @@ object Swerve : SubsystemBase() {
 
         GlobalScope.launch {
             while (DriverStation.isEnabled()) {
-                logs("Swerve Module States", moduleStates)
+                logs("Swerve/Swerve Module States", moduleStates)
                 delay(100)
             }
         }
@@ -484,10 +484,10 @@ object Swerve : SubsystemBase() {
      */
     fun newPose(pose: Pose2d) {
         poseEstimator.resetPosition(this.pidgeyRotation, this.getModulePositions().toTypedArray(), pose)
-        poseEstimator3d.resetPosition(pidgey.getRotation3d(), this.getModulePositions().toTypedArray(), Pose3d(pose))
+        poseEstimator3d.resetPosition(pidgey.rotation3d, this.getModulePositions().toTypedArray(), Pose3d(pose))
     }
 
-    val autoSpeeds: ChassisSpeeds?
+    val autoSpeeds: ChassisSpeeds
         /**
          * Gets the chassis speeds for autonomous driving.
          *
@@ -513,11 +513,11 @@ object Swerve : SubsystemBase() {
          */
         get() {
             // TODO try returning new states maybe it is calling it too much why is why pp doesn't update
-            val moduleStates = arrayOf<SwerveModuleState>()
+            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
             for (i in modules.indices) {
                 moduleStates[i] = modules[i].state
             }
-            return moduleStates
+            return moduleStates as Array<SwerveModuleState>
         }
 
         /**
