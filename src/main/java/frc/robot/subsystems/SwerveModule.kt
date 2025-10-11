@@ -75,7 +75,11 @@ class SwerveModule(
     private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
     private val swerveModulePosition = SwerveModulePosition()
 
-    var state: SwerveModuleState = SwerveModuleState(0.0, Rotation2d.fromDegrees(0.0))
+    var state: SwerveModuleState =
+        SwerveModuleState(
+            driveMotor.rotorVelocity / DRIVE_MOTOR_GEAR_RATIO * METERS_PER_REV,
+            Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble),
+        )
         get() {
             field.angle = Rotation2d.fromRotations(canCoder.absolutePosition.valueAsDouble)
             field.speedMetersPerSecond =

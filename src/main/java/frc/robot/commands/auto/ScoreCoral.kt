@@ -7,7 +7,6 @@ import frc.robot.utils.emu.OuttakeState
 
 class ScoreCoral : InstantCommand() {
     init {
-        // each subsystem used by the command must be passed into the addRequirements() method
         addRequirements(Outtake)
     }
 
