@@ -114,7 +114,7 @@ object Outtake : SubsystemBase() {
                     setOuttakeSpeed(100.0)
                 }
 
-                if (intakeTimer.hasElapsed(2.0)) {
+                if (intakeTimer.hasElapsed(2.2)) {
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.CORAL_HOLD
                     correctIntakingState = OuttakePivotState.STOW

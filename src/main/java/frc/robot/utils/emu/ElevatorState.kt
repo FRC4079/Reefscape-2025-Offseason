@@ -25,7 +25,7 @@ enum class ElevatorState(
     L4(46.22),
 
     /** Represents the low level of the elevator for algae.  */
-    ALGAE_LOW(12.0),
+    ALGAE_LOW(24.0),
 
     /** Represents the high level of the elevator for algae.  */
     ALGAE_HIGH(26.0),
