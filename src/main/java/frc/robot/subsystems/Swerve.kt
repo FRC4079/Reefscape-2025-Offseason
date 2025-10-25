@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
+import frc.robot.utils.RobotParameters.LiveRobotValues.slowMode
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_DRIVE_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_STEER_ID
@@ -66,6 +67,7 @@ import kotlinx.coroutines.launch
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.photonvision.EstimatedRobotPose
 import xyz.malefic.frc.extension.getEstimatedPose
+import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.extension.to3d
 import xyz.malefic.frc.extension.updateStdDev
 import xyz.malefic.frc.extension.updateStdDev3d
@@ -244,7 +246,7 @@ object Swerve : SubsystemBase() {
         // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
         if (swerveState is SwerveDriveState.ManualDrive) {
-            stickDrive(testPad)
+            stickDrive(aacrn)
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
             // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
             val translationToDesiredPoint =
@@ -310,14 +312,16 @@ object Swerve : SubsystemBase() {
         robotPos = poseEstimator.estimatedPosition
 
         logs {
+            log("Swerve/Left Stick Position X", aacrn.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
+            log("Swerve/Left Stick Position Y", aacrn.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
             log("Swerve/Pidgey Yaw", this.pidgeyYaw)
             log("Swerve/Pidgey Heading", this.heading)
             log("Swerve/Pidgey Rotation", pidgey.pitch.valueAsDouble)
             log("Swerve/Pidgey Roll", pidgey.roll.valueAsDouble)
             log("Swerve/Pidgey Rotation2D", pidgey.rotation2d.degrees)
             log("Swerve/Robot Pose", field.robotPose)
-            log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
             log("Swerve/Robot Pose 2D extra", robotPos)
+            log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
             log("Swerve/Swerve State", swerveState)
         }
         applySwerveState()
@@ -513,7 +517,7 @@ object Swerve : SubsystemBase() {
          */
         get() {
             // TODO try returning new states maybe it is calling it too much why is why pp doesn't update
-            val moduleStates = arrayOfNulls<SwerveModuleState>(4)
+            val moduleStates = arrayOfNulls<SwerveModuleState>(modules.size)
             for (i in modules.indices) {
                 moduleStates[i] = modules[i].state
             }
@@ -626,10 +630,10 @@ object Swerve : SubsystemBase() {
      * @param controller The XboxController providing joystick input.
      */
     fun stickDrive(controller: XboxController) {
-        var x: Double = -controller.leftX * MAX_SPEED
+        var x: Double = -controller.leftX * MAX_SPEED * (if (slowMode) 0.5 else 1.0)
         if (abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0
 
-        var y: Double = -controller.leftY * MAX_SPEED
+        var y: Double = -controller.leftY * MAX_SPEED * (if (slowMode) 0.5 else 1.0)
         if (abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0
 
         val rotation = if (abs(controller.rightX) >= 0.1) -controller.rightX * MAX_ANGULAR_SPEED * 0.5 else 0.0

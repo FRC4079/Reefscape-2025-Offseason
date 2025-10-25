@@ -121,8 +121,6 @@ object Elevator : SubsystemBase() {
         // moveElevator(testPad.leftY)
 
         logs {
-            log("Elevator/Test Pad Left Stick Position X", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
-            log("Elevator/Test Pad Left Stick Position Y", testPad.leftStickPosition(X_DEADZONE, Y_DEADZONE).second)
             log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.motor.stickyFault_ForwardSoftLimit.value)
             log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.motor.stickyFault_ReverseSoftLimit.value)
             log(

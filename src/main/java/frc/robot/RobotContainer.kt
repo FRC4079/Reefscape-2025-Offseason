@@ -20,6 +20,7 @@ import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.Swerve
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
 import frc.robot.utils.RobotParameters.ControllerConstants.testPad
+import frc.robot.utils.RobotParameters.LiveRobotValues.slowMode
 import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
 import frc.robot.utils.emu.Direction
@@ -71,7 +72,7 @@ object RobotContainer {
     }
 
     private fun configureBindings() {
-        testPad.bindings {
+        aacrn.bindings {
             press(DPAD_DOWN) {
                 Swerve.resetPidgey()
             }
@@ -85,42 +86,52 @@ object RobotContainer {
             }
             press(B) {
                 if (Outtake.getCoralSensor()) {
-                    setElevatorState(L2).schedule()
-                } else {
-                    setElevatorState(ElevatorState.ALGAE_LOW).schedule()
-                    outtakeState = OuttakeState.ALGAE_INTAKE
-                }
-            }
-            press(X) {
-                setElevatorState(L4).schedule()
-            }
-            press(Y) {
-                if (Outtake.getCoralSensor()) {
                     setElevatorState(L3).schedule()
                 } else {
                     setElevatorState(ElevatorState.ALGAE_HIGH).schedule()
                     outtakeState = OuttakeState.ALGAE_INTAKE
                 }
             }
+            press(X) {
+                if (Outtake.getCoralSensor()) {
+                    setElevatorState(L2).schedule()
+                } else {
+                    setElevatorState(ElevatorState.ALGAE_LOW).schedule()
+                    outtakeState = OuttakeState.ALGAE_INTAKE
+                }
+            }
+            press(Y) {
+                setElevatorState(L4).schedule()
+            }
             press(A) {
                 setElevatorState(DEFAULT).schedule()
+            }
+            press(LEFT_TRIGGER) {
+                visionDead = !visionDead
             }
             press(RIGHT_TRIGGER) {
                 if (getCoralSensor()) {
                     outtakeState = OuttakeState.CORAL_SHOOT
+                    slowMode = false
                 } else if (outtakeState == OuttakeState.ALGAE_HOLD) {
                     outtakeState = OuttakeState.ALGAE_SHOOT
                     setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
                 }
             }
             press(LEFT_BUMPER) {
-                SuperStructure + State.ScoreAlign(LEFT)
+                when (visionDead) {
+                    false -> SuperStructure + State.ScoreAlign(LEFT)
+                    true -> slowMode = true
+                }
             }
             release(LEFT_BUMPER) {
                 SuperStructure.cancel()
             }
             press(RIGHT_BUMPER) {
-                SuperStructure + State.ScoreAlign(RIGHT)
+                when (visionDead) {
+                    false -> SuperStructure + State.ScoreAlign(RIGHT)
+                    true -> slowMode = true
+                }
             }
             release(RIGHT_BUMPER) {
                 SuperStructure.cancel()

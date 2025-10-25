@@ -175,6 +175,8 @@ object RobotParameters {
         var robotPos = Pose2d()
 
         var visionDead: Boolean = false
+
+        var slowMode: Boolean = false
     }
 
     /** Class containing constants for the PhotonVision subsystem.  */
