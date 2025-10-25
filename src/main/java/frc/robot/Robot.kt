@@ -153,7 +153,7 @@ class Robot : LoggedRobot() {
 //        currentState = State.Auto
 //        swerveState = SwerveDriveState.Auto
         flipPidgey()
-        autonomousCommand = PathPlannerAuto("Straight Auto")
+        autonomousCommand = PathPlannerAuto("CenterL4Auto")
         autonomousCommand.schedule()
     }
 

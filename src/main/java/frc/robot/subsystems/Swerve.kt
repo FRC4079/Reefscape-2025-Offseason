@@ -323,6 +323,7 @@ object Swerve : SubsystemBase() {
             log("Swerve/Robot Pose 2D extra", robotPos)
             log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
             log("Swerve/Swerve State", swerveState)
+            log("Swerve/Align to Pose", desiredPoseForDriveToPoint)
         }
         applySwerveState()
     }

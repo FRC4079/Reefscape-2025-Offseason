@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.PhotonVisionConstants.CAMERA_ONE_HEIGHT_METER
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
@@ -103,6 +104,7 @@ object PhotonVision : SubsystemBase() {
             log("PhotonVision/Has tag", hasTag())
             log("PhotonVision/resultCamera List length", resultPairs!!.size)
             log("PhotonVision/Result pairs have targets", resultPairs.hasTargets())
+            log("PhotonVision/Aligned tag", PhotonVision.bestTargetID)
         }
 
         if (this.resultPairs != null) {
@@ -115,6 +117,7 @@ object PhotonVision : SubsystemBase() {
                 logs("PhotonVision/Best Target is not null", bestTarget != null)
 
                 if (bestTarget != null) {
+                    println("Best Target ID: ${bestTarget.getFiducialId()} is being chagned")
                     yaw = bestTarget.getYaw()
                     y = bestTarget.getBestCameraToTarget().x
                     dist = bestTarget.getBestCameraToTarget().z

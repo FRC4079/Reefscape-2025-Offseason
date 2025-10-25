@@ -27,7 +27,7 @@ enum class OuttakePivotState(
     ALGAE_HOLD(0.0),
 
     /** Represents the position of the pivot for shooting the algae  */
-    ALGAE_SHOOT(0.0),
+    ALGAE_SHOOT(-2.0),
 
     /** Represents the stowed position of the pivot  */
     STOW(0.0),

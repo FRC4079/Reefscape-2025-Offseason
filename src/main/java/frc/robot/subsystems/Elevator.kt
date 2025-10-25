@@ -3,6 +3,7 @@ package frc.robot.subsystems
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -88,6 +89,8 @@ object Elevator : SubsystemBase() {
     private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
 
     private val voltagePos: PositionVoltage = PositionVoltage(0.0)
+
+    private val voltageOut: VoltageOut = VoltageOut(0.0)
 
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
@@ -278,4 +281,15 @@ object Elevator : SubsystemBase() {
         }
         return false
     }
+
+    fun isAlgaeReadyForPivot(): Boolean {
+        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 20.0)) {
+            return true
+        }
+        return false
+    }
+
+//    fun manualMoveElevator(double: velocity): {
+//        elevatorMotorLeft.move(state.pos.position)
+//    }
 }

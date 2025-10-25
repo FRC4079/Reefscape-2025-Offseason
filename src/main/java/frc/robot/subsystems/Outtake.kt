@@ -114,7 +114,7 @@ object Outtake : SubsystemBase() {
                     setOuttakeSpeed(100.0)
                 }
 
-                if (intakeTimer.hasElapsed(2.2)) {
+                if (intakeTimer.hasElapsed(3.1)) {
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.CORAL_HOLD
                     correctIntakingState = OuttakePivotState.STOW
@@ -322,6 +322,11 @@ object Outtake : SubsystemBase() {
         if (Elevator.isAlgaeReadyForShoot()) {
             setOuttakeSpeed(-100.00)
         }
+
+        if (Elevator.isAlgaeReadyForPivot()) {
+            movePivotTo(OuttakePivotState.ALGAE_SHOOT)
+        }
+
         if (!getAlgaeSensor()) {
             outtakeState = OuttakeState.STOWED
         }

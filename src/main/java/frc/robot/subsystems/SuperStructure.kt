@@ -1,6 +1,7 @@
 package frc.robot.subsystems
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.commands.AlignToPose
 import frc.robot.utils.Pose.getDesiredScorePose
 import frc.robot.utils.RobotParameters.SwerveParameters.swerveState
 import frc.robot.utils.emu.Direction
@@ -26,6 +27,7 @@ object SuperStructure : SubsystemBase() {
         when (val state = currentState) {
             is State.TeleOpDrive -> swerveState = SwerveDriveState.ManualDrive
             is State.ScoreAlign -> driveToScoringPose(state.dir)
+//            is State.ShawnAutoAlign -> AlignToPose(state.dir)
             State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
         }
