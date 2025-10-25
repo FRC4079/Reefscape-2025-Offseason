@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import co.touchlab.kermit.Logger
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Rotation3d
@@ -7,7 +8,6 @@ import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.PhotonVisionConstants.CAMERA_ONE_HEIGHT_METER
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
@@ -96,7 +96,8 @@ object PhotonVision : SubsystemBase() {
      * selects the best camera based on pose ambiguity, and updates logged information.
      */
     override fun periodic() {
-        this.resultPairs?.addAll(cameras.getDecentResultPairs())
+        resultPairs?.clear()
+        resultPairs?.addAll(cameras.getDecentResultPairs())
 
         logs {
             log("PhotonVision/Does any camera exist", cameras.isNotEmpty())
@@ -104,10 +105,10 @@ object PhotonVision : SubsystemBase() {
             log("PhotonVision/Has tag", hasTag())
             log("PhotonVision/resultCamera List length", resultPairs!!.size)
             log("PhotonVision/Result pairs have targets", resultPairs.hasTargets())
-            log("PhotonVision/Aligned tag", PhotonVision.bestTargetID)
+            log("PhotonVision/Aligned tag", bestTargetID)
         }
 
-        if (this.resultPairs != null) {
+        if (resultPairs != null) {
             logs("PhotonVision/Best Target list is empty", resultPairs.isEmpty())
 
             if (resultPairs.isNotEmpty()) {
@@ -117,17 +118,17 @@ object PhotonVision : SubsystemBase() {
                 logs("PhotonVision/Best Target is not null", bestTarget != null)
 
                 if (bestTarget != null) {
-                    println("Best Target ID: ${bestTarget.getFiducialId()} is being chagned")
+                    Logger.d { "Best Target ID: ${bestTarget.getFiducialId()} is being changed" }
                     yaw = bestTarget.getYaw()
                     y = bestTarget.getBestCameraToTarget().x
                     dist = bestTarget.getBestCameraToTarget().z
-                    this.bestTargetID = bestTarget.getFiducialId()
+                    bestTargetID = bestTarget.getFiducialId()
                 }
 
                 logs("PhotonVision/Best Target Yaw", yaw)
                 logs("PhotonVision/Best Target Y", y)
                 logs("PhotonVision/Best Target Dist", dist)
-                logs("PhotonVision/Best Target ID", this.bestTargetID)
+                logs("PhotonVision/Best Target ID", bestTargetID)
             }
 
             logStdDev()
