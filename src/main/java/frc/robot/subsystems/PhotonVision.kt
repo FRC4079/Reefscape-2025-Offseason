@@ -56,7 +56,7 @@ object PhotonVision : SubsystemBase() {
     var bestTargetID: Int = 0
         private set
     private var logCount = 0
-    val resultPairs: MutableList<Pair<PhotonModule, PhotonPipelineResult>>?
+    val resultPairs: MutableList<Pair<PhotonModule, PhotonPipelineResult>> = ArrayList<Pair<PhotonModule, PhotonPipelineResult>>()
 
     /**
      * Creates a new instance of this PhotonVision subsystem. This constructor is private since this
@@ -86,8 +86,6 @@ object PhotonVision : SubsystemBase() {
             ),
         )
 
-        this.resultPairs = ArrayList<Pair<PhotonModule, PhotonPipelineResult>>()
-
         PortForwarder.add(5800, "photonvision.local", 5800)
     }
 
@@ -96,43 +94,40 @@ object PhotonVision : SubsystemBase() {
      * selects the best camera based on pose ambiguity, and updates logged information.
      */
     override fun periodic() {
-        resultPairs?.clear()
-        resultPairs?.addAll(cameras.getDecentResultPairs())
+        resultPairs.clear()
+        resultPairs.addAll(cameras.getDecentResultPairs())
 
         logs {
             log("PhotonVision/Does any camera exist", cameras.isNotEmpty())
-            log("PhotonVision/Does any result pair exist", this.resultPairs != null)
             log("PhotonVision/Has tag", hasTag())
-            log("PhotonVision/resultCamera List length", resultPairs!!.size)
+            log("PhotonVision/resultCamera List length", resultPairs.size)
             log("PhotonVision/Result pairs have targets", resultPairs.hasTargets())
             log("PhotonVision/Aligned tag", bestTargetID)
         }
 
-        if (resultPairs != null) {
-            logs("PhotonVision/Best Target list is empty", resultPairs.isEmpty())
+        logs("PhotonVision/Best Target list is empty", resultPairs.isEmpty())
 
-            if (resultPairs.isNotEmpty()) {
-                logCount++
-                logs("PhotonVision/Best Target updated counter", logCount)
-                val bestTarget = resultPairs[0].second.bestTarget
-                logs("PhotonVision/Best Target is not null", bestTarget != null)
+        if (resultPairs.isNotEmpty()) {
+            logCount++
+            logs("PhotonVision/Best Target updated counter", logCount)
+            val bestTarget = resultPairs[0].second.bestTarget
+            logs("PhotonVision/Best Target is not null", bestTarget != null)
 
-                if (bestTarget != null) {
-                    Logger.d { "Best Target ID: ${bestTarget.getFiducialId()} is being changed" }
-                    yaw = bestTarget.getYaw()
-                    y = bestTarget.getBestCameraToTarget().x
-                    dist = bestTarget.getBestCameraToTarget().z
-                    bestTargetID = bestTarget.getFiducialId()
-                }
-
-                logs("PhotonVision/Best Target Yaw", yaw)
-                logs("PhotonVision/Best Target Y", y)
-                logs("PhotonVision/Best Target Dist", dist)
-                logs("PhotonVision/Best Target ID", bestTargetID)
+            if (bestTarget != null) {
+                Logger.d { "Best Target ID: ${bestTarget.getFiducialId()} is being changed" }
+                yaw = bestTarget.getYaw()
+                y = bestTarget.getBestCameraToTarget().x
+                dist = bestTarget.getBestCameraToTarget().z
+                bestTargetID = bestTarget.getFiducialId()
             }
 
-            logStdDev()
+            logs("PhotonVision/Best Target Yaw", yaw)
+            logs("PhotonVision/Best Target Y", y)
+            logs("PhotonVision/Best Target Dist", dist)
+            logs("PhotonVision/Best Target ID", bestTargetID)
         }
+
+        logStdDev()
     }
 
     /**
@@ -140,14 +135,11 @@ object PhotonVision : SubsystemBase() {
      *
      * @return true if there is a visible tag and the current result pair is not null
      */
-    fun hasTag(): Boolean {
-        logs("PhotonVision/currentResultPair not null", this.resultPairs != null)
-
-        return this.resultPairs?.let {
+    fun hasTag() =
+        resultPairs.let {
             logs("PhotonVision/hasTargets currentResultPair", resultPairs.hasTargets())
-            return@let resultPairs.hasTargets()
-        } ?: false
-    }
+            resultPairs.hasTargets()
+        }
 
     fun requestCamera(cameraName: String?): PhotonCamera? {
         for (camera in cameras) {
@@ -159,7 +151,7 @@ object PhotonVision : SubsystemBase() {
     }
 
     fun fetchYaw(camera: PhotonCamera?): Double {
-        for (pair in this.resultPairs!!) {
+        for (pair in this.resultPairs) {
             if (pair.first.camera == camera) {
                 return pair.second.bestTarget.getYaw()
             }
@@ -168,7 +160,7 @@ object PhotonVision : SubsystemBase() {
     }
 
     fun fetchDist(camera: PhotonCamera?): Double {
-        for (pair in this.resultPairs!!) {
+        for (pair in this.resultPairs) {
             if (pair.first.camera == camera) {
                 return pair.second
                     .bestTarget
@@ -180,7 +172,7 @@ object PhotonVision : SubsystemBase() {
     }
 
     fun fetchY(camera: PhotonCamera?): Double {
-        for (pair in this.resultPairs!!) {
+        for (pair in this.resultPairs) {
             if (pair.first.camera == camera) {
                 return pair.second
                     .bestTarget
