@@ -10,7 +10,6 @@ import frc.robot.subsystems.Outtake
 enum class OuttakeState(
     val block: Outtake.() -> Unit,
 ) {
-
     /** Represents the state when the coral manipulator is holding a coral piece. */
     CORAL_HOLD({ stopMotors() }),
 

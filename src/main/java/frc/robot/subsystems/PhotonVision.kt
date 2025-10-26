@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import co.touchlab.kermit.Logger
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Rotation3d
@@ -187,7 +186,7 @@ object PhotonVision : SubsystemBase() {
      * Logs the standard deviation norm for each camera. This method filters out cameras with null
      * standard deviations and logs the normF value of the standard deviations for each camera.
      */
-    fun logStdDev() {
+    fun logStdDev() =
         cameras
             .stream()
             .filter { camera: PhotonModule? -> camera!!.currentStdDevs != null }
@@ -197,5 +196,4 @@ object PhotonVision : SubsystemBase() {
                     camera?.currentStdDevs!!.normF(),
                 )
             }
-    }
 }

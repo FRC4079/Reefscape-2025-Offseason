@@ -95,7 +95,7 @@ open class AlignToPose(
 
     /**
      * The main body of a command. Called repeatedly while the command is scheduled. (That is, it is
-     * called repeatedly until [.isFinished]) returns true.
+     * called repeatedly until [isFinished]) returns true.
      *
      *
      * Refer to commit 9c00e5 for the old method of aligning the robot.
@@ -111,7 +111,6 @@ open class AlignToPose(
                     xController.calculate(currentPose.x),
                     yController.calculate(currentPose.y),
                     rotationalController.calculate(currentPose.rotation.degrees),
-                    true,
                 )
         } else {
             Swerve
@@ -119,7 +118,6 @@ open class AlignToPose(
                     -xController.calculate(currentPose.x),
                     -yController.calculate(currentPose.y),
                     rotationalController.calculate(currentPose.rotation.degrees),
-                    true,
                 )
         }
         alignLogs()
@@ -162,19 +160,13 @@ open class AlignToPose(
             log("AlignToPose/Heading got from odometry", currentPose.rotation.degrees)
             log("AlignToPose/Y Controller Setpoint", yController.atSetpoint())
             log("AlignToPose/X Controller Setpoint ", xController.atSetpoint())
-            log(
-                "AlignToPose/X Set Speed ",
-                xController.calculate(currentPose.x, targetPose.x),
-            )
+            log("AlignToPose/X Set Speed ", xController.calculate(currentPose.x, targetPose.x))
             log("AlignToPose/Y Set Speed ", yController.calculate(currentPose.y))
-            log(
-                "AlignToPose/Rot Set Speed ",
-                rotationalController.calculate(currentPose.rotation.degrees),
-            )
-            log("AlignToPose/ X Set Pos", currentPose.x)
-            log("AlignToPose/ Y Set Pos", currentPose.y)
-            log("AlignToPose/ X Target Pos", targetPose.x)
-            log("AlignToPose/ Y Target Pos", targetPose.y)
+            log("AlignToPose/Rot Set Speed ", rotationalController.calculate(currentPose.rotation.degrees))
+            log("AlignToPose/X Set Pos", currentPose.x)
+            log("AlignToPose/Y Set Pos", currentPose.y)
+            log("AlignToPose/X Target Pos", targetPose.x)
+            log("AlignToPose/Y Target Pos", targetPose.y)
         }
     }
 }

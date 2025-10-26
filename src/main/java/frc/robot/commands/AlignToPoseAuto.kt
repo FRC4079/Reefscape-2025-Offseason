@@ -55,29 +55,30 @@ class AlignToPoseAuto(
         addCoralPosList()
         currentPose = Swerve.estimatedPose2D
 
-        if (elevatorToBeSetState == ElevatorState.L4) {
-            targetPose = moveToClosestCoralScore(offsetSide, Swerve.estimatedPose2D)
-        } else {
-            targetPose = moveToClosestCoralScoreNotL4(offsetSide, Swerve.estimatedPose2D)
-        }
+        targetPose =
+            if (elevatorToBeSetState == ElevatorState.L4) {
+                moveToClosestCoralScore(offsetSide, Swerve.estimatedPose2D)
+            } else {
+                moveToClosestCoralScoreNotL4(offsetSide, Swerve.estimatedPose2D)
+            }
 
         xController = X_PINGU.profiledPIDController
         xController!!.setTolerance(0.015)
         xController!!.setConstraints(PROFILE_CONSTRAINTS)
-        xController!!.setGoal(targetPose!!.getX())
-        xController!!.reset(currentPose!!.getX())
+        xController!!.setGoal(targetPose!!.x)
+        xController!!.reset(currentPose!!.x)
 
         yController = Y_PINGU.profiledPIDController
         yController!!.setTolerance(0.015)
         yController!!.setConstraints(PROFILE_CONSTRAINTS)
-        yController!!.setGoal(targetPose!!.getY())
-        yController!!.reset(currentPose!!.getY())
+        yController!!.setGoal(targetPose!!.y)
+        yController!!.reset(currentPose!!.y)
 
         rotationalController = ROTATIONAL_PINGU.profiledPIDController
         rotationalController!!.setTolerance(2.0)
         rotationalController!!.setConstraints(TrapezoidProfile.Constraints(5.0, 5.0))
-        rotationalController!!.setGoal(targetPose!!.getRotation().getDegrees())
-        rotationalController!!.reset(currentPose!!.getRotation().getDegrees())
+        rotationalController!!.setGoal(targetPose!!.rotation.degrees)
+        rotationalController!!.reset(currentPose!!.rotation.degrees)
         rotationalController!!.enableContinuousInput(-180.0, 180.0)
     }
 
@@ -94,35 +95,35 @@ class AlignToPoseAuto(
         // TODO the swerve should not need a negative anymore and we should not even have to check poses
         // theoretically??????? TEST THIS IN THE PIT ASAP
         if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-            if (targetPose!!.getX() < 4.5) {
+            if (targetPose!!.x < 4.5) {
                 Swerve.setDriveSpeeds(
-                    xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
-                    yController!!.calculate(currentPose!!.getY(), targetPose!!.getY()),
-                    rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+                    xController!!.calculate(currentPose!!.x, targetPose!!.x),
+                    yController!!.calculate(currentPose!!.y, targetPose!!.y),
+                    rotationalController!!.calculate(currentPose!!.rotation.degrees),
                     false,
                 )
             } else {
                 Swerve.setDriveSpeeds(
-                    -xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
-                    -yController!!.calculate(currentPose!!.getY(), targetPose!!.getY()),
-                    rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+                    -xController!!.calculate(currentPose!!.x, targetPose!!.x),
+                    -yController!!.calculate(currentPose!!.y, targetPose!!.y),
+                    rotationalController!!.calculate(currentPose!!.rotation.degrees),
                     false,
                 )
             }
         } else {
             // TODO MAKE A COPY OF ALIGNTOPOSE FOR AUTO WITH FIELD CENTRIC TURE!@!!!!@
-            if (targetPose!!.getX() < 13) {
+            if (targetPose!!.x < 13) {
                 Swerve.setDriveSpeeds(
-                    xController!!.calculate(currentPose!!.getX()),
-                    yController!!.calculate(currentPose!!.getY()),
-                    rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+                    xController!!.calculate(currentPose!!.x),
+                    yController!!.calculate(currentPose!!.y),
+                    rotationalController!!.calculate(currentPose!!.rotation.degrees),
                     false,
                 )
             } else {
                 Swerve.setDriveSpeeds(
-                    -xController!!.calculate(currentPose!!.getX()),
-                    -yController!!.calculate(currentPose!!.getY()),
-                    rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+                    -xController!!.calculate(currentPose!!.x),
+                    -yController!!.calculate(currentPose!!.y),
+                    rotationalController!!.calculate(currentPose!!.rotation.degrees),
                     false,
                 )
             }
@@ -130,27 +131,27 @@ class AlignToPoseAuto(
         logs {
             log("AlignToPose/Current Pose", currentPose!!)
             log("AlignToPose/Target Pose", targetPose!!)
-            log("AlignToPose/Rotational Error", rotationalController!!.getPositionError())
-            log("AlignToPose/Y Error", yController!!.getPositionError())
-            log("AlignToPose/X Error ", xController!!.getPositionError())
-            log("AlignToPose/X Set ", xController!!.getSetpoint().position)
-            log("AlignToPose/X Goal ", xController!!.getGoal().position)
+            log("AlignToPose/Rotational Error", rotationalController!!.positionError)
+            log("AlignToPose/Y Error", yController!!.positionError)
+            log("AlignToPose/X Error ", xController!!.positionError)
+            log("AlignToPose/X Set ", xController!!.setpoint.position)
+            log("AlignToPose/X Goal ", xController!!.goal.position)
             log("AlignToPose/Rotational Controller Setpoint", rotationalController!!.atSetpoint())
             log("AlignToPose/Y Controller Setpoint", yController!!.atSetpoint())
             log("AlignToPose/X Controller Setpoint ", xController!!.atSetpoint())
             log(
                 "AlignToPose/X Set Speed ",
-                xController!!.calculate(currentPose!!.getX(), targetPose!!.getX()),
+                xController!!.calculate(currentPose!!.x, targetPose!!.x),
             )
-            log("AlignToPose/Y Set Speed ", yController!!.calculate(currentPose!!.getY()))
+            log("AlignToPose/Y Set Speed ", yController!!.calculate(currentPose!!.y))
             log(
                 "AlignToPose/Rot Set Speed ",
-                rotationalController!!.calculate(currentPose!!.getRotation().getDegrees()),
+                rotationalController!!.calculate(currentPose!!.rotation.degrees),
             )
-            log("AlignToPose/ X Set Pos", currentPose!!.getX())
-            log("AlignToPose/ Y Set Pos", currentPose!!.getY())
-            log("AlignToPose/ X Target Pos", targetPose!!.getX())
-            log("AlignToPose/ Y Target Pos", targetPose!!.getY())
+            log("AlignToPose/ X Set Pos", currentPose!!.x)
+            log("AlignToPose/ Y Set Pos", currentPose!!.y)
+            log("AlignToPose/ X Target Pos", targetPose!!.x)
+            log("AlignToPose/ Y Target Pos", targetPose!!.y)
         }
     }
 

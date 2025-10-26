@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
-import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.LiveRobotValues.slowMode
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
@@ -45,8 +44,6 @@ import frc.robot.utils.RobotParameters.MotorParameters.MAX_SPEED
 import frc.robot.utils.RobotParameters.MotorParameters.PIDGEY_ID
 import frc.robot.utils.RobotParameters.SwerveParameters.PhysicalParameters.kinematics
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters
-import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PINGU_AUTO
-import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.DRIVE_PINGU_TELE
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.ROTATIONAL_PINGU
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.X_PINGU
 import frc.robot.utils.RobotParameters.SwerveParameters.PinguParameters.Y_PINGU
@@ -76,9 +73,9 @@ import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import java.util.Optional
 import java.util.function.Predicate
-import kotlin.math.*
 import kotlin.math.abs
-import kotlin.math.min
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(DelicateCoroutinesApi::class)
 object Swerve : SubsystemBase() {
@@ -115,15 +112,15 @@ object Swerve : SubsystemBase() {
      * a Singleton. Code should use the [.getInstance] method to get the singleton instance.
      */
     init {
-        this.pidgey.reset()
-        this.poseEstimator = initializePoseEstimator()
-        this.poseEstimator3d = initializePoseEstimator3d()
-//        this.modulePositions = getModulePositions()
-        this.desiredPoseForDriveToPoint = Pose2d()
-        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
-        this.maximumAngularVelocityForDriveToPoint = 0.0
+        pidgey.reset()
+        poseEstimator = initializePoseEstimator()
+        poseEstimator3d = initializePoseEstimator3d()
+        // modulePositions = getModulePositions()
+        desiredPoseForDriveToPoint = Pose2d()
+        maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
+        maximumAngularVelocityForDriveToPoint = 0.0
         swerveState = SwerveDriveState.ManualDrive
-        //    configureAutoBuilder();
+        // configureAutoBuilder();
         initializePathPlannerLogging()
 
         GlobalScope.launch {
@@ -244,12 +241,30 @@ object Swerve : SubsystemBase() {
         )
     }
 
+    /**
+     * Normalize an angle in degrees to the range (-180, 180].
+     *
+     * @param angleDeg Angle in degrees (any finite value).
+     * @return The equivalent angle normalized to the range (-180, 180].
+     */
     fun wrapTo180(angleDeg: Double): Double {
         var a = (angleDeg + 180) % 360
-        if (a < 0) a += 360
+        if (a <= 0) a += 360
         return a - 180
     }
 
+    /**
+     * Compute the pose of a target relative to the robot's local frame.
+     *
+     * Converts the world-frame translation (dx, dy) between the robot and the target
+     * into the robot's coordinate system by rotating the vector by the robot's heading.
+     * The returned [Pose2d] uses the convention: x = forward, y = left, and rotation
+     * normalized to the range (-180, 180] degrees.
+     *
+     * @param robot The robot pose in world coordinates.
+     * @param target The target pose in world coordinates.
+     * @return The target pose expressed in the robot's local coordinate frame.
+     */
     fun relativePose(
         robot: Pose2d,
         target: Pose2d,
@@ -258,51 +273,56 @@ object Swerve : SubsystemBase() {
         val dy = target.y - robot.y
 
         // convert to radians for trig
-        val th1 = Math.toRadians(robot.rotation.degrees)
+        val robotHeadingRad = Math.toRadians(robot.rotation.degrees)
 
-        val xRel = cos(th1) * dx + sin(th1) * dy
-        val yRel = -sin(th1) * dx + cos(th1) * dy
+        val xRel = cos(robotHeadingRad) * dx + sin(robotHeadingRad) * dy
+        val yRel = -sin(robotHeadingRad) * dx + cos(robotHeadingRad) * dy
 
         val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees)
 
         return Pose2d(xRel, yRel, Rotation2d.fromDegrees(thetaRel))
     }
 
+    /**
+     * Applies the current high-level swerve state to control outputs.
+     *
+     * - When the subsystem is in [SwerveDriveState.ManualDrive], this forwards joystick input
+     *   handling to [stickDrive] using the configured controller (`aacrn`).
+     * - When in [SwerveDriveState.SwerveAlignment], computes the target pose relative to the
+     *   robot using [relativePose] (world -> robot frame) and uses the tuning
+     *   [NetworkPingu] controllers to calculate X, Y and rotational velocity outputs.
+     *   Those outputs are then passed into [setDriveSpeeds] with field-oriented control
+     *   disabled so the alignment controllers drive in robot-relative coordinates.
+     *
+     * This method is intended to be called periodically (from [periodic]) to apply
+     * the appropriate control mode.
+     */
     private fun applySwerveState() {
-        // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
-
         if (swerveState is SwerveDriveState.ManualDrive) {
             stickDrive(aacrn)
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
-            var relativePose =
-                relativePose(
-                    this.poseEstimator.estimatedPosition,
-                    desiredPoseForDriveToPoint,
+            relativePose(
+                this.poseEstimator.estimatedPosition,
+                desiredPoseForDriveToPoint,
+            ).apply {
+                setDriveSpeeds(
+                    networkPinguYAutoAlign.calculate(
+                        y,
+                        0.0,
+                    ),
+                    networkPinguXAutoAlign.calculate(
+                        x,
+                        0.0,
+                    ),
+                    networkPinguRotAutoAlign.calculate(
+                        rotation.degrees,
+                        0.0,
+                    ),
+                    false,
                 )
-
-            val xOutput =
-                networkPinguXAutoAlign.calculate(
-                    relativePose.x,
-                    0.0,
-                )
-            val yOutput =
-                networkPinguYAutoAlign.calculate(
-                    relativePose.y,
-                    0.0,
-                )
-            val rotOutput =
-                networkPinguRotAutoAlign.calculate(
-                    relativePose.rotation.degrees,
-                    0.0,
-                )
-
-            this.setDriveSpeeds(yOutput, xOutput, rotOutput, false)
+            }
         }
     }
-
-    //    public void setSwerveState(SwerveRequest request) {
-    //        this.setControl(request);
-    //    }
 
     /**
      * This method is called periodically by the scheduler. It updates the pose estimator and
@@ -339,7 +359,7 @@ object Swerve : SubsystemBase() {
      * adds the vision measurement to the pose estimator.
      */
     private fun updatePos() {
-        PhotonVision.resultPairs?.let {
+        PhotonVision.resultPairs.let {
             if (!it.isEmpty()) {
                 it.forEach { pair ->
                     val pose =
@@ -368,19 +388,6 @@ object Swerve : SubsystemBase() {
     }
 
     /**
-     * Sets the drive speeds for the swerve modules.3
-     *
-     * @param forwardSpeed The forward speed.
-     * @param leftSpeed The left speed.
-     * @param turnSpeed The turn speed.
-     */
-    fun setDriveSpeeds(
-        forwardSpeed: Double,
-        leftSpeed: Double,
-        turnSpeed: Double,
-    ) = setDriveSpeeds(forwardSpeed, leftSpeed, turnSpeed, IS_FIELD_ORIENTED)
-
-    /**
      * Sets the drive speeds for the swerve modules.
      *
      * @param forwardSpeed The forward speed.
@@ -392,7 +399,7 @@ object Swerve : SubsystemBase() {
         forwardSpeed: Double,
         leftSpeed: Double,
         turnSpeed: Double,
-        isFieldOriented: Boolean,
+        isFieldOriented: Boolean = IS_FIELD_ORIENTED,
     ) {
         logs {
             log("Swerve/Forward speed", forwardSpeed)
@@ -416,7 +423,7 @@ object Swerve : SubsystemBase() {
 
         SwerveDriveKinematics.desaturateWheelSpeeds(newStates, MAX_SPEED)
 
-        this.moduleStates = newStates
+        moduleStates = newStates
     }
 
     val pidgeyRotation: Rotation2d?
@@ -515,20 +522,16 @@ object Swerve : SubsystemBase() {
         this.moduleStates = newStates
     }
 
+    /**
+     * The current states of the swerve modules.
+     */
     var moduleStates: Array<SwerveModuleState>
         /**
          * Gets the states of the swerve modules.
          *
          * @return SwerveModuleState[], The states of the swerve modules.
          */
-        get() {
-            // TODO try returning new states maybe it is calling it too much why is why pp doesn't update
-            val moduleStates = arrayOfNulls<SwerveModuleState>(modules.size)
-            for (i in modules.indices) {
-                moduleStates[i] = modules[i].state
-            }
-            return moduleStates as Array<SwerveModuleState>
-        }
+        get() = Array(modules.size) { i -> modules[i].state }
 
         /**
          * Sets the states of the swerve modules.
@@ -623,10 +626,10 @@ object Swerve : SubsystemBase() {
         direction: Direction,
     ) {
         log("Swerve/Driving to scoring pose", pose)
-        this.desiredPoseForDriveToPoint = pose
+        desiredPoseForDriveToPoint = pose
         // SuperStructure + ScoreAlign(direction)
         swerveState = SwerveDriveState.SwerveAlignment(direction)
-        this.maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
+        maxVelocityOutputForDriveToPoint = Units.feetToMeters(10.0)
         this.maximumAngularVelocityForDriveToPoint = maximumAngularVelocityForDriveToPoint
     }
 
