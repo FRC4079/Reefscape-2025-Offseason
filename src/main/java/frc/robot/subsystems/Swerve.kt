@@ -76,12 +76,14 @@ import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import java.util.Optional
 import java.util.function.Predicate
+import kotlin.math.*
 import kotlin.math.abs
 import kotlin.math.min
 
 @OptIn(DelicateCoroutinesApi::class)
 object Swerve : SubsystemBase() {
     private val poseEstimator: SwerveDrivePoseEstimator
+
     private val poseEstimator3d: SwerveDrivePoseEstimator3d
     private val field = Field2d()
     private val pidgey = Pigeon2(PIDGEY_ID)
@@ -242,56 +244,59 @@ object Swerve : SubsystemBase() {
         )
     }
 
+    fun wrapTo180(angleDeg: Double): Double {
+        var a = (angleDeg + 180) % 360
+        if (a < 0) a += 360
+        return a - 180
+    }
+
+    fun relativePose(
+        robot: Pose2d,
+        target: Pose2d,
+    ): Pose2d {
+        val dx = target.x - robot.x
+        val dy = target.y - robot.y
+
+        // convert to radians for trig
+        val th1 = Math.toRadians(robot.rotation.degrees)
+
+        val xRel = cos(th1) * dx + sin(th1) * dy
+        val yRel = -sin(th1) * dx + cos(th1) * dy
+
+        val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees)
+
+        return Pose2d(xRel, yRel, Rotation2d.fromDegrees(thetaRel))
+    }
+
     private fun applySwerveState() {
         // SuperStructure.INSTANCE.getCurrentState() instanceof State.TeleOpDrive
 
         if (swerveState is SwerveDriveState.ManualDrive) {
             stickDrive(aacrn)
         } else if (swerveState is SwerveDriveState.SwerveAlignment) {
-            // Direction dir = ((State.ScoreAlign) SuperStructure.INSTANCE.getCurrentState()).getDir();
-            val translationToDesiredPoint =
-                desiredPoseForDriveToPoint.translation.minus(this.pose.translation)
-            val linearDistance = translationToDesiredPoint.norm
-            var frictionCoefficient = 0.1 // this is a guess
-            if (linearDistance >= Units.inchesToMeters(0.5)) {
-                frictionCoefficient *= MAX_SPEED
-            }
+            var relativePose =
+                relativePose(
+                    this.poseEstimator.estimatedPosition,
+                    desiredPoseForDriveToPoint,
+                )
 
-            val directionOfTravel = translationToDesiredPoint.angle
+            val xOutput =
+                networkPinguXAutoAlign.calculate(
+                    relativePose.x,
+                    0.0,
+                )
+            val yOutput =
+                networkPinguYAutoAlign.calculate(
+                    relativePose.y,
+                    0.0,
+                )
+            val rotOutput =
+                networkPinguRotAutoAlign.calculate(
+                    relativePose.rotation.degrees,
+                    0.0,
+                )
 
-            val velocityOutput: Double =
-                if (DriverStation.isAutonomous()) {
-                    min(
-                        abs(DRIVE_PINGU_AUTO.pidController.calculate(linearDistance, 0.0)) + frictionCoefficient,
-                        maxVelocityOutputForDriveToPoint,
-                    )
-                } else {
-                    min(
-                        abs(DRIVE_PINGU_TELE.pidController.calculate(linearDistance, 0.0)) + frictionCoefficient,
-                        maxVelocityOutputForDriveToPoint,
-                    )
-                }
-            val xComponent = velocityOutput * directionOfTravel.cos
-            val yComponent = velocityOutput * directionOfTravel.sin
-
-            val currentAngle = this.pose.rotation.degrees
-
-            this.setDriveSpeeds(
-                yComponent,
-                xComponent,
-                min(
-                    abs(
-                        ROTATIONAL_PINGU
-                            .profiledPIDController
-                            .calculate(
-                                currentAngle,
-                                desiredPoseForDriveToPoint.rotation.degrees,
-                            ),
-                    ),
-                    MAX_ANGULAR_SPEED,
-                ),
-                false,
-            )
+            this.setDriveSpeeds(yOutput, xOutput, rotOutput, false)
         }
     }
 
