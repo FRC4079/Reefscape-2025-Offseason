@@ -144,12 +144,14 @@ object RobotContainer {
             }
             release(LEFT_BUMPER) {
                 SuperStructure.cancel()
+                println("Cancelled Left Align")
             }
             press(RIGHT_BUMPER) {
                 SuperStructure + State.ScoreAlign(RIGHT)
             }
             release(RIGHT_BUMPER) {
                 SuperStructure.cancel()
+                println("Cancelled Right Align")
             }
         }
     }

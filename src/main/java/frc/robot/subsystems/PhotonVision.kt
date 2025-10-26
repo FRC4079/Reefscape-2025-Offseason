@@ -114,7 +114,7 @@ object PhotonVision : SubsystemBase() {
             logs("PhotonVision/Best Target is not null", bestTarget != null)
 
             if (bestTarget != null) {
-                Logger.d { "Best Target ID: ${bestTarget.getFiducialId()} is being changed" }
+//                Logger.d { "Best Target ID: ${bestTarget.getFiducialId()} is being changed" }
                 yaw = bestTarget.getYaw()
                 y = bestTarget.getBestCameraToTarget().x
                 dist = bestTarget.getBestCameraToTarget().z
