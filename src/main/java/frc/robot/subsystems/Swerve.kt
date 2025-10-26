@@ -167,7 +167,7 @@ object Swerve : SubsystemBase() {
         )
 
     /**
-     * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEsimator estimates the robot's
+     * Initializes the SwerveDrivePoseEstimator. The SwerveDrivePoseEstimator estimates the robot's
      * position. This is based on a combination of the robot's movement and vision.
      *
      * @return SwerveDrivePoseEstimator, A new SwerveDrivePoseEstimator object.
@@ -191,7 +191,7 @@ object Swerve : SubsystemBase() {
     }
 
     /**
-     * Initializes the SwerveDrivePoseEstimator3d. The SwerveDrivePoseEsimator3d estimates the robot's
+     * Initializes the SwerveDrivePoseEstimator3d. The SwerveDrivePoseEstimator3d estimates the robot's
      * position in 3D space. This is based on a combination of the robot's movement and vision.
      *
      * @return SwerveDrivePoseEstimator3d, A new SwerveDrivePoseEstimator3d object.
@@ -407,7 +407,7 @@ object Swerve : SubsystemBase() {
             log("Swerve/Turn speed", turnSpeed)
         }
 
-        // Converts to a measure that the robot aktualy understands
+        // Converts to a measure that the robot actually understands
         var speeds =
             if (isFieldOriented) {
                 ChassisSpeeds.fromFieldRelativeSpeeds(forwardSpeed, leftSpeed, turnSpeed, this.pidgeyRotation)
@@ -430,7 +430,7 @@ object Swerve : SubsystemBase() {
         /**
          * Gets the rotation of the Pigeon2 IMU.
          *
-         * @return Rotation2d, The rotation of the Pigeon2 IMU.
+         * @return [Rotation2d], The rotation of the Pigeon2 IMU.
          */
         get() = pidgey.rotation2d
 

@@ -1,8 +1,6 @@
 package frc.robot.subsystems
 
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VelocityVoltage
-import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -10,30 +8,21 @@ import frc.robot.subsystems.Outtake.getCoralSensor
 import frc.robot.utils.RobotParameters.IntakeParameters.STAR_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.IntakeParameters.WHEEL_FEEDER_PINGU
 import frc.robot.utils.RobotParameters.MotorParameters.CORAL_FEEDER_ID
-import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_MOTOR_GEAR_RATIO
-import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_STATOR_LIMIT
-import frc.robot.utils.RobotParameters.MotorParameters.DRIVE_SUPPLY_LIMIT
 import frc.robot.utils.RobotParameters.MotorParameters.STAR_FEEDER_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.outtakeState
-import frc.robot.utils.RobotParameters.SwerveParameters
 import frc.robot.utils.emu.OuttakeState
-import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.velocity
-import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
-import xyz.malefic.frc.pingu.motor.talonfx.setControl
+import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
 
 object Intake : SubsystemBase() {
     private val wheelFeederMotor =
-        Mongu(TalonFX(CORAL_FEEDER_ID)) {
-            this as TalonFXConfig
+        TonguFX(CORAL_FEEDER_ID) {
             pingu = WHEEL_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.Clockwise_Positive
             name = "Wheel Feeder Motor"
         }
     private val starFeederMotor =
-        Mongu(TalonFX(STAR_FEEDER_ID)) {
-            this as TalonFXConfig
+        TonguFX(STAR_FEEDER_ID) {
             pingu = STAR_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive

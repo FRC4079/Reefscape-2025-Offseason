@@ -4,10 +4,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicVoltage
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
-import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.utils.RobotParameters.ControllerConstants.testPad
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_MAGIC_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_PINGU
 import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_DOWN
@@ -15,29 +13,15 @@ import frc.robot.utils.RobotParameters.ElevatorParameters.ELEVATOR_SOFT_LIMIT_UP
 import frc.robot.utils.RobotParameters.ElevatorParameters.elevatorToBeSetState
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_LEFT_ID
 import frc.robot.utils.RobotParameters.MotorParameters.ELEVATOR_MOTOR_RIGHT_ID
-import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.X_DEADZONE
-import frc.robot.utils.RobotParameters.SwerveParameters.Thresholds.Y_DEADZONE
 import frc.robot.utils.emu.ElevatorMotor
 import frc.robot.utils.emu.ElevatorState
 import frc.robot.utils.emu.ElevatorState.L2
 import frc.robot.utils.emu.ElevatorState.L3
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
-import xyz.malefic.frc.extension.leftStickPosition
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
-import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.control.position
-import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
-import xyz.malefic.frc.pingu.motor.talonfx.acceleration
-import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
-import xyz.malefic.frc.pingu.motor.talonfx.motorVoltage
-import xyz.malefic.frc.pingu.motor.talonfx.position
+import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
 import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
-import xyz.malefic.frc.pingu.motor.talonfx.setControl
-import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
-import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
-import xyz.malefic.frc.pingu.motor.talonfx.supplyVoltage
-import xyz.malefic.frc.pingu.motor.talonfx.velocity
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -46,8 +30,7 @@ import xyz.malefic.frc.pingu.motor.talonfx.velocity
  */
 object Elevator : SubsystemBase() {
     private val elevatorMotorLeft =
-        Mongu(TalonFX(ELEVATOR_MOTOR_LEFT_ID)) {
-            this as TalonFXConfig
+        TonguFX(ELEVATOR_MOTOR_LEFT_ID) {
             pingu = ELEVATOR_PINGU
             inverted = InvertedValue.CounterClockwise_Positive
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
@@ -57,8 +40,7 @@ object Elevator : SubsystemBase() {
             name = "Elevator Left Motor"
         }
     private val elevatorMotorRight =
-        Mongu(TalonFX(ELEVATOR_MOTOR_RIGHT_ID)) {
-            this as TalonFXConfig
+        TonguFX(ELEVATOR_MOTOR_RIGHT_ID) {
             pingu = ELEVATOR_PINGU
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
             currentLimits = null
@@ -124,53 +106,53 @@ object Elevator : SubsystemBase() {
         // moveElevator(testPad.leftY)
 
         logs {
-            log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.motor.stickyFault_ForwardSoftLimit.value)
-            log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.motor.stickyFault_ReverseSoftLimit.value)
+            log("Elevator/Elevator Left is at softstop forward", elevatorMotorLeft.stickyFault_ForwardSoftLimit.value)
+            log("Elevator/Elevator Left is at softstop backward", elevatorMotorRight.stickyFault_ReverseSoftLimit.value)
             log(
                 "Elevator/Elevator Left Position",
-                elevatorMotorLeft.position,
+                elevatorMotorLeft.position.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Position",
-                elevatorMotorRight.position,
+                elevatorMotorRight.position.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Left Set Speed",
-                elevatorMotorLeft.velocity,
+                elevatorMotorLeft.velocity.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Set Speed",
-                elevatorMotorRight.velocity,
+                elevatorMotorRight.velocity.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Left Acceleration",
-                elevatorMotorLeft.acceleration,
+                elevatorMotorLeft.acceleration.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Right Acceleration",
-                elevatorMotorRight.acceleration,
+                elevatorMotorRight.acceleration.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Supply Voltage",
-                elevatorMotorLeft.supplyVoltage,
+                elevatorMotorLeft.supplyVoltage.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Motor Voltage",
-                elevatorMotorLeft.motorVoltage,
+                elevatorMotorLeft.motorVoltage.valueAsDouble,
             )
             log("Elevator/Elevator State", elevatorState)
             log("Elevator/Elevator To Be State", elevatorToBeSetState)
             log(
                 "Elevator/Elevator Stator Current",
-                elevatorMotorLeft.statorCurrent,
+                elevatorMotorLeft.statorCurrent.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Supply Current",
-                elevatorMotorLeft.supplyCurrent,
+                elevatorMotorLeft.supplyCurrent.valueAsDouble,
             )
             log(
                 "Elevator/Elevator Stall Current",
-                elevatorMotorLeft.motorStallCurrent,
+                elevatorMotorLeft.motorStallCurrent.valueAsDouble,
             )
         }
     }
@@ -197,8 +179,8 @@ object Elevator : SubsystemBase() {
      */
     fun getElevatorPosValue(motor: ElevatorMotor): Double =
         when (motor) {
-            ElevatorMotor.LEFT -> elevatorMotorLeft.position
-            ElevatorMotor.RIGHT -> elevatorMotorRight.position
+            ElevatorMotor.LEFT -> elevatorMotorLeft.position.valueAsDouble
+            ElevatorMotor.RIGHT -> elevatorMotorRight.position.valueAsDouble
         }
 
     val elevatorPosAvg: Double
@@ -228,29 +210,15 @@ object Elevator : SubsystemBase() {
     }
 
     fun initializeLoggedNetworkPID() {
-        elevatorP =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator P", elevatorRightConfigs.Slot0.kP)
-        elevatorI =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator I", elevatorRightConfigs.Slot0.kI)
-        elevatorD =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator D", elevatorRightConfigs.Slot0.kD)
-        elevatorV =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator V", elevatorRightConfigs.Slot0.kV)
-        elevatorS =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator S", elevatorRightConfigs.Slot0.kS)
-        elevatorG =
-            LoggedNetworkNumber("Tuning/Elevator/Elevator G", elevatorRightConfigs.Slot0.kG)
+        elevatorP = LoggedNetworkNumber("Tuning/Elevator/Elevator P", elevatorRightConfigs.Slot0.kP)
+        elevatorI = LoggedNetworkNumber("Tuning/Elevator/Elevator I", elevatorRightConfigs.Slot0.kI)
+        elevatorD = LoggedNetworkNumber("Tuning/Elevator/Elevator D", elevatorRightConfigs.Slot0.kD)
+        elevatorV = LoggedNetworkNumber("Tuning/Elevator/Elevator V", elevatorRightConfigs.Slot0.kV)
+        elevatorS = LoggedNetworkNumber("Tuning/Elevator/Elevator S", elevatorRightConfigs.Slot0.kS)
+        elevatorG = LoggedNetworkNumber("Tuning/Elevator/Elevator G", elevatorRightConfigs.Slot0.kG)
 
-        cruiseV =
-            LoggedNetworkNumber(
-                "Tuning/Elevator/MM Cruise Velocity",
-                ELEVATOR_MAGIC_PINGU.velocity,
-            )
-        acc =
-            LoggedNetworkNumber(
-                "Tuning/Elevator/MM Acceleration",
-                ELEVATOR_MAGIC_PINGU.acceleration,
-            )
+        cruiseV = LoggedNetworkNumber("Tuning/Elevator/MM Cruise Velocity", ELEVATOR_MAGIC_PINGU.velocity)
+        acc = LoggedNetworkNumber("Tuning/Elevator/MM Acceleration", ELEVATOR_MAGIC_PINGU.acceleration)
         jerk = LoggedNetworkNumber("Tuning/Elevator/MM Jerk", ELEVATOR_MAGIC_PINGU.jerk)
     }
 
@@ -273,23 +241,19 @@ object Elevator : SubsystemBase() {
         }
 
     val atState: Boolean
-        get() = elevatorMotorLeft.motor.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
+        get() = elevatorMotorLeft.position.valueAsDouble in elevatorState.pos - 0.5..elevatorState.pos + 0.5
 
     fun isAlgaeReadyForShoot(): Boolean {
-        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 10.0)) {
+        if (elevatorMotorLeft.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 10.0)) {
             return true
         }
         return false
     }
 
     fun isAlgaeReadyForPivot(): Boolean {
-        if (elevatorMotorLeft.motor.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 20.0)) {
+        if (elevatorMotorLeft.position.valueAsDouble >= (ElevatorState.ALGAE_SHOOT.pos - 20.0)) {
             return true
         }
         return false
     }
-
-//    fun manualMoveElevator(double: velocity): {
-//        elevatorMotorLeft.move(state.pos.position)
-//    }
 }

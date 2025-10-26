@@ -2,7 +2,6 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.DigitalInput
@@ -10,6 +9,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.commands.Kommand.setElevatorState
 import frc.robot.subsystems.Elevator.elevatorState
+import frc.robot.subsystems.Outtake.setOuttakeSpeed
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_OUTTAKE_MOTOR_ID
 import frc.robot.utils.RobotParameters.MotorParameters.OUTTAKE_PIVOT_MOTOR_ID
 import frc.robot.utils.RobotParameters.OuttakeParameters.ALGAE_SENSOR_ID
@@ -24,15 +24,7 @@ import frc.robot.utils.emu.OuttakeState
 import frc.robot.utils.emu.State
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
-import xyz.malefic.frc.pingu.motor.Mongu
-import xyz.malefic.frc.pingu.motor.talonfx.TalonFXConfig
-import xyz.malefic.frc.pingu.motor.talonfx.deviceID
-import xyz.malefic.frc.pingu.motor.talonfx.isConnected
-import xyz.malefic.frc.pingu.motor.talonfx.motorStallCurrent
-import xyz.malefic.frc.pingu.motor.talonfx.position
-import xyz.malefic.frc.pingu.motor.talonfx.setControl
-import xyz.malefic.frc.pingu.motor.talonfx.statorCurrent
-import xyz.malefic.frc.pingu.motor.talonfx.supplyCurrent
+import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
 
 /**
  * The Outtake class is a subsystem that interfaces with the arm system to provide control
@@ -44,25 +36,25 @@ object Outtake : SubsystemBase() {
     val intakeTimer: Timer = Timer()
     val algaeTimer: Timer = Timer()
 
-//    val testPadThree: XboxController = XboxController(3)
-    val intakeTime = 0.3
     var correctIntakingState: OuttakePivotState = OuttakePivotState.STOW
-    //    private val canbore = Engu(OUTTAKE_PIVOT_CANBORE_ID)
     // Shawn was here
 
-    /** Creates a new end effector.  */
+    /**
+     * Pivot motor that controls the outtake pivot arm.
+     */
     private val pivotMotor =
-        Mongu(TalonFX(OUTTAKE_PIVOT_MOTOR_ID)) {
-            this as TalonFXConfig
+        TonguFX(OUTTAKE_PIVOT_MOTOR_ID) {
             pingu = PIVOT_PINGU
             inverted = InvertedValue.Clockwise_Positive
             currentLimits = 30.0 to 30.0
             name = "Outtake Pivot Motor"
         }
 
+    /**
+     * Outtake motor responsible for intaking/shooting game pieces.
+     */
     private val outtakeMotor =
-        Mongu(TalonFX(OUTTAKE_OUTTAKE_MOTOR_ID)) {
-            this as TalonFXConfig
+        TonguFX(OUTTAKE_OUTTAKE_MOTOR_ID) {
             pingu = OUTTAKE_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
@@ -153,7 +145,7 @@ object Outtake : SubsystemBase() {
 
             OuttakeState.ALGAE_INTAKE -> {
                 movePivotTo(OuttakePivotState.ALGAE_INTAKE)
-                if (pivotMotor.motor.position.valueAsDouble in
+                if (pivotMotor.position.valueAsDouble in
                     OuttakePivotState.ALGAE_INTAKE.pos - 0.1..OuttakePivotState.ALGAE_INTAKE.pos + 0.1
                 ) {
                     if (getAlgaeSensor()) {
@@ -201,7 +193,7 @@ object Outtake : SubsystemBase() {
 
         logs {
             log("Outtake/Outtake Pivot Motor Position", pivotPosValue)
-            log("Outtake/Outtake Pivot Motor Velocity", pivotMotor.motor.velocity.valueAsDouble)
+            log("Outtake/Outtake Pivot Motor Velocity", pivotMotor.velocity.valueAsDouble)
             log("Outtake/Outtake Pivot State State", outtakePivotState)
             log("Outtake/Outtake State", outtakeState)
             log(
@@ -223,8 +215,8 @@ object Outtake : SubsystemBase() {
             log("Outtake/Coral Sensor", getCoralSensor())
             log("Outtake/Algae Sensor", getAlgaeSensor())
             log("Outtake/Voltage Velo", voltageVelo.Velocity)
-            log("Outtake/Supplied voltage", outtakeMotor.motor.supplyVoltage.value)
-            log("Outtake/Supplied Current", outtakeMotor.motor.supplyCurrent.value)
+            log("Outtake/Supplied voltage", outtakeMotor.supplyVoltage.value)
+            log("Outtake/Supplied Current", outtakeMotor.supplyCurrent.value)
 //            log (
 //                "Outtake/Outtake Pivot Abs Encoder",
 //                canbore.position.valueAsDouble
@@ -247,7 +239,7 @@ object Outtake : SubsystemBase() {
          *
          * @return double, the position of the end effector motor
          */
-        get() = pivotMotor.position
+        get() = pivotMotor.position.valueAsDouble
 
     /**
      * Sets the speed of the coral outtake motor.
@@ -280,7 +272,7 @@ object Outtake : SubsystemBase() {
      * @see setOuttakeSpeed
      */
     fun shootCoral() {
-        if (pivotMotor.motor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25 && Elevator.atState) {
+        if (pivotMotor.position.valueAsDouble in outtakePivotState.pos - 0.25..outtakePivotState.pos + 0.25 && Elevator.atState) {
             shootTimer.start()
             setOuttakeSpeed(30.0)
         }
