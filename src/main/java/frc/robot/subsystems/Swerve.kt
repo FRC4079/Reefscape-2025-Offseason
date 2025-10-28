@@ -280,7 +280,9 @@ object Swerve : SubsystemBase() {
 
         val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees)
 
-        return Pose2d(xRel, yRel, Rotation2d.fromDegrees(thetaRel))
+        val deltaTheta = this.heading - thetaRel
+
+        return Pose2d(xRel, yRel, Rotation2d.fromDegrees(deltaTheta))
     }
 
     /**
