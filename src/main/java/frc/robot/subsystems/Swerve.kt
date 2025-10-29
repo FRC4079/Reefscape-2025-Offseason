@@ -280,9 +280,7 @@ object Swerve : SubsystemBase() {
 
         val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees)
 
-        val deltaTheta = this.heading - thetaRel
-
-        return Pose2d(xRel, yRel, Rotation2d.fromDegrees(deltaTheta))
+        return Pose2d(xRel, yRel, Rotation2d.fromDegrees(thetaRel))
     }
 
     /**
@@ -352,6 +350,7 @@ object Swerve : SubsystemBase() {
             log("Swerve/Swerve State", swerveState)
             log("Swerve/Align to Pose", desiredPoseForDriveToPoint)
         }
+
         applySwerveState()
     }
 
