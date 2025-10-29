@@ -320,6 +320,23 @@ object Swerve : SubsystemBase() {
                     ),
                     false,
                 )
+
+                val rotError = rotation.degrees
+                val xError = x
+                val yError = y
+
+                val xOutput = networkPinguXAutoAlign.calculate(xError, 0.0)
+                val yOutput = networkPinguYAutoAlign.calculate(yError, 0.0)
+                val rotOutput = networkPinguRotAutoAlign.calculate(rotError, 0.0)
+
+                logs {
+                    log("AutoAlign/xError", xError)
+                    log("AutoAlign/yError", yError)
+                    log("AutoAlign/rotError", rotError)
+                    log("AutoAlign/xOutput", xOutput)
+                    log("AutoAlign/yOutput", yOutput)
+                    log("AutoAlign/rotOutput", rotOutput)
+                }
             }
         }
     }
