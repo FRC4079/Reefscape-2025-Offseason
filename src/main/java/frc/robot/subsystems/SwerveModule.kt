@@ -28,7 +28,6 @@ import xyz.malefic.frc.pingu.encoder.Engu
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
-import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
 
 /** Represents a swerve module used in a swerve drive system.  */
 class SwerveModule(
@@ -37,8 +36,11 @@ class SwerveModule(
     canCoderID: Int,
     canCoderDriveStraightSteerSetPoint: Double,
 ) {
+    private val positionSetter = PositionTorqueCurrentFOC(0.0)
+    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
+
     private val driveMotor =
-        TonguFX(driveId) {
+        TonguFX(driveId, velocitySetter, { out -> this.withVelocity(out) }) {
             pingu = DRIVE_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
             inverted = SwerveParameters.Thresholds.DRIVE_MOTOR_INVERTED
@@ -49,7 +51,7 @@ class SwerveModule(
             name = "Swerve Drive Motor $driveId"
         }
     private val steerMotor =
-        TonguFX(steerId) {
+        TonguFX(steerId, positionSetter, { out -> this.withPosition(out) }) {
             pingu = STEER_PINGU_TELE
             neutralMode = NeutralModeValue.Brake
             inverted = SwerveParameters.Thresholds.STEER_MOTOR_INVERTED
@@ -63,8 +65,7 @@ class SwerveModule(
             name = "Swerve Steer Motor $steerId"
         }
     private val canCoder = Engu(canCoderID)
-    private val positionSetter = PositionTorqueCurrentFOC(0.0)
-    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
+
     private val swerveModulePosition = SwerveModulePosition()
 
     var state: SwerveModuleState =

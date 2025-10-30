@@ -101,11 +101,11 @@ object RobotParameters {
 
             val DRIVE_PINGU_TELE = Pingu(5.0, 0.0, 0.0, 0.7)
 
-            val ROTATIONAL_PINGU = ProfiledPingu(0.15, 0.0, 0.01, profile = PROFILE_CONSTRAINTS)
+            val ROTATIONAL_PINGU = ProfiledPingu(0.1, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
-            val Y_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
+            val Y_PINGU = ProfiledPingu(1.0, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
-            val X_PINGU = ProfiledPingu(4.079, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
+            val X_PINGU = ProfiledPingu(1.0, 0.0, 0.0, profile = PROFILE_CONSTRAINTS)
 
             val DIST_PINGU = Pingu(0.2910, 0.0, 0.0)
 

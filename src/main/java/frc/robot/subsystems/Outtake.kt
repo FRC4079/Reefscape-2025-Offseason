@@ -37,13 +37,16 @@ object Outtake : SubsystemBase() {
     val algaeTimer: Timer = Timer()
 
     var correctIntakingState: OuttakePivotState = OuttakePivotState.STOW
+
+    private val voltageVelo: VelocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0)
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
     // Shawn was here
 
     /**
      * Pivot motor that controls the outtake pivot arm.
      */
     private val pivotMotor =
-        TonguFX(OUTTAKE_PIVOT_MOTOR_ID) {
+        TonguFX(OUTTAKE_PIVOT_MOTOR_ID, voltageVelo, { out -> this.withVelocity(out) }) {
             pingu = PIVOT_PINGU
             inverted = InvertedValue.Clockwise_Positive
             currentLimits = 30.0 to 30.0
@@ -54,7 +57,7 @@ object Outtake : SubsystemBase() {
      * Outtake motor responsible for intaking/shooting game pieces.
      */
     private val outtakeMotor =
-        TonguFX(OUTTAKE_OUTTAKE_MOTOR_ID) {
+        TonguFX(OUTTAKE_OUTTAKE_MOTOR_ID, voltageVelo, { out -> this.withVelocity(out) }) {
             pingu = OUTTAKE_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
@@ -64,9 +67,6 @@ object Outtake : SubsystemBase() {
 
     private val coralSensor: DigitalInput = DigitalInput(CORAL_SENSOR_ID)
     private val algaeSensor: DigitalInput = DigitalInput(ALGAE_SENSOR_ID)
-
-    private val voltageVelo: VelocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0)
-    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
 
     // This method will be called once per scheduler run
     override fun periodic() {

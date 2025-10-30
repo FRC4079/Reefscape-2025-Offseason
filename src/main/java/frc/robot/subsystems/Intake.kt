@@ -14,21 +14,22 @@ import frc.robot.utils.emu.OuttakeState
 import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
 
 object Intake : SubsystemBase() {
+    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
+
     private val wheelFeederMotor =
-        TonguFX(CORAL_FEEDER_ID) {
+        TonguFX(CORAL_FEEDER_ID, velocitySetter, { out -> this.withVelocity(out) }) {
             pingu = WHEEL_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.Clockwise_Positive
             name = "Wheel Feeder Motor"
         }
     private val starFeederMotor =
-        TonguFX(STAR_FEEDER_ID) {
+        TonguFX(STAR_FEEDER_ID, velocitySetter, { out -> this.withVelocity(out) }) {
             pingu = STAR_FEEDER_PINGU
             neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.CounterClockwise_Positive
             name = "Star Feeder Motor"
         }
-    private val velocitySetter = VelocityTorqueCurrentFOC(0.0)
 
     /**
      * If the coral sensor is triggered, set the hasPiece boolean to true. (hasPiece = true,

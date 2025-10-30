@@ -21,7 +21,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import xyz.malefic.frc.pingu.log.LogPingu.log
 import xyz.malefic.frc.pingu.log.LogPingu.logs
 import xyz.malefic.frc.pingu.motor.talonfx.TonguFX
-import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
 
 /**
  * The ElevatorSubsystem class is a Singleton to control the elevator motors on the robot. The class
@@ -29,8 +28,12 @@ import xyz.malefic.frc.pingu.motor.talonfx.resetPosition
  * for the elevator motor.
  */
 object Elevator : SubsystemBase() {
+    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
+
+    private val voltageOut: VoltageOut = VoltageOut(0.0)
+
     private val elevatorMotorLeft =
-        TonguFX(ELEVATOR_MOTOR_LEFT_ID) {
+        TonguFX(ELEVATOR_MOTOR_LEFT_ID, voltagePos, { out -> this.withPosition(out) }) {
             pingu = ELEVATOR_PINGU
             inverted = InvertedValue.CounterClockwise_Positive
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
@@ -40,7 +43,7 @@ object Elevator : SubsystemBase() {
             name = "Elevator Left Motor"
         }
     private val elevatorMotorRight =
-        TonguFX(ELEVATOR_MOTOR_RIGHT_ID) {
+        TonguFX(ELEVATOR_MOTOR_RIGHT_ID, voltagePos, { out -> this.withPosition(out) }) {
             pingu = ELEVATOR_PINGU
             softLimits = ELEVATOR_SOFT_LIMIT_UP to ELEVATOR_SOFT_LIMIT_DOWN
             currentLimits = null
@@ -69,10 +72,6 @@ object Elevator : SubsystemBase() {
     var elevatorState: ElevatorState = ElevatorState.DEFAULT
 
     private val motionMagicVoltage: MotionMagicVoltage = MotionMagicVoltage(0.0)
-
-    private val voltagePos: PositionVoltage = PositionVoltage(0.0)
-
-    private val voltageOut: VoltageOut = VoltageOut(0.0)
 
     /**
      * Creates a new instance of this ElevatorSubsystem. This constructor is private since this class
@@ -193,8 +192,8 @@ object Elevator : SubsystemBase() {
 
     /** Soft resets the encoders on the elevator motors  */
     fun resetEncoders() {
-        elevatorMotorLeft.resetPosition(0.0)
-        elevatorMotorRight.resetPosition(0.0)
+        elevatorMotorLeft.setPosition(0.0)
+        elevatorMotorRight.setPosition(0.0)
     }
 
     /**

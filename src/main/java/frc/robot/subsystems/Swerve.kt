@@ -278,7 +278,7 @@ object Swerve : SubsystemBase() {
         val xRel = cos(robotHeadingRad) * dx + sin(robotHeadingRad) * dy
         val yRel = -sin(robotHeadingRad) * dx + cos(robotHeadingRad) * dy
 
-        val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees)
+        val thetaRel = wrapTo180(target.rotation.degrees - robot.rotation.degrees) - 180
 
         return Pose2d(xRel, yRel, Rotation2d.fromDegrees(thetaRel))
     }
@@ -306,12 +306,12 @@ object Swerve : SubsystemBase() {
                 desiredPoseForDriveToPoint,
             ).apply {
                 setDriveSpeeds(
-                    networkPinguYAutoAlign.calculate(
-                        y,
+                    networkPinguXAutoAlign.calculate(
+                        -x,
                         0.0,
                     ),
-                    networkPinguXAutoAlign.calculate(
-                        x,
+                    networkPinguYAutoAlign.calculate(
+                        -y,
                         0.0,
                     ),
                     networkPinguRotAutoAlign.calculate(
