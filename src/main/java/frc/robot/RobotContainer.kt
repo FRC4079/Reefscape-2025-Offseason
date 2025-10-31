@@ -42,7 +42,7 @@ import kotlin.time.Instant
 
 object RobotContainer {
 //    val networkChooser: SendableChooser<Command?>
-    var queuedState: OuttakeState = OuttakeState.STOWED
+    var queuedState: OuttakeState = STOWED
 
     init {
 //        Elevator.defaultCommand = padElevator(testPad)
@@ -59,12 +59,12 @@ object RobotContainer {
 //            bind("SetL4", setElevatorState(L4))
 //            bind("MoveElevatorDown", setElevatorState(DEFAULT))
 
-            bind("AlignLeft", Align(Direction.LEFT))
-            bind("AlignRight", Align(Direction.RIGHT))
-            bind("StowElevator", setElevatorState(ElevatorState.DEFAULT))
-            bind("MoveL2Auto", setElevatorState(ElevatorState.L2))
-            bind("MoveL3Auto", setElevatorState(ElevatorState.L3))
-            bind("MoveL4Auto", setElevatorState(ElevatorState.L4))
+            bind("AlignLeft", Align(LEFT))
+            bind("AlignRight", Align(RIGHT))
+            bind("StowElevator", setElevatorState(DEFAULT))
+            bind("MoveL2Auto", setElevatorState(L2))
+            bind("MoveL3Auto", setElevatorState(L3))
+            bind("MoveL4Auto", setElevatorState(L4))
             bind("ScoreCoral", ScoreCoral())
         }
 
@@ -87,19 +87,19 @@ object RobotContainer {
                 outtakeState
             }
             press(B) {
-                if (Outtake.getCoralSensor()) {
+                if (getCoralSensor()) {
                     setElevatorState(L3).schedule()
                 } else {
-                    setElevatorState(ElevatorState.ALGAE_HIGH).schedule()
-                    outtakeState = OuttakeState.ALGAE_INTAKE
+                    setElevatorState(ALGAE_HIGH).schedule()
+                    outtakeState = ALGAE_INTAKE
                 }
             }
             press(X) {
-                if (Outtake.getCoralSensor()) {
+                if (getCoralSensor()) {
                     setElevatorState(L2).schedule()
                 } else {
-                    setElevatorState(ElevatorState.ALGAE_LOW).schedule()
-                    outtakeState = OuttakeState.ALGAE_INTAKE
+                    setElevatorState(ALGAE_LOW).schedule()
+                    outtakeState = ALGAE_INTAKE
                 }
             }
             press(Y) {
@@ -114,9 +114,9 @@ object RobotContainer {
             }
             press(RIGHT_TRIGGER) {
                 if (getCoralSensor()) {
-                    outtakeState = OuttakeState.CORAL_SHOOT
+                    outtakeState = CORAL_SHOOT
                     slowMode = false
-                } else if (outtakeState == OuttakeState.ALGAE_HOLD) {
+                } else if (outtakeState == ALGAE_HOLD) {
                     outtakeState = OuttakeState.ALGAE_SHOOT
                     setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
                 }

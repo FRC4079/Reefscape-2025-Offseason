@@ -82,7 +82,7 @@ object Kommand {
      *
      * @return An [InstantCommand] that flips the Pidgey sensor.
      */
-    fun flipPidgey() = cmd { Swerve.flipPidgey() }
+    val flipPidgey = cmd { Swerve.flipPidgey() }
 
     /**
      * Creates an [InstantCommand] to set the teleoperation PID.

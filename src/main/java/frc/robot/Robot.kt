@@ -152,7 +152,6 @@ class Robot : LoggedRobot() {
         //    autonomousCommand = robotContainer.networkChooser.getSelected();
 //        currentState = State.Auto
 //        swerveState = SwerveDriveState.Auto
-        flipPidgey()
         autonomousCommand = PathPlannerAuto("CenterL4Auto")
         autonomousCommand.schedule()
     }
@@ -162,7 +161,7 @@ class Robot : LoggedRobot() {
         if (::autonomousCommand.isInitialized) autonomousCommand.cancel()
 //        currentState = State.TeleOpDrive
 //        swerveState = SwerveDriveState.ManualDrive
-//        flipPidgey()
+        flipPidgey.schedule()
     }
 
     /** This function is called once when test mode is initialized.  */
