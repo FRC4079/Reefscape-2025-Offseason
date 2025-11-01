@@ -315,11 +315,21 @@ object Swerve : SubsystemBase() {
                         -y,
                         0.0,
                     )
-                val turnSpeed = 0.0
+
+                // try this first
+                val turnSpeed =
+                    networkPinguRotAutoAlign.calculate(
+                        heading,
+                        desiredPoseForDriveToPoint.rotation.degrees,
+                    ) * 0.41
+
+                // try this second
+//                val turnSpeed =
 //                    networkPinguRotAutoAlign.calculate(
-//                        rotation.degrees,
+//                        desiredPoseForDriveToPoint.rotation.degrees - heading,
 //                        0.0,
 //                    ) * 0.41
+//
 
                 setDriveSpeeds(
                     forwardSpeed,
