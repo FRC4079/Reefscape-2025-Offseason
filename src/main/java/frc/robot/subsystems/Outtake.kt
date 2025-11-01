@@ -92,7 +92,6 @@ object Outtake : SubsystemBase() {
         when (outtakeState) {
             OuttakeState.STOWED -> {
                 movePivotTo(correctIntakingState)
-                @Suppress("ktlint:standard:if-else-wrapping")
                 if (!getCoralSensor()) {
                     setOuttakeSpeed(100.0)
                 } else {
@@ -118,7 +117,7 @@ object Outtake : SubsystemBase() {
 
             OuttakeState.CORAL_HOLD -> {
                 movePivotTo(correctIntakingState) // y7gyugyugfygygyuigyigyivyvtfucvtfucvtu
-                if (!getCoralSensor()) {
+                if (!getCoralSensor() && elevatorState == ElevatorState.DEFAULT) {
                     coralErrorTimer.start()
                     if (coralErrorTimer.hasElapsed(1.0)) {
                         coralErrorTimer.stop()
@@ -134,11 +133,8 @@ object Outtake : SubsystemBase() {
             OuttakeState.CORAL_SHOOT -> {
                 when (elevatorState) {
                     ElevatorState.L4 -> movePivotTo(OuttakePivotState.CORAL_L4)
-
                     ElevatorState.L3, ElevatorState.L2 -> movePivotTo(OuttakePivotState.CORAL_L23)
-
                     ElevatorState.L1 -> movePivotTo(OuttakePivotState.CORAL_L1)
-
                     else -> { /* no-op */ }
                 }
             }
@@ -174,15 +170,17 @@ object Outtake : SubsystemBase() {
 
         when {
             (outtakeState == OuttakeState.CORAL_SHOOT && !getCoralSensor()) -> {
-                if (shootTimer.hasElapsed(0.5)) {
+                if (shootTimer.hasElapsed(0.75)) {
                     stopOuttakeMotor()
                     outtakeState = OuttakeState.STOWED
                     shootTimer.stop()
                     shootTimer.reset()
                     correctIntakingState = OuttakePivotState.STOW
+                } else {
+                    shootTimer.start()
                 }
             }
-//
+
 //            (outtakeState == OuttakeState.ALGAE_SHOOT && !getAlgaeSensor()) -> {
 //                outtakeState = OuttakeState.STOWED
 //                stopOuttakeMotor()
@@ -196,22 +194,10 @@ object Outtake : SubsystemBase() {
             log("Outtake/Outtake Pivot Motor Velocity", pivotMotor.velocity.valueAsDouble)
             log("Outtake/Outtake Pivot State State", outtakePivotState)
             log("Outtake/Outtake State", outtakeState)
-            log(
-                "Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID,
-                pivotMotor.isConnected,
-            )
-            log(
-                "Outtake/Outtake Pivot Stator Current",
-                pivotMotor.statorCurrent,
-            )
-            log(
-                "Outtake/Outtake Pivot Supply Current",
-                pivotMotor.supplyCurrent,
-            )
-            log(
-                "Outtake/Outtake Pivot Stall Current",
-                pivotMotor.motorStallCurrent,
-            )
+            log("Outtake/Disconnected algaeManipulatorMotor " + pivotMotor.deviceID, pivotMotor.isConnected)
+            log("Outtake/Outtake Pivot Stator Current", pivotMotor.statorCurrent)
+            log("Outtake/Outtake Pivot Supply Current", pivotMotor.supplyCurrent)
+            log("Outtake/Outtake Pivot Stall Current", pivotMotor.motorStallCurrent)
             log("Outtake/Coral Sensor", getCoralSensor())
             log("Outtake/Algae Sensor", getAlgaeSensor())
             log("Outtake/Voltage Velo", voltageVelo.Velocity)
