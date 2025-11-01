@@ -14,7 +14,7 @@ enum class OuttakePivotState(
     /** Represents the position of the pivot for the level one of coral  */
     CORAL_L1(0.0),
 
-    // ** Represents the position of the pivot for the level two and level three of coral  */
+    /** Represents the position of the pivot for the level two and level three of coral  */
     CORAL_L23(-3.05),
 
     /** Represents the position of the pivot for the level four of coral  */

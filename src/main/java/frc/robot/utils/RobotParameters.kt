@@ -262,7 +262,7 @@ object RobotParameters {
         val FIELD_LENGTH: Distance = Feet.of(57.0).plus(Inches.of(6.0 + 7.0 / 8.0))
         val FIELD_WIDTH: Distance = Feet.of(26.0).plus(Inches.of(5.0))
 
-        const val X_OFFSET_FROM_TAG_FOR_SCORING_INCHES: Double = 22.0
+        const val X_OFFSET_FROM_TAG_FOR_SCORING_INCHES: Double = 20.25
 
         const val Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES: Double = 6.5
 

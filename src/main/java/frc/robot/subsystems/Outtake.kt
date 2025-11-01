@@ -133,20 +133,11 @@ object Outtake : SubsystemBase() {
 
             OuttakeState.CORAL_SHOOT -> {
                 when (elevatorState) {
-                    ElevatorState.L4 -> {
-                        movePivotTo(OuttakePivotState.CORAL_L4)
-                        outtakePivotState = OuttakePivotState.CORAL_L4
-                    }
+                    ElevatorState.L4 -> movePivotTo(OuttakePivotState.CORAL_L4)
 
-                    ElevatorState.L3, ElevatorState.L2 -> {
-                        movePivotTo(OuttakePivotState.CORAL_L23)
-                        outtakePivotState = OuttakePivotState.CORAL_L23
-                    }
+                    ElevatorState.L3, ElevatorState.L2 -> movePivotTo(OuttakePivotState.CORAL_L23)
 
-                    ElevatorState.L1 -> {
-                        movePivotTo(OuttakePivotState.CORAL_L1)
-                        outtakePivotState = OuttakePivotState.CORAL_L1
-                    }
+                    ElevatorState.L1 -> movePivotTo(OuttakePivotState.CORAL_L1)
 
                     else -> { /* no-op */ }
                 }
@@ -168,13 +159,13 @@ object Outtake : SubsystemBase() {
             }
 
             OuttakeState.ALGAE_HOLD -> {
-                outtakePivotState = OuttakePivotState.ALGAE_HOLD
+                movePivotTo(OuttakePivotState.ALGAE_HOLD)
                 setElevatorState(ElevatorState.DEFAULT).schedule()
             }
             else -> { /* no-op */ }
         }
 
-        if (intakeTimer.hasElapsed(0.35) && intakeTimer.isRunning) {
+        if (intakeTimer.hasElapsed(0.4) && intakeTimer.isRunning) {
             outtakeState = OuttakeState.CORAL_HOLD
             intakeTimer.stop()
             intakeTimer.reset()
@@ -239,6 +230,7 @@ object Outtake : SubsystemBase() {
      * @param state the state to set the algae pivot
      */
     fun movePivotTo(state: OuttakePivotState) {
+        outtakePivotState = state
         pivotMotor.setControl(voltagePos.withPosition(state.pos))
     }
 

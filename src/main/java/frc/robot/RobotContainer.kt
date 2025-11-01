@@ -78,11 +78,11 @@ object RobotContainer {
             press(DPAD_DOWN) {
                 Swerve.resetPidgey()
             }
-            press(DPAD_UP) {
+            press(LEFT_TRIGGER) {
                 queuedState = outtakeState
                 outtakeState = CORAL_REVERSE
             }
-            release(DPAD_UP) {
+            release(LEFT_TRIGGER) {
                 outtakeState = queuedState
                 outtakeState
             }
@@ -113,13 +113,13 @@ object RobotContainer {
                 outtakeState = STOWED
             }
             press(RIGHT_TRIGGER) {
-                if (getCoralSensor()) {
-                    outtakeState = CORAL_SHOOT
-                    slowMode = false
-                } else if (outtakeState == ALGAE_HOLD) {
-                    outtakeState = OuttakeState.ALGAE_SHOOT
-                    setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
-                }
+//                if (getCoralSensor()) {
+                outtakeState = CORAL_SHOOT
+//                } else if (outtakeState == ALGAE_HOLD) {
+//                    outtakeState = OuttakeState.ALGAE_SHOOT
+//                    setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
+//                }
+                slowMode = false
             }
             press(LEFT_BUMPER) {
                 when (visionDead) {
