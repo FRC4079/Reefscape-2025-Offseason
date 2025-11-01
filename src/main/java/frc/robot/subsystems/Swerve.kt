@@ -305,37 +305,49 @@ object Swerve : SubsystemBase() {
                 this.poseEstimator.estimatedPosition,
                 desiredPoseForDriveToPoint,
             ).apply {
-                setDriveSpeeds(
+                val forwardSpeed =
                     networkPinguXAutoAlign.calculate(
                         -x,
                         0.0,
-                    ),
+                    )
+                val leftSpeed =
                     networkPinguYAutoAlign.calculate(
                         -y,
                         0.0,
-                    ),
-                    networkPinguRotAutoAlign.calculate(
-                        rotation.degrees,
-                        0.0,
-                    ),
+                    )
+                val turnSpeed = 0.0
+//                    networkPinguRotAutoAlign.calculate(
+//                        rotation.degrees,
+//                        0.0,
+//                    ) * 0.41
+
+                setDriveSpeeds(
+                    forwardSpeed,
+                    leftSpeed,
+                    turnSpeed,
                     false,
                 )
 
-                val rotError = rotation.degrees
-                val xError = x
-                val yError = y
-
-                val xOutput = networkPinguXAutoAlign.calculate(xError, 0.0)
-                val yOutput = networkPinguYAutoAlign.calculate(yError, 0.0)
-                val rotOutput = networkPinguRotAutoAlign.calculate(rotError, 0.0)
+//                val rotError = rotation.degrees
+//                val xError = x
+//                val yError = y
+//
+//                val xOutput = networkPinguXAutoAlign.calculate(xError, 0.0)
+//                val yOutput = networkPinguYAutoAlign.calculate(yError, 0.0)
+//                val rotOutput = networkPinguRotAutoAlign.calculate(rotError, 0.0)
 
                 logs {
-                    log("AutoAlign/xError", xError)
-                    log("AutoAlign/yError", yError)
-                    log("AutoAlign/rotError", rotError)
-                    log("AutoAlign/xOutput", xOutput)
-                    log("AutoAlign/yOutput", yOutput)
-                    log("AutoAlign/rotOutput", rotOutput)
+//                    log("AutoAlign/xError", xError)
+//                    log("AutoAlign/yError", yError)
+//                    log("AutoAlign/rotError", rotError)
+//                    log("AutoAlign/xOutput", xOutput)
+//                    log("AutoAlign/yOutput", yOutput)
+//                    log("AutoAlign/rotOutput", rotOutput)
+                    log("AutoAlign/forwardSpeed", forwardSpeed)
+                    log("AutoAlign/leftSpeed", leftSpeed)
+                    log("AutoAlign/turnSpeed", turnSpeed)
+                    log("AutoAlign/maxSpeed", MAX_SPEED)
+                    log("AutoAlign/maxAngularSpeed", MAX_ANGULAR_SPEED)
                 }
             }
         }
@@ -657,13 +669,22 @@ object Swerve : SubsystemBase() {
      * @param controller The XboxController providing joystick input.
      */
     fun stickDrive(controller: XboxController) {
-        var x: Double = -controller.leftX * MAX_SPEED * (if (slowMode) 0.5 else 1.0)
+        var x: Double = -controller.leftX * MAX_SPEED
         if (abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0
+        x *= (if (slowMode) 0.25 else 1.0)
 
-        var y: Double = -controller.leftY * MAX_SPEED * (if (slowMode) 0.5 else 1.0)
+        var y: Double = -controller.leftY * MAX_SPEED
         if (abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0
+        y *= (if (slowMode) 0.25 else 1.0)
 
-        val rotation = if (abs(controller.rightX) >= 0.1) -controller.rightX * MAX_ANGULAR_SPEED * 0.5 else 0.0
+        val rotation =
+            if (abs(controller.rightX) >=
+                0.1
+            ) {
+                -controller.rightX * MAX_ANGULAR_SPEED * 0.5
+            } else {
+                0.0
+            } * (if (slowMode) 0.25 else 1.0)
 
         logs {
             log("X Joystick", x)

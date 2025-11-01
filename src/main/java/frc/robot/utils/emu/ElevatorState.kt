@@ -16,16 +16,16 @@ enum class ElevatorState(
     L1(8.0),
 
     /** Represents the second level of the elevator for coral.  */
-    L2(18.0),
+    L2(22.07),
 
     /** Represents the third level of the elevator for coral.  */
-    L3(29.2),
+    L3(32.78),
 
     /** Represents the fourth level of the elevator for coral.  */
-    L4(46.22),
+    L4(48.42),
 
     /** Represents the low level of the elevator for algae.  */
-    ALGAE_LOW(24.0),
+    ALGAE_LOW(12.7),
 
     /** Represents the high level of the elevator for algae.  */
     ALGAE_HIGH(26.0),

@@ -17,6 +17,7 @@ import frc.robot.subsystems.PhotonVision
 import frc.robot.subsystems.SuperStructure
 import frc.robot.subsystems.SuperStructure.currentState
 import frc.robot.subsystems.Swerve
+import frc.robot.subsystems.Swerve.resetPidgey
 import frc.robot.utils.RobotParameters.FieldParameters.RobotPoses.addCoralPosList
 import frc.robot.utils.RobotParameters.Info.logInfo
 import frc.robot.utils.RobotParameters.LiveRobotValues.LOW_BATTERY_VOLTAGE
@@ -151,7 +152,7 @@ class Robot : LoggedRobot() {
     override fun autonomousInit() {
         //    autonomousCommand = robotContainer.networkChooser.getSelected();
 //        currentState = State.Auto
-//        swerveState = SwerveDriveState.Auto
+//        swerveState = SwerveDriveState.Auto;
         autonomousCommand = PathPlannerAuto("CenterL4Auto")
         autonomousCommand.schedule()
     }
@@ -161,7 +162,7 @@ class Robot : LoggedRobot() {
         if (::autonomousCommand.isInitialized) autonomousCommand.cancel()
 //        currentState = State.TeleOpDrive
 //        swerveState = SwerveDriveState.ManualDrive
-        flipPidgey.schedule()
+        resetPidgey()
     }
 
     /** This function is called once when test mode is initialized.  */

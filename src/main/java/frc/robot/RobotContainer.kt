@@ -86,6 +86,9 @@ object RobotContainer {
                 outtakeState = queuedState
                 outtakeState
             }
+            press(DPAD_LEFT) {
+                visionDead = !visionDead
+            }
             press(B) {
                 if (getCoralSensor()) {
                     setElevatorState(L3).schedule()
@@ -109,9 +112,6 @@ object RobotContainer {
                 setElevatorState(DEFAULT).schedule()
                 outtakeState = STOWED
             }
-            press(LEFT_TRIGGER) {
-                visionDead = !visionDead
-            }
             press(RIGHT_TRIGGER) {
                 if (getCoralSensor()) {
                     outtakeState = CORAL_SHOOT
@@ -121,34 +121,34 @@ object RobotContainer {
                     setElevatorState(ElevatorState.ALGAE_SHOOT).schedule()
                 }
             }
-//            press(LEFT_BUMPER) {
-//                when (visionDead) {
-//                    false -> AlignToPose(LEFT)
-//                    true -> slowMode = true
-//                }
-//            }
+            press(LEFT_BUMPER) {
+                when (visionDead) {
+                    false -> SuperStructure + State.ScoreAlign(LEFT)
+                    true -> slowMode = true
+                }
+            }
 //            release(LEFT_BUMPER) {
 //                SuperStructure.cancel()
 //            }
-//            press(RIGHT_BUMPER) {
-//                when (visionDead) {
-//                    false -> AlignToPose(Direction.RIGHT)
-//                    true -> slowMode = true
-//                }
-//            }
+            press(RIGHT_BUMPER) {
+                when (visionDead) {
+                    false -> SuperStructure + State.ScoreAlign(RIGHT)
+                    true -> slowMode = true
+                }
+            }
 //            release(RIGHT_BUMPER) {
 //                SuperStructure.cancel()
 //            }
-            press(LEFT_BUMPER) {
-                SuperStructure + State.ScoreAlign(LEFT)
-            }
+//            press(LEFT_BUMPER) {
+//                SuperStructure + State.ScoreAlign(LEFT)
+//            }
             release(LEFT_BUMPER) {
                 SuperStructure.cancel()
                 println("Cancelled Left Align")
             }
-            press(RIGHT_BUMPER) {
-                SuperStructure + State.ScoreAlign(RIGHT)
-            }
+//            press(RIGHT_BUMPER) {
+//                SuperStructure + State.ScoreAlign(RIGHT)
+//            }
             release(RIGHT_BUMPER) {
                 SuperStructure.cancel()
                 println("Cancelled Right Align")

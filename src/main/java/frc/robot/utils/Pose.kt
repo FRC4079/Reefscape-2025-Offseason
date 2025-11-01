@@ -10,6 +10,7 @@ import frc.robot.utils.RobotParameters.FieldParameters.Y_OFFSET_FROM_TAG_FOR_SCO
 import frc.robot.utils.emu.Direction
 import xyz.malefic.frc.extension.inchesToMeters
 import xyz.malefic.frc.extension.layout
+import xyz.malefic.frc.extension.rotated180
 
 /**
  * Utility object for pose-related calculations.
@@ -40,6 +41,6 @@ object Pose {
         val ySign = if (dir == Direction.RIGHT) 1.0 else -1.0
         val yOffset = ySign * Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES.inchesToMeters
 
-        return tagPose.plus(Transform2d(xOffset, yOffset, Rotation2d.kZero))
+        return tagPose.plus(Transform2d(xOffset, yOffset, Rotation2d.kZero)).rotated180
     }
 }

@@ -35,6 +35,7 @@ object Outtake : SubsystemBase() {
     val shootTimer: Timer = Timer()
     val intakeTimer: Timer = Timer()
     val algaeTimer: Timer = Timer()
+    val coralErrorTimer = Timer()
 
     var correctIntakingState: OuttakePivotState = OuttakePivotState.STOW
 
@@ -48,6 +49,7 @@ object Outtake : SubsystemBase() {
     private val pivotMotor =
         TonguFX(OUTTAKE_PIVOT_MOTOR_ID, voltageVelo, { out -> this.withVelocity(out) }) {
             pingu = PIVOT_PINGU
+            neutralMode = NeutralModeValue.Brake
             inverted = InvertedValue.Clockwise_Positive
             currentLimits = 30.0 to 30.0
             name = "Outtake Pivot Motor"
@@ -93,7 +95,7 @@ object Outtake : SubsystemBase() {
                 @Suppress("ktlint:standard:if-else-wrapping")
                 if (!getCoralSensor()) {
                     setOuttakeSpeed(100.0)
-                } else if (getCoralSensor()) {
+                } else {
                     intakeTimer.start()
                 }
 
@@ -115,10 +117,17 @@ object Outtake : SubsystemBase() {
             }
 
             OuttakeState.CORAL_HOLD -> {
-                movePivotTo(correctIntakingState)
+                movePivotTo(correctIntakingState) // y7gyugyugfygygyuigyigyivyvtfucvtfucvtu
                 if (!getCoralSensor()) {
-                    outtakeState = OuttakeState.STOWED
-                    correctIntakingState = OuttakePivotState.STOW
+                    coralErrorTimer.start()
+                    if (coralErrorTimer.hasElapsed(1.0)) {
+                        coralErrorTimer.stop()
+                        coralErrorTimer.reset()
+                        outtakeState = OuttakeState.STOWED
+                        correctIntakingState = OuttakePivotState.STOW
+                    }
+                } else {
+                    coralErrorTimer.reset()
                 }
             }
 
@@ -311,13 +320,13 @@ object Outtake : SubsystemBase() {
      */
     fun shootAlgae() {
         // TODO: Weird elevator timing (in this file or somewhere else?)
-        if (Elevator.isAlgaeReadyForShoot()) {
-            setOuttakeSpeed(-100.00)
-        }
+//        if (Elevator.isAlgaeReadyForShoot()) {
+        setOuttakeSpeed(-100.00)
+//        }
 
-        if (Elevator.isAlgaeReadyForPivot()) {
-            movePivotTo(OuttakePivotState.ALGAE_SHOOT)
-        }
+//        if (Elevator.isAlgaeReadyForPivot()) {
+        movePivotTo(OuttakePivotState.ALGAE_SHOOT)
+//        }
 
         if (!getAlgaeSensor()) {
             outtakeState = OuttakeState.STOWED
