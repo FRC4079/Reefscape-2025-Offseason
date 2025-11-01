@@ -39,7 +39,8 @@ object Pose {
                 .toPose2d()
         val xOffset = X_OFFSET_FROM_TAG_FOR_SCORING_INCHES.inchesToMeters
         val ySign = if (dir == Direction.RIGHT) 1.0 else -1.0
-        val yOffset = ySign * Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES.inchesToMeters
+        val yOffset =
+            ySign * Y_OFFSET_FROM_TAG_FOR_SCORING_ON_REEF_INCHES.inchesToMeters + if (dir == Direction.LEFT) 5.0.inchesToMeters else 0.0
 
         return tagPose.plus(Transform2d(xOffset, yOffset, Rotation2d.kZero)).rotated180
     }
