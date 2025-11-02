@@ -28,7 +28,6 @@ object SuperStructure : SubsystemBase() {
             is State.TeleOpDrive -> swerveState = SwerveDriveState.ManualDrive
             is State.ScoreAlign -> driveToScoringPose(state.dir)
 //            is State.ShawnAutoAlign -> AlignToPose(state.dir)
-            State.ScoreManual -> TODO()
             State.Auto -> { /* no-op */ }
         }
     }

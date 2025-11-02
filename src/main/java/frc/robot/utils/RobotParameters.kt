@@ -28,6 +28,7 @@ import frc.robot.utils.emu.SwerveDriveState
 import xyz.malefic.frc.pingu.control.MagicPingu
 import xyz.malefic.frc.pingu.control.Pingu
 import xyz.malefic.frc.pingu.control.ProfiledPingu
+import xyz.malefic.frc.pingu.log.LogPingu
 import xyz.malefic.frc.pingu.log.LogPingu.metaLogs
 import kotlin.math.PI
 import kotlin.math.cos
@@ -171,11 +172,7 @@ object RobotParameters {
     object LiveRobotValues {
         const val LOW_BATTERY_VOLTAGE = 11.8
         var lowBattery: Boolean = false
-
-        var robotPos = Pose2d()
-
         var visionDead: Boolean = false
-
         var slowMode: Boolean = false
     }
 

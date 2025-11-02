@@ -143,15 +143,19 @@ object RobotContainer {
 //                SuperStructure + State.ScoreAlign(LEFT)
 //            }
             release(LEFT_BUMPER) {
-                SuperStructure.cancel()
-                println("Cancelled Left Align")
+                if (!slowMode) {
+                    SuperStructure.cancel()
+                    Logger.i("RobotContainer") { "Cancelled Left Align" }
+                }
             }
 //            press(RIGHT_BUMPER) {
 //                SuperStructure + State.ScoreAlign(RIGHT)
 //            }
             release(RIGHT_BUMPER) {
-                SuperStructure.cancel()
-                println("Cancelled Right Align")
+                if (!slowMode) {
+                    SuperStructure.cancel()
+                    Logger.i("RobotContainer") { "Cancelled Left Align" }
+                }
             }
         }
     }

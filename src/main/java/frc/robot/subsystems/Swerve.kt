@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.utils.RobotParameters.ControllerConstants.aacrn
-import frc.robot.utils.RobotParameters.LiveRobotValues.robotPos
 import frc.robot.utils.RobotParameters.LiveRobotValues.slowMode
+import frc.robot.utils.RobotParameters.LiveRobotValues.visionDead
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_CAN_CODER_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_DRIVE_ID
 import frc.robot.utils.RobotParameters.MotorParameters.BACK_LEFT_STEER_ID
@@ -321,15 +321,14 @@ object Swerve : SubsystemBase() {
                     networkPinguRotAutoAlign.calculate(
                         heading,
                         desiredPoseForDriveToPoint.rotation.degrees,
-                    ) * 0.41
+                    )
 
                 // try this second
 //                val turnSpeed =
 //                    networkPinguRotAutoAlign.calculate(
 //                        desiredPoseForDriveToPoint.rotation.degrees - heading,
 //                        0.0,
-//                    ) * 0.41
-//
+//                    )
 
                 setDriveSpeeds(
                     forwardSpeed,
@@ -373,7 +372,6 @@ object Swerve : SubsystemBase() {
         poseEstimator3d.update(pidgey.getRotation3d(), this.getModulePositions().toTypedArray())
 
         field.robotPose = poseEstimator.estimatedPosition
-        robotPos = poseEstimator.estimatedPosition
 
         logs {
             log("Swerve/Left Stick Position X", aacrn.leftStickPosition(X_DEADZONE, Y_DEADZONE).first)
@@ -384,7 +382,6 @@ object Swerve : SubsystemBase() {
             log("Swerve/Pidgey Roll", pidgey.roll.valueAsDouble)
             log("Swerve/Pidgey Rotation2D", pidgey.rotation2d.degrees)
             log("Swerve/Robot Pose", field.robotPose)
-            log("Swerve/Robot Pose 2D extra", robotPos)
             log("Swerve/Robot Pose 3D", poseEstimator3d.estimatedPosition)
             log("Swerve/Swerve State", swerveState)
             log("Swerve/Align to Pose", desiredPoseForDriveToPoint)
@@ -420,7 +417,6 @@ object Swerve : SubsystemBase() {
                             timestamp,
                             pair.first.currentStdDevs3d,
                         )
-                        robotPos = poseEstimator.estimatedPosition
                     }
                 }
             }
@@ -681,25 +677,25 @@ object Swerve : SubsystemBase() {
     fun stickDrive(controller: XboxController) {
         var x: Double = -controller.leftX * MAX_SPEED
         if (abs(x) < X_DEADZONE * MAX_SPEED) x = 0.0
-        x *= (if (slowMode) 0.25 else 1.0)
+        x *= if (slowMode) 0.25 else 1.0
 
         var y: Double = -controller.leftY * MAX_SPEED
         if (abs(y) < Y_DEADZONE * MAX_SPEED) y = 0.0
-        y *= (if (slowMode) 0.25 else 1.0)
+        y *= if (slowMode) 0.25 else 1.0
 
         val rotation =
-            if (abs(controller.rightX) >=
-                0.1
-            ) {
+            if (abs(controller.rightX) >= 0.1) {
                 -controller.rightX * MAX_ANGULAR_SPEED * 0.5
             } else {
                 0.0
-            } * (if (slowMode) 0.25 else 1.0)
+            } * if (slowMode) 0.25 else 1.0
 
         logs {
-            log("X Joystick", x)
-            log("Y Joystick", y)
-            log("Rotation", rotation)
+            log("Swerve/Drive/X Speed", x)
+            log("Swerve/Drive/Y Speed", y)
+            log("Swerve/Drive/Rotation Speed", rotation)
+            log("Swerve/Drive/Vision Dead", visionDead)
+            log("Swerve/Drive/Slow Mode Enabled", slowMode)
         }
 
         setDriveSpeeds(y, x, rotation * 0.5, true)
